@@ -1,14 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { generateCalendarPlan, generateHTML, CalendarPlanSettings } from '@/lib/generation/calendar-plan';
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const cookieStore = await cookies();
     
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options);
+            });
+          },
+        },
+      }
+    );
+
     const { data: { session } } = await supabase.auth.getSession();
-    
+
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -95,7 +112,7 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', document.id);
 
-    // Оновлення лічильника
+    // Оновлення лічільника
     if (profile?.subscription_tier === 'free') {
       await supabase
         .from('profiles')
@@ -110,7 +127,6 @@ export async function POST(request: NextRequest) {
       documentId: document.id,
       fileUrl: urlData.publicUrl
     });
-
   } catch (error) {
     console.error('Generation error:', error);
     return NextResponse.json(
