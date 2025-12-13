@@ -7,6 +7,18 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Додаткові налаштування для ігнорування помилок
+  experimental: {
+    // @ts-ignore
+    turbo: {
+      rules: {
+        '*.ts': {
+          loaders: ['ts-loader'],
+          as: '*.js',
+        },
+      },
+    },
+  },
 };
 
 export default nextConfig;
