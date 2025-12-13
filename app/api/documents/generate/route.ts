@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
         }
         
         lessons = result.lessons || [];
-        planSettings = result.settings || formData;
+        planSettings = (result as any).settings || formData;
       } else if (formData.subject === "Математика") {
         // Імпортуємо та викликаємо генератор для математики
         const { generateMathematicsCalendarPlan } = await import("@/lib/generation/mathematics-plan");
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
         }
         
         lessons = result.lessons || [];
-        planSettings = result.settings || formData;
+        planSettings = (result as any).settings || formData;
       } else if (formData.subject === "Інформатика") {
         // Імпортуємо та викликаємо генератор для інформатики
         const { generateInformaticsCalendarPlan } = await import("@/lib/generation/informatics-plan");
