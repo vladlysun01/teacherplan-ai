@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { CheckCircle, FileText, ArrowRight, X } from 'lucide-react';
 
 type VariantModule = {
   id: string;
@@ -189,6 +190,7 @@ export default function Dashboard() {
 
   const [loading, setLoading] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const currentProgram = PROGRAMS[formData.subject]?.[formData.program];
 
@@ -307,7 +309,7 @@ export default function Dashboard() {
 
       if (!response.ok) throw new Error(data.error || "Помилка генерації");
 
-      alert("✅ Документ успішно згенеровано!");
+      setShowSuccessModal(true);
       setFormData({ ...formData, variantModules: [] });
     } catch (error: any) {
       alert("❌ Помилка: " + error.message);
@@ -317,6 +319,62 @@ export default function Dashboard() {
   };
 
   return (
+    <>
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="relative w-full max-w-md bg-slate-900 border border-cyan-500/30 rounded-2xl shadow-2xl shadow-cyan-500/20">
+            <button
+              onClick={() => setShowSuccessModal(false)}
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
+            >
+              <X size={20} />
+            </button>
+
+            <div className="p-6 sm:p-8 text-center">
+              <div className="mb-6 flex justify-center">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-green-500/30 rounded-full blur-2xl animate-pulse"></div>
+                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
+                    <CheckCircle className="text-white" size={40} />
+                  </div>
+                </div>
+              </div>
+
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+                Успішно згенеровано!
+              </h2>
+
+              <p className="text-sm sm:text-base text-gray-400 mb-6 sm:mb-8">
+                Ваш календарний план готовий. <br className="hidden sm:block" />
+                Перегляньте його в розділі "Мої документи"
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <button
+                  onClick={() => setShowSuccessModal(false)}
+                  className="flex-1 px-4 sm:px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl transition-all duration-300 font-medium text-sm sm:text-base"
+                >
+                  Закрити
+                </button>
+
+                <a
+                  href="/dashboard/documents"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white rounded-xl transition-all duration-300 font-semibold text-sm sm:text-base shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 group"
+                >
+                  <FileText size={18} />
+                  <span>Мої документи</span>
+                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                </a>
+              </div>
+            </div>
+
+            <div className="absolute -top-20 -right-20 w-40 h-40 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-teal-500/20 rounded-full blur-3xl pointer-events-none"></div>
+          </div>
+        </div>
+      )}
+
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
       <div className="max-w-3xl mx-auto">
         {/* Заголовок */}
@@ -705,5 +763,6 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
+    </>
   );
 }

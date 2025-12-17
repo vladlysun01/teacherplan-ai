@@ -14,7 +14,7 @@ export default function DashboardLayout({
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [credits, setCredits] = useState<number>(0);
-  const [sidebarOpen, setSidebarOpen] = useState(false); // ✅ ДОДАНО: стан для мобільного меню
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     checkUser();
@@ -34,45 +34,25 @@ export default function DashboardLayout({
 
   const checkUser = async () => {
     try {
-      console.log('🔍 CheckUser: Starting...');
-      console.log('🔍 Current URL:', window.location.href);
-      console.log('🔍 Hash:', window.location.hash);
-      
-      // Спочатку перевіряємо чи є токени в hash (після OAuth redirect)
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const accessToken = hashParams.get('access_token');
       
-      console.log('🔍 Access token in hash?', !!accessToken);
-      
       if (accessToken) {
-        console.log('⏳ Waiting for Supabase to process tokens...');
-        // Якщо є токени в hash, чекаємо поки Supabase їх обробить
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
-      console.log('🔍 Getting session from Supabase...');
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      console.log('🔍 Session result:', { 
-        hasSession: !!session, 
-        userId: session?.user?.id,
-        error: error?.message 
-      });
+      const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        console.log('❌ No session found, redirecting to login');
         router.push('/login');
       } else {
-        console.log('✅ Session found! User:', session.user.email);
         setUser(session.user);
-        // Очищаємо hash з URL після успішної автентифікації
         if (window.location.hash) {
-          console.log('🧹 Cleaning hash from URL');
           window.history.replaceState(null, '', window.location.pathname);
         }
       }
     } catch (error) {
-      console.error('💥 Auth error:', error);
+      console.error('Auth error:', error);
       router.push('/login');
     } finally {
       setLoading(false);
@@ -107,11 +87,9 @@ export default function DashboardLayout({
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="relative">
-          {/* Animated background glow */}
           <div className="absolute inset-0 blur-3xl opacity-50">
             <div className="w-32 h-32 bg-cyan-500 rounded-full animate-pulse"></div>
           </div>
-          {/* Spinner */}
           <div className="relative w-16 h-16 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"></div>
         </div>
       </div>
@@ -119,22 +97,21 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 transition-colors duration-500">
+    <div className="min-h-screen bg-slate-950">
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full blur-3xl opacity-20 bg-cyan-500 animate-pulse" style={{animationDuration: '4s'}}></div>
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full blur-3xl opacity-10 bg-teal-500 animate-pulse" style={{animationDuration: '6s'}}></div>
-        <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] rounded-full blur-3xl opacity-5 bg-blue-500 animate-pulse" style={{animationDuration: '8s'}}></div>
       </div>
 
-      {/* ✅ ДОДАНО: Mobile Header */}
+      {/* Mobile Header - ЗАВЖДИ ВИДИМИЙ */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-xl border-b border-slate-800/50">
         <div className="flex items-center justify-between p-4">
           <button 
             onClick={() => router.push('/')}
             className="flex items-center gap-2"
           >
-            <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-teal-500 rounded-lg flex items-center justify-center shadow-lg shadow-cyan-500/50">
+            <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-teal-500 rounded-lg flex items-center justify-center shadow-lg">
               <Sparkles className="text-white" size={16} />
             </div>
             <span className="text-lg font-bold text-white">TeacherPlan</span>
@@ -143,33 +120,34 @@ export default function DashboardLayout({
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="p-2 text-white hover:bg-slate-800/50 rounded-lg transition-colors"
+            aria-label="Toggle menu"
           >
             {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
 
-      {/* ✅ ДОДАНО: Mobile Overlay */}
+      {/* Mobile Overlay - клік закриває меню */}
       {sidebarOpen && (
         <div 
-          className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* ✅ ВИПРАВЛЕНО: Sidebar - адаптивний */}
-      <div className={`
-        fixed left-0 top-0 h-full w-64 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/50 shadow-2xl flex flex-col transition-all duration-300 z-50
-        lg:translate-x-0
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      {/* Sidebar */}
+      <aside className={`
+        fixed top-0 left-0 h-full w-64 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/50 shadow-2xl flex flex-col z-50
+        transition-transform duration-300 ease-in-out
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
-        {/* Logo - DesktopOnly */}
-        <div className="hidden lg:block p-6 border-b border-slate-800/50">
+        {/* Logo - тільки на desktop */}
+        <div className="hidden lg:flex p-6 border-b border-slate-800/50">
           <button 
             onClick={() => router.push('/')}
             className="flex items-center gap-3 hover:opacity-80 transition-opacity w-full"
           >
-            <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-teal-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/50">
+            <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-teal-500 rounded-xl flex items-center justify-center shadow-lg">
               <Sparkles className="text-white" size={20} />
             </div>
             <div>
@@ -179,7 +157,7 @@ export default function DashboardLayout({
           </button>
         </div>
 
-        {/* ✅ ДОДАНО: Mobile Spacer */}
+        {/* Mobile spacer */}
         <div className="lg:hidden h-16"></div>
 
         {/* Navigation */}
@@ -187,7 +165,7 @@ export default function DashboardLayout({
           <a 
             href="/dashboard" 
             onClick={() => setSidebarOpen(false)}
-            className="group w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 bg-gradient-to-r from-cyan-500 to-teal-500 text-white shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 hover:scale-105"
+            className="group w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 bg-gradient-to-r from-cyan-500 to-teal-500 text-white shadow-lg hover:shadow-cyan-500/50"
           >
             <Plus size={20} />
             <span className="font-medium">Генерувати</span>
@@ -221,10 +199,9 @@ export default function DashboardLayout({
           </a>
         </nav>
 
-        {/* Credits Balance Card */}
+        {/* Credits Card */}
         <div className="p-4 border-t border-slate-800/50 space-y-4">
           <div className="relative overflow-hidden bg-gradient-to-br from-cyan-500/10 to-teal-500/10 border border-cyan-500/30 rounded-xl p-4">
-            {/* Animated background pattern */}
             <div className="absolute inset-0 opacity-5">
               <div className="absolute inset-0" style={{
                 backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
@@ -250,14 +227,14 @@ export default function DashboardLayout({
                   router.push('/dashboard/billing');
                   setSidebarOpen(false);
                 }}
-                className="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white text-sm py-2.5 rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 hover:scale-105 transition-all duration-300 font-medium"
+                className="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white text-sm py-2.5 rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 font-medium"
               >
                 Поповнити
               </button>
             </div>
           </div>
           
-          {/* Logout Button */}
+          {/* Logout */}
           <button 
             onClick={() => {
               handleLogout();
@@ -269,15 +246,15 @@ export default function DashboardLayout({
             <span>Вийти</span>
           </button>
         </div>
-      </div>
+      </aside>
 
-      {/* ✅ ВИПРАВЛЕНО: Main Content - адаптивний margin */}
-      <div className="lg:ml-64 min-h-screen flex flex-col pt-16 lg:pt-0">
+      {/* Main Content - АДАПТИВНИЙ MARGIN */}
+      <main className="min-h-screen flex flex-col pt-16 lg:pt-0 lg:ml-64">
         <div className="flex-1">
           {children}
         </div>
         
-        {/* Footer with legal links */}
+        {/* Footer */}
         <footer className="border-t border-slate-800/50 bg-slate-900/50 backdrop-blur-xl mt-auto">
           <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -289,19 +266,19 @@ export default function DashboardLayout({
                   Про нас
                 </a>
                 <a href="/terms" className="text-slate-400 hover:text-cyan-400 transition-colors">
-                  Умови використання
+                  Умови
                 </a>
                 <a href="/privacy" className="text-slate-400 hover:text-cyan-400 transition-colors">
                   Конфіденційність
                 </a>
                 <a href="/refund" className="text-slate-400 hover:text-cyan-400 transition-colors">
-                  Повернення коштів
+                  Повернення
                 </a>
               </div>
             </div>
           </div>
         </footer>
-      </div>
+      </main>
     </div>
   );
 }
