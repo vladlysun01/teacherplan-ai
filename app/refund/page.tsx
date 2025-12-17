@@ -276,7 +276,7 @@ export default function RefundPage() {
                   <span>📧</span>
                   <span className="text-slate-400">Email:</span>
                   <a href="mailto:support@teacherplan.com" className="text-cyan-400 hover:text-cyan-300">
-                    support@teacherplan.com
+                    teacher_plan_ai@proton.me
                   </a>
                 </p>
                 <p className="flex items-center gap-3">

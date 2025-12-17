@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { Sparkles, FileText, Plus, Settings, CreditCard, LogOut, Zap } from 'lucide-react';
+import { Sparkles, FileText, Plus, Settings, CreditCard, LogOut, Zap, Menu, X } from 'lucide-react';
 
 export default function DashboardLayout({
   children,
@@ -14,6 +14,7 @@ export default function DashboardLayout({
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [credits, setCredits] = useState<number>(0);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // ✅ ДОДАНО: стан для мобільного меню
 
   useEffect(() => {
     checkUser();
@@ -126,10 +127,44 @@ export default function DashboardLayout({
         <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] rounded-full blur-3xl opacity-5 bg-blue-500 animate-pulse" style={{animationDuration: '8s'}}></div>
       </div>
 
-      {/* Sidebar */}
-      <div className="fixed left-0 top-0 h-full w-64 bg-slate-900/50 backdrop-blur-xl border-r border-slate-800/50 shadow-2xl flex flex-col transition-all duration-300 z-10">
-        {/* Logo - кнопка повернення на лендінг */}
-        <div className="p-6 border-b border-slate-800/50">
+      {/* ✅ ДОДАНО: Mobile Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-xl border-b border-slate-800/50">
+        <div className="flex items-center justify-between p-4">
+          <button 
+            onClick={() => router.push('/')}
+            className="flex items-center gap-2"
+          >
+            <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-teal-500 rounded-lg flex items-center justify-center shadow-lg shadow-cyan-500/50">
+              <Sparkles className="text-white" size={16} />
+            </div>
+            <span className="text-lg font-bold text-white">TeacherPlan</span>
+          </button>
+          
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 text-white hover:bg-slate-800/50 rounded-lg transition-colors"
+          >
+            {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      </div>
+
+      {/* ✅ ДОДАНО: Mobile Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* ✅ ВИПРАВЛЕНО: Sidebar - адаптивний */}
+      <div className={`
+        fixed left-0 top-0 h-full w-64 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/50 shadow-2xl flex flex-col transition-all duration-300 z-50
+        lg:translate-x-0
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        {/* Logo - DesktopOnly */}
+        <div className="hidden lg:block p-6 border-b border-slate-800/50">
           <button 
             onClick={() => router.push('/')}
             className="flex items-center gap-3 hover:opacity-80 transition-opacity w-full"
@@ -144,10 +179,14 @@ export default function DashboardLayout({
           </button>
         </div>
 
+        {/* ✅ ДОДАНО: Mobile Spacer */}
+        <div className="lg:hidden h-16"></div>
+
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           <a 
             href="/dashboard" 
+            onClick={() => setSidebarOpen(false)}
             className="group w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 bg-gradient-to-r from-cyan-500 to-teal-500 text-white shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 hover:scale-105"
           >
             <Plus size={20} />
@@ -156,6 +195,7 @@ export default function DashboardLayout({
 
           <a 
             href="/dashboard/documents" 
+            onClick={() => setSidebarOpen(false)}
             className="group w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-slate-400 hover:text-white hover:bg-slate-800/50"
           >
             <FileText size={20} />
@@ -164,6 +204,7 @@ export default function DashboardLayout({
 
           <a 
             href="/dashboard/settings" 
+            onClick={() => setSidebarOpen(false)}
             className="group w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-slate-400 hover:text-white hover:bg-slate-800/50"
           >
             <Settings size={20} />
@@ -172,6 +213,7 @@ export default function DashboardLayout({
 
           <a 
             href="/dashboard/billing" 
+            onClick={() => setSidebarOpen(false)}
             className="group w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-slate-400 hover:text-white hover:bg-slate-800/50"
           >
             <CreditCard size={20} />
@@ -204,7 +246,10 @@ export default function DashboardLayout({
               </div>
 
               <button 
-                onClick={() => router.push('/dashboard/billing')}
+                onClick={() => {
+                  router.push('/dashboard/billing');
+                  setSidebarOpen(false);
+                }}
                 className="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white text-sm py-2.5 rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 hover:scale-105 transition-all duration-300 font-medium"
               >
                 Поповнити
@@ -214,7 +259,10 @@ export default function DashboardLayout({
           
           {/* Logout Button */}
           <button 
-            onClick={handleLogout} 
+            onClick={() => {
+              handleLogout();
+              setSidebarOpen(false);
+            }}
             className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl transition-all duration-300"
           >
             <LogOut size={20} />
@@ -223,20 +271,20 @@ export default function DashboardLayout({
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="ml-64 min-h-screen flex flex-col">
+      {/* ✅ ВИПРАВЛЕНО: Main Content - адаптивний margin */}
+      <div className="lg:ml-64 min-h-screen flex flex-col pt-16 lg:pt-0">
         <div className="flex-1">
           {children}
         </div>
         
         {/* Footer with legal links */}
         <footer className="border-t border-slate-800/50 bg-slate-900/50 backdrop-blur-xl mt-auto">
-          <div className="max-w-7xl mx-auto px-8 py-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <p className="text-sm text-slate-400">
+          <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <p className="text-sm text-slate-400 text-center sm:text-left">
                 © 2024 TeacherPlan. Всі права захищені.
               </p>
-              <div className="flex flex-wrap gap-6 text-sm">
+              <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-sm">
                 <a href="/about" className="text-slate-400 hover:text-cyan-400 transition-colors">
                   Про нас
                 </a>

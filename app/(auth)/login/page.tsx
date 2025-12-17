@@ -38,12 +38,18 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     try {
       console.log('🔐 Starting Google OAuth...');
-      console.log('🔐 Redirect URL:', `${window.location.origin}/auth/callback`);
+      // ✅ ВИПРАВЛЕНО: правильний URL без /auth/
+      const redirectUrl = `${window.location.origin}/callback`;
+      console.log('🔐 Redirect URL:', redirectUrl);
       
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: redirectUrl,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         },
       });
 
