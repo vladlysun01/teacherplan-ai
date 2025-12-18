@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
         }
         
         lessons = result.lessons || [];
-        planSettings = result.settings || formData;
+        planSettings = (result as any).settings || formData;
       } else if (formData.subject === "Історія України") {
         // Імпортуємо та викликаємо генератор для історії України
         const { generateHistoryCalendarPlan } = await import("@/lib/generation/history-plan");
@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
         }
         
         lessons = result.lessons || [];
-        planSettings = result.settings || formData;
+        planSettings = (result as any).settings || formData;
       } else if (formData.subject === "Географія") {
         // Імпортуємо та викликаємо генератор для географії
         const { generateGeographyCalendarPlan } = await import("@/lib/generation/geography-plan");
@@ -184,6 +184,13 @@ export async function POST(request: NextRequest) {
         
         lessons = result.lessons || [];
         planSettings = result;
+      } else if (formData.subject === "Захист України") {
+  // Імпортуємо та викликаємо генератор для захисту України
+  const { generateDefenseOfUkraineCalendarPlan } = await import("@/lib/generation/defense-ukraine-plan");
+  const result = generateDefenseOfUkraineCalendarPlan(formData);
+  
+  lessons = result.lessons || [];
+  planSettings = result;
       } else {
         throw new Error(`Предмет "${formData.subject}" ще не підтримується`);
       }

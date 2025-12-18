@@ -1,25 +1,45 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CreditCard, Sparkles, TrendingUp, Zap, History, Loader } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { 
-  CREDIT_PACKAGES, 
-  getUserCredits, 
-  getCreditTransactions,
-  formatPrice,
-  formatDate,
-  getTransactionIcon,
-  getTransactionColor,
-  type CreditTransaction 
-} from '@/lib/credits';
+
+// Updated credit packages with correct prices
+const CREDIT_PACKAGES = [
+  {
+    id: '1',
+    name: '1 кредит',
+    credits: 1,
+    price: 99,
+    icon: CreditCard,
+    popular: false,
+  },
+  {
+    id: '3',
+    name: '3 кредити',
+    credits: 3,
+    price: 249,
+    savings: 'Економія 48 ₴',
+    icon: TrendingUp,
+    popular: true,
+  },
+  {
+    id: '10',
+    name: '10 кредитів',
+    credits: 10,
+    price: 599,
+    savings: 'Економія 391 ₴',
+    icon: Zap,
+    popular: false,
+  },
+];
 
 export default function BillingPage() {
   const [loading, setLoading] = useState(true);
   const [credits, setCredits] = useState(0);
-  const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
   const [user, setUser] = useState<any>(null);
   const [purchasing, setPurchasing] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     loadData();
@@ -35,10 +55,15 @@ export default function BillingPage() {
       }
 
       setUser(authUser);
-      const userCredits = await getUserCredits(authUser.id);
-      setCredits(userCredits || 0);
-      const userTransactions = await getCreditTransactions(authUser.id, 10);
-      setTransactions(userTransactions);
+
+      // Load user credits
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('credits')
+        .eq('id', authUser.id)
+        .single();
+
+      setCredits(profile?.credits || 0);
       setLoading(false);
     } catch (error) {
       console.error('Error loading billing data:', error);
@@ -47,16 +72,64 @@ export default function BillingPage() {
   };
 
   const handlePurchase = async (packageId: string) => {
-    if (!user) return;
+    if (!user) {
+      alert('Будь ласка, увійдіть в систему');
+      return;
+    }
+
     setPurchasing(packageId);
 
     try {
-      const pkg = CREDIT_PACKAGES.find(p => p.id === packageId);
-      alert(`Покупка пакету: ${pkg?.name}\nЦіна: ${pkg?.price} грн\n\nІнтеграція платежів буде додана наступним кроком!`);
-    } catch (error) {
+      // Call API to create payment
+      const response = await fetch('/api/payments/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          packageId,
+          userId: user.id,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Помилка створення платежу');
+      }
+
+      console.log('✅ Payment data received:', data);
+
+      // Create and submit form to WayForPay
+      if (formRef.current) {
+        // Clear previous form fields
+        formRef.current.innerHTML = '';
+
+        // Add all payment data as hidden fields
+        Object.entries(data.paymentData).forEach(([key, value]) => {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = key;
+          
+          // Handle arrays
+          if (Array.isArray(value)) {
+            input.value = value.join(';');
+          } else {
+            input.value = String(value);
+          }
+          
+          formRef.current?.appendChild(input);
+        });
+
+        // Set form action
+        formRef.current.action = data.redirectUrl;
+
+        // Submit form
+        console.log('🚀 Submitting payment form to WayForPay...');
+        formRef.current.submit();
+      }
+
+    } catch (error: any) {
       console.error('Purchase error:', error);
-      alert('Помилка при покупці. Спробуйте ще раз.');
-    } finally {
+      alert('Помилка: ' + error.message);
       setPurchasing(null);
     }
   };
@@ -71,7 +144,10 @@ export default function BillingPage() {
 
   return (
     <div className="p-4 sm:p-8 max-w-7xl mx-auto">
-      {/* Header - Compact */}
+      {/* Hidden form for WayForPay redirect */}
+      <form ref={formRef} method="POST" style={{ display: 'none' }} />
+
+      {/* Header */}
       <div className="mb-4 sm:mb-8">
         <h1 className="text-xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">
           💳 Кредити
@@ -81,7 +157,7 @@ export default function BillingPage() {
         </p>
       </div>
 
-      {/* Current Balance - Compact */}
+      {/* Current Balance */}
       <div className="mb-4 sm:mb-8 bg-gradient-to-br from-cyan-500/20 to-teal-500/20 border border-cyan-500/30 rounded-xl sm:rounded-2xl p-4 sm:p-6">
         <div className="flex items-center justify-between gap-2">
           <div>
@@ -100,142 +176,97 @@ export default function BillingPage() {
         </div>
       </div>
 
-      {/* Credit Packages - HORIZONTAL COMPACT CARDS */}
+      {/* Credit Packages */}
       <div className="mb-6 sm:mb-10">
         <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">Пакети кредитів</h2>
         
         <div className="space-y-2 sm:space-y-3">
-          {CREDIT_PACKAGES.map((pkg, index) => (
-            <div
-              key={pkg.id}
-              className={`
-                relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl p-3 sm:p-4
-                hover:bg-white/10 hover:border-white/20 transition-all duration-300
-                ${pkg.popular ? 'ring-1 sm:ring-2 ring-cyan-500' : ''}
-              `}
-            >
-              {/* Popular Badge */}
-              {pkg.popular && (
-                <div className="absolute -top-2 left-3 sm:left-4">
-                  <div className="bg-gradient-to-r from-cyan-500 to-teal-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                    🔥 Популярне
-                  </div>
-                </div>
-              )}
-
-              {/* HORIZONTAL LAYOUT - ALL IN ONE ROW */}
-              <div className="flex items-center gap-3 sm:gap-4">
-                {/* Icon - Small */}
-                <div className="flex-shrink-0">
-                  {index === 0 && <CreditCard className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />}
-                  {index === 1 && <TrendingUp className="w-8 h-8 sm:w-10 sm:h-10 text-cyan-400" />}
-                  {index === 2 && <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-teal-400" />}
-                </div>
-
-                {/* Credits Amount */}
-                <div className="flex-shrink-0">
-                  <div className="text-2xl sm:text-3xl font-bold text-white leading-none">
-                    {pkg.credits}
-                  </div>
-                  <div className="text-gray-400 text-xs mt-0.5">
-                    {pkg.credits === 1 ? 'документ' : 'документи'}
-                  </div>
-                </div>
-
-                {/* Divider */}
-                <div className="hidden sm:block w-px h-12 bg-white/10"></div>
-
-                {/* Price Info - Flexible space */}
-                <div className="flex-1 min-w-0">
-                  <div className="text-xl sm:text-2xl font-bold text-white leading-none mb-0.5">
-                    {pkg.price} ₴
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    {Math.round(pkg.price / pkg.credits)} ₴ за документ
-                  </div>
-                  {pkg.savings && (
-                    <div className="text-xs text-green-400 font-medium mt-0.5">
-                      {pkg.savings}
+          {CREDIT_PACKAGES.map((pkg, index) => {
+            const IconComponent = pkg.icon;
+            
+            return (
+              <div
+                key={pkg.id}
+                className={`
+                  relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl p-3 sm:p-4
+                  hover:bg-white/10 hover:border-white/20 transition-all duration-300
+                  ${pkg.popular ? 'ring-1 sm:ring-2 ring-cyan-500' : ''}
+                `}
+              >
+                {pkg.popular && (
+                  <div className="absolute -top-2 left-3 sm:left-4">
+                    <div className="bg-gradient-to-r from-cyan-500 to-teal-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                      🔥 Популярне
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
 
-                {/* Buy Button - Fixed width */}
-                <div className="flex-shrink-0">
-                  <button
-                    onClick={() => handlePurchase(pkg.id)}
-                    disabled={purchasing !== null}
-                    className={`
-                      px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-semibold transition-all duration-300 text-xs sm:text-sm whitespace-nowrap
-                      ${pkg.popular 
-                        ? 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:shadow-lg hover:shadow-cyan-500/50' 
-                        : 'bg-white/10 text-white hover:bg-white/20'
-                      }
-                      ${purchasing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}
-                    `}
-                  >
-                    {purchasing === pkg.id ? (
-                      <span className="flex items-center gap-1.5">
-                        <Loader className="w-3 h-3 animate-spin" />
-                        <span className="hidden sm:inline">Обробка...</span>
-                      </span>
-                    ) : (
-                      'Купити'
+                <div className="flex items-center gap-3 sm:gap-4">
+                  {/* Icon */}
+                  <div className="flex-shrink-0">
+                    <IconComponent className="w-8 h-8 sm:w-10 sm:h-10 text-cyan-400" />
+                  </div>
+
+                  {/* Credits */}
+                  <div className="flex-shrink-0">
+                    <div className="text-2xl sm:text-3xl font-bold text-white leading-none">
+                      {pkg.credits}
+                    </div>
+                    <div className="text-gray-400 text-xs mt-0.5">
+                      {pkg.credits === 1 ? 'документ' : 'документи'}
+                    </div>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="hidden sm:block w-px h-12 bg-white/10"></div>
+
+                  {/* Price Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xl sm:text-2xl font-bold text-white leading-none mb-0.5">
+                      {pkg.price} ₴
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {Math.round(pkg.price / pkg.credits)} ₴ за документ
+                    </div>
+                    {pkg.savings && (
+                      <div className="text-xs text-green-400 font-medium mt-0.5">
+                        {pkg.savings}
+                      </div>
                     )}
-                  </button>
+                  </div>
+
+                  {/* Buy Button */}
+                  <div className="flex-shrink-0">
+                    <button
+                      onClick={() => handlePurchase(pkg.id)}
+                      disabled={purchasing !== null}
+                      className={`
+                        px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-semibold transition-all duration-300 text-xs sm:text-sm whitespace-nowrap
+                        ${pkg.popular 
+                          ? 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:shadow-lg hover:shadow-cyan-500/50' 
+                          : 'bg-white/10 text-white hover:bg-white/20'
+                        }
+                        ${purchasing === pkg.id ? 'opacity-50 cursor-not-allowed' : ''}
+                      `}
+                    >
+                      {purchasing === pkg.id ? (
+                        <span className="flex items-center gap-1.5">
+                          <Loader className="w-3 h-3 animate-spin" />
+                          <span className="hidden sm:inline">Обробка...</span>
+                        </span>
+                      ) : (
+                        'Купити'
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      {/* Transaction History - Compact */}
-      {transactions.length > 0 && (
-        <div>
-          <div className="flex items-center gap-2 mb-3 sm:mb-4">
-            <History className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
-            <h2 className="text-lg sm:text-xl font-bold text-white">Історія</h2>
-          </div>
-          
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl overflow-hidden">
-            <div className="divide-y divide-white/10">
-              {transactions.map((transaction) => (
-                <div key={transaction.id} className="p-3 sm:p-4 hover:bg-white/5 transition-colors">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                      <div className="text-xl sm:text-2xl flex-shrink-0">
-                        {getTransactionIcon(transaction.type)}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-xs sm:text-sm text-white font-medium truncate">
-                          {transaction.description || 'Транзакція'}
-                        </div>
-                        <div className="text-xs text-gray-400">
-                          {formatDate(transaction.created_at)}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="text-right flex-shrink-0">
-                      <div className={`text-base sm:text-lg font-bold ${getTransactionColor(transaction.type)}`}>
-                        {transaction.amount > 0 ? '+' : ''}{transaction.amount}
-                      </div>
-                      {transaction.price && (
-                        <div className="text-xs text-gray-400">
-                          {formatPrice(transaction.price)}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Info Section - Minimal */}
+      {/* Info Section */}
       <div className="mt-6 sm:mt-8 bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 sm:p-4">
         <h3 className="text-sm sm:text-base font-semibold text-white mb-2">
           ℹ️ Як працюють кредити?
@@ -244,6 +275,7 @@ export default function BillingPage() {
           <li>• 1 кредит = 1 документ</li>
           <li>• Кредити не згорають</li>
           <li>• Новим 1 кредит безкоштовно</li>
+          <li>• Безпечна оплата через WayForPay</li>
         </ul>
       </div>
     </div>

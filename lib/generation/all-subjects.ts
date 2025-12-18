@@ -64,6 +64,13 @@ export const ALL_SUBJECTS = [
     name: 'Основи правознавства',
     classes: ['9'],
     hasModules: true
+  },
+  {
+    id: 'defense-of-ukraine',
+    name: 'Захист України',
+    classes: ['10', '11'],
+    levels: ['профільний'],
+    hasModules: true
   }
 ];
 

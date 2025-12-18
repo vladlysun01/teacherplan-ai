@@ -170,6 +170,14 @@ const PROGRAMS: Programs = {
       hasVariant: false,
     },
   },
+  "Захист України": {
+    "10-11 класи (профільний рівень)": {
+      id: "defense-ukraine-10-11-profile",
+      classes: [10, 11],
+      description: "6 год/тиждень, 210 год на рік",
+      hasVariant: false,
+    },
+  },
 };
 
 export default function Dashboard() {
