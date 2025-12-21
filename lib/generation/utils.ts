@@ -3,14 +3,10 @@
  * Використовується всіма генераторами
  */
 
-// Конвертація днів тижня
-export function convertWeekdays(weekdays: string | number[]): number[] {
+// Конвертація днів тижня - повертає масив рядків ["Пн", "Вт", "Ср"]
+export function convertWeekdays(weekdays: string | string[]): string[] {
   if (typeof weekdays === 'string') {
-    const weekdayNames = weekdays.split(',').map(d => d.trim());
-    const dayMap: { [key: string]: number } = {
-      'Пн': 1, 'Вт': 2, 'Ср': 3, 'Чт': 4, 'Пт': 5
-    };
-    return weekdayNames.map(name => dayMap[name]).filter(d => d);
+    return weekdays.split(',').map(d => d.trim()).filter(d => d);
   }
   return weekdays;
 }

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Sparkles, Mail, Lock, User, Eye, EyeOff, ArrowRight, Chrome } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase-browser';
 import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
@@ -36,6 +36,7 @@ export default function RegisterPage() {
     }
 
     try {
+      const supabase = createClient();
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -51,6 +52,7 @@ export default function RegisterPage() {
       setSuccess(true);
       setTimeout(() => {
         router.push('/dashboard');
+        router.refresh();
       }, 2000);
     } catch (err: any) {
       setError(err.message || 'Помилка реєстрації');
@@ -61,10 +63,18 @@ export default function RegisterPage() {
 
   const handleGoogleSignup = async () => {
     try {
+      const supabase = createClient();
+      const origin = window.location.origin;
+      const redirectUrl = `${origin}/callback`;
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: redirectUrl,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         },
       });
 

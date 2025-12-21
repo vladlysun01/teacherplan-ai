@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Sparkles, FileText, Zap, Clock, CheckCircle, ArrowRight, Stars, BookOpen, Calendar, Download } from "lucide-react";
-
+import FactOfTheDay from "@/components/landing/FactOfTheDay";
 export default function LandingPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);

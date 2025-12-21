@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { CreditCard, Sparkles, TrendingUp, Zap, History, Loader } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase-browser';
 
 // Updated credit packages with correct prices
 const CREDIT_PACKAGES = [
@@ -47,6 +47,7 @@ export default function BillingPage() {
 
   const loadData = async () => {
     try {
+      const supabase = createClient();
       const { data: { user: authUser } } = await supabase.auth.getUser();
       
       if (!authUser) {

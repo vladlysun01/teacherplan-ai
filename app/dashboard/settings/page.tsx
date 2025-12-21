@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { User, School, BookOpen, Award, Mail, Save, Loader } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase-browser';
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -22,6 +22,7 @@ export default function SettingsPage() {
 
   const loadProfile = async () => {
     try {
+      const supabase = createClient();
       const { data: { user: authUser } } = await supabase.auth.getUser();
       
       if (!authUser) return;
@@ -64,6 +65,7 @@ export default function SettingsPage() {
     setSaving(true);
 
     try {
+      const supabase = createClient();
       const { data: { user: authUser } } = await supabase.auth.getUser();
       
       if (!authUser) return;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase-browser";
 import { CheckCircle, FileText, ArrowRight, X } from 'lucide-react';
 
 type VariantModule = {
@@ -209,6 +209,7 @@ export default function Dashboard() {
 
   const loadUserProfile = async () => {
     try {
+      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) return;
@@ -293,6 +294,7 @@ export default function Dashboard() {
 
     setLoading(true);
     try {
+      const supabase = createClient();
       const {
         data: { user },
         error: userError,

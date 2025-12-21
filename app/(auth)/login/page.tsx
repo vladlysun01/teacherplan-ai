@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Sparkles, Mail, Lock, Eye, EyeOff, ArrowRight, Chrome } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase-browser';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -20,6 +20,7 @@ export default function LoginPage() {
     setError('');
 
     try {
+      const supabase = createClient();
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
@@ -28,6 +29,7 @@ export default function LoginPage() {
       if (error) throw error;
 
       router.push('/dashboard');
+      router.refresh();
     } catch (err: any) {
       setError(err.message || 'Помилка входу');
     } finally {
@@ -38,8 +40,11 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     try {
       console.log('🔐 Starting Google OAuth...');
-      // ✅ ВИПРАВЛЕНО: правильний URL без /auth/
-      const redirectUrl = `${window.location.origin}/callback`;
+      const supabase = createClient();
+      
+      // Отримуємо поточний URL для redirect
+      const origin = window.location.origin;
+      const redirectUrl = `${origin}/callback`;
       console.log('🔐 Redirect URL:', redirectUrl);
       
       const { error } = await supabase.auth.signInWithOAuth({

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Wallet, TrendingUp, FileText, ShoppingCart, Loader } from 'lucide-react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase-browser';
 import { getUserStats } from '@/lib/credits';
 
 export default function CreditsBalance() {
@@ -19,6 +19,7 @@ export default function CreditsBalance() {
 
   const loadStats = async () => {
     try {
+      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
