@@ -20,7 +20,14 @@ interface Lesson {
   date: string;
   topic: string;
   module: string;
+  content?: string;
   homework?: string;
+}
+
+// Допоміжна функція для отримання назви дня тижня
+function getWeekdayName(date: Date): string {
+  const days = ["Нд", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+  return days[date.getDay()];
 }
 
 export async function generateWorldHistoryCalendarPlan(settings: WorldHistorySettings) {
@@ -35,7 +42,7 @@ export async function generateWorldHistoryCalendarPlan(settings: WorldHistorySet
     }
 
     const lessons: Lesson[] = [];
-    // Конвертуємо weekdays з рядка в масив чисел
+    // Конвертуємо weekdays з рядка в масив рядків
     const weekdaysArray = convertWeekdays(settings.weekdays);
     let currentDate = new Date(settings.startDate);
     let lessonNumber = 1;
@@ -80,7 +87,6 @@ export async function generateWorldHistoryCalendarPlan(settings: WorldHistorySet
           date: formatDate(currentDate),
           topic: topic,
           module: module.name,
-          moduleName: module.name, // Для Apps Script
           content: `Вивчення теми: ${topic}. Аналіз історичних подій, хронології, причинно-наслідкових зв'язків.`,
           homework: generateHomework(topic, settings.class)
         });
@@ -110,9 +116,8 @@ export async function generateWorldHistoryCalendarPlan(settings: WorldHistorySet
   }
 }
 
-function isLessonDay(date: Date, weekdays: number[]): boolean {
-  const currentDay = date.getDay(); // 0 = неділя, 1 = понеділок, ...
-  return weekdays.includes(currentDay);
+function isLessonDay(date: Date, weekdays: string[]): boolean {
+  return weekdays.includes(getWeekdayName(date));
 }
 
 function isHoliday(date: Date): boolean {

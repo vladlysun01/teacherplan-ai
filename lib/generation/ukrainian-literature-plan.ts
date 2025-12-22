@@ -2,11 +2,33 @@
 import { convertWeekdays, convertSemester, convertStartDate } from "./utils";
 import { getUkrainianLiteratureModulesByClass } from './ukrainian-literature-modules';
 
+// Допоміжна функція для отримання назви дня тижня
+function getWeekdayName(date: Date): string {
+  const days = ["Нд", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+  return days[date.getDay()];
+}
+
+function isLessonDay(date: Date, weekdays: string[]): boolean {
+  return weekdays.includes(getWeekdayName(date));
+}
+
+function isHoliday(date: Date): boolean {
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const holidays = [[1,1], [1,7], [3,8], [5,1], [5,9], [6,28], [8,24]];
+  return holidays.some(([m, d]) => m === month && d === day);
+}
+
+function formatDate(date: Date): string {
+  return `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}.${date.getFullYear()}`;
+}
+
 export async function generateUkrainianLiteratureCalendarPlan(settings: any) {
   try {
     const modules = getUkrainianLiteratureModulesByClass(settings.class);
     const lessons: any[] = [];
-    // Конвертуємо weekdays з рядка в масив чисел
+    
+    // Конвертуємо weekdays з рядка в масив рядків
     const weekdaysArray = convertWeekdays(settings.weekdays);
     let currentDate = new Date(settings.startDate);
     let lessonNumber = 1;
@@ -19,40 +41,31 @@ export async function generateUkrainianLiteratureCalendarPlan(settings: any) {
 
         const topicIndex = i % module.topics.length;
         const topic = module.topics[topicIndex];
+        
         lessons.push({
           number: lessonNumber++,
           date: formatDate(currentDate),
           topic: topic,
           module: module.name,
-          moduleName: module.name, // Для Apps Script
           content: `Вивчення теми: ${topic}. Аналіз літературних творів, обговорення ключових ідей.`,
           homework: 'Опрацювати матеріал підручника, підготувати усну відповідь'
         });
-
+        
         currentDate.setDate(currentDate.getDate() + 1);
       }
     }
 
-    return { success: true, lessons, settings: { ...settings, totalLessons: lessons.length } };
+    return { 
+      success: true, 
+      lessons, 
+      settings: { ...settings, totalLessons: lessons.length } 
+    };
   } catch (error) {
-    return { success: false, error: error instanceof Error ? error.message : 'Помилка' };
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Помилка' 
+    };
   }
-}
-
-function isLessonDay(date: Date, weekdays: number[]): boolean {
-  const currentDay = date.getDay(); // 0 = неділя, 1 = понеділок, ...
-  return weekdays.includes(currentDay);
-}
-
-function isHoliday(date: Date): boolean {
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  const holidays = [[1,1], [1,7], [3,8], [5,1], [5,9], [6,28], [8,24]];
-  return holidays.some(([m, d]) => m === month && d === day);
-}
-
-function formatDate(date: Date): string {
-  return `${String(date.getDate()).padStart(2, '0')}.${String(date.getMonth() + 1).padStart(2, '0')}.${date.getFullYear()}`;
 }
 
 export function generateUkrainianLiteratureHTML(lessons: any[], settings: any): string {

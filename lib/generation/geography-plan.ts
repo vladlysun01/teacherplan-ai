@@ -15,6 +15,12 @@ export interface GeographyPlanSettings {
   schoolName: string;
 }
 
+// Допоміжна функція для отримання назви дня тижня
+function getWeekdayName(date: Date): string {
+  const days = ["Нд", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+  return days[date.getDay()];
+}
+
 // Отримання модулів для класу
 function getModulesForClass(classNum: number): GeographyModule[] {
   switch (classNum) {
@@ -102,7 +108,7 @@ export function generateGeographyCalendarPlan(settings: GeographyPlanSettings) {
         }
         
         // Знаходимо наступний день тижня
-        while (!weekdays.includes(currentDate.getDay())) {
+        while (weekdays.length > 0 && !weekdays.includes(getWeekdayName(currentDate))) {
           currentDate.setDate(currentDate.getDate() + 1);
         }
         

@@ -121,7 +121,7 @@ export async function generateHistoryCalendarPlan(settings: HistoryPlanSettings)
     
     const { semester1, semester2 } = distributeModulesBySemesters(modules);
     
-    // Конвертуємо weekdays з рядка в масив чисел
+    // Конвертуємо weekdays з рядка в масив рядків
     const weekdays = convertWeekdays(settings.weekdays);
     const startDate = new Date(settings.startDate);
     
@@ -133,7 +133,7 @@ export async function generateHistoryCalendarPlan(settings: HistoryPlanSettings)
       modulesList.forEach(module => {
         module.topics.forEach((topic, idx) => {
           // Перевіряємо чи поточний день входить у список weekdays
-          while (!weekdays.includes(currentDate.getDay())) {
+          while (weekdays.length > 0 && !weekdays.includes(getWeekdayName(currentDate))) {
             currentDate.setDate(currentDate.getDate() + 1);
           }
           

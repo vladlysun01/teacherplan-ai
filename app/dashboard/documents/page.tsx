@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FileText, Download, Trash2, Calendar, Clock, AlertCircle } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase-browser';
 
 interface Document {
   id: string;
@@ -23,6 +23,7 @@ export default function DocumentsPage() {
 
   const loadDocuments = async () => {
     try {
+      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) return;
@@ -47,6 +48,7 @@ export default function DocumentsPage() {
     if (!confirm('Ви впевнені що хочете видалити цей документ?')) return;
 
     try {
+      const supabase = createClient();
       const { error } = await supabase
         .from('documents')
         .delete()

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase-browser';
 import { Sparkles, FileText, Plus, Settings, CreditCard, LogOut, Zap, Menu, X } from 'lucide-react';
 
 export default function DashboardLayout({
@@ -20,6 +20,7 @@ export default function DashboardLayout({
     checkUser();
     loadCredits();
 
+    const supabase = createClient();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
         router.push('/login');
@@ -34,6 +35,7 @@ export default function DashboardLayout({
 
   const checkUser = async () => {
     try {
+      const supabase = createClient();
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const accessToken = hashParams.get('access_token');
       
@@ -61,6 +63,7 @@ export default function DashboardLayout({
 
   const loadCredits = async () => {
     try {
+      const supabase = createClient();
       const { data: { user: authUser } } = await supabase.auth.getUser();
       if (!authUser) return;
 
@@ -79,6 +82,7 @@ export default function DashboardLayout({
   };
 
   const handleLogout = async () => {
+    const supabase = createClient();
     await supabase.auth.signOut();
     router.push('/');
   };

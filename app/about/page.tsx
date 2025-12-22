@@ -77,23 +77,23 @@ export default function AboutPage() {
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-slate-400 text-sm mb-1">Найменування</p>
-                  <p className="text-white font-medium">ФОП [Ваше ПІБ]</p>
+                  <p className="text-white font-medium">ФОП Лисун Владислав Сергійович</p>
                 </div>
                 <div>
-                  <p className="text-slate-400 text-sm mb-1">ЄДРПОУ/ІПН</p>
-                  <p className="text-white font-medium">[Ваш код]</p>
+                  <p className="text-slate-400 text-sm mb-1">РНОКПП</p>
+                  <p className="text-white font-medium">3494908755</p>
                 </div>
-                <div>
-                  <p className="text-slate-400 text-sm mb-1">Адреса</p>
-                  <p className="text-white font-medium">[Ваша адреса]</p>
+                <div className="md:col-span-2">
+                  <p className="text-slate-400 text-sm mb-1">Місцезнаходження</p>
+                  <p className="text-white font-medium">Україна, 62203, Харківська обл., Богодухівський р-н, селище Золочів, вул. Народна, будинок 4</p>
                 </div>
                 <div>
                   <p className="text-slate-400 text-sm mb-1">Електронна пошта</p>
-                  <p className="text-white font-medium">support@teacherplan.com</p>
+                  <p className="text-white font-medium">teacher_plan_ai@proton.me</p>
                 </div>
                 <div>
                   <p className="text-slate-400 text-sm mb-1">Телефон</p>
-                  <p className="text-white font-medium">+380 XX XXX XX XX</p>
+                  <p className="text-white font-medium">+380 93 197 20 61</p>
                 </div>
               </div>
             </div>
@@ -131,13 +131,13 @@ export default function AboutPage() {
               Маєте запитання або пропозиції? Зв'яжіться з нами!
             </p>
             <div className="space-y-2">
-              <a href="mailto:support@teacherplan.com" className="flex items-center gap-3 text-cyan-400 hover:text-cyan-300">
+              <a href="mailto:teacher_plan_ai@proton.me" className="flex items-center gap-3 text-cyan-400 hover:text-cyan-300">
                 <span>📧</span>
-                <span>support@teacherplan.com</span>
+                <span>teacher_plan_ai@proton.me</span>
               </a>
-              <a href="tel:+380XXXXXXXXX" className="flex items-center gap-3 text-cyan-400 hover:text-cyan-300">
+              <a href="tel:+380931972061" className="flex items-center gap-3 text-cyan-400 hover:text-cyan-300">
                 <span>📞</span>
-                <span>+380 XX XXX XX XX</span>
+                <span>+380 93 197 20 61</span>
               </a>
             </div>
           </section>

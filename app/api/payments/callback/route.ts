@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { verifySignature, TRANSACTION_STATUS } from '@/lib/wayforpay';
+
+// Server-side Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export async function POST(request: Request) {
   try {
@@ -147,4 +153,4 @@ export async function POST(request: Request) {
 }
 
 // Allow WayForPay to send POST requests
-export const runtime = 'edge';
+

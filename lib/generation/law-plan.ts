@@ -57,6 +57,12 @@ function generateLessonContent(topic: string, moduleName: string): string {
   return content;
 }
 
+// Допоміжна функція для отримання назви дня тижня
+function getWeekdayName(date: Date): string {
+  const days = ["Нд", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+  return days[date.getDay()];
+}
+
 // Головна функція генерації
 export function generateLawCalendarPlan(settings: LawPlanSettings) {
   const modules = allModulesLaw9;
@@ -88,7 +94,7 @@ export function generateLawCalendarPlan(settings: LawPlanSettings) {
         }
         
         // Знаходимо наступний день тижня
-        while (!weekdays.includes(currentDate.getDay())) {
+        while (weekdays.length > 0 && !weekdays.includes(getWeekdayName(currentDate))) {
           currentDate.setDate(currentDate.getDate() + 1);
         }
         

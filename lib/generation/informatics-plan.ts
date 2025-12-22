@@ -315,8 +315,8 @@ export async function generateInformaticsCalendarPlan(
     // Вибір модулів
     let modules: InformaticsModule[];
     
-    if (settings.profile && RECOMMENDED_SETS[settings.profile]) {
-      modules = RECOMMENDED_SETS[settings.profile];
+    if (settings.profile && typeof settings.profile === 'string' && settings.profile in RECOMMENDED_SETS) {
+      modules = RECOMMENDED_SETS[settings.profile as keyof typeof RECOMMENDED_SETS];
     } else if (settings.selectedModules && settings.selectedModules.length > 0) {
       modules = selectModulesForYear(settings.selectedModules);
     } else {

@@ -1,11 +1,17 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { 
   createPaymentData, 
   getPackageById, 
   generateOrderId,
   CreatePaymentParams 
 } from '@/lib/wayforpay';
+
+// Server-side Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export async function POST(request: Request) {
   try {
@@ -87,7 +93,6 @@ export async function POST(request: Request) {
       paymentData,
       redirectUrl: 'https://secure.wayforpay.com/pay',
     });
-
   } catch (error: any) {
     console.error('Payment creation error:', error);
     return NextResponse.json(

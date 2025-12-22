@@ -192,8 +192,8 @@ export default function LoginPage() {
                 <input type="checkbox" className="w-4 h-4 rounded border-white/10 bg-white/5" />
                 Запам'ятати мене
               </label>
-              <a href="#" className="text-amber-400 hover:text-amber-300 transition">
-                Забули пароль?
+              <a href="/reset-password" className="text-amber-400 hover:text-amber-300 transition">
+               Забули пароль?
               </a>
             </div>
 

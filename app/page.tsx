@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase-browser";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Sparkles, FileText, Zap, Clock, CheckCircle, ArrowRight, Stars, BookOpen, Calendar, Download } from "lucide-react";
@@ -16,10 +16,11 @@ export default function LandingPage() {
   }, []);
 
   const checkUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    setUser(user);
-    setLoading(false);
-  };
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  setUser(user);
+  setLoading(false);
+};
 
   if (loading) {
     return (
@@ -734,18 +735,26 @@ export default function LandingPage() {
               <div>
                 <h4 className="text-white font-semibold mb-3">Контакти</h4>
                 <div className="space-y-2">
-                  <a href="mailto:support@teacherplan.com" className="block text-slate-400 hover:text-cyan-400 transition-colors text-sm">
-                    support@teacherplan.com
+                  <a href="mailto:teacher_plan_ai@proton.me" className="block text-slate-400 hover:text-cyan-400 transition-colors text-sm">
+                    teacher_plan_ai@proton.me
                   </a>
-                  <p className="text-slate-400 text-sm">
-                    +380 XX XXX XX XX
-                  </p>
+                  <a href="tel:+380931972061" className="block text-slate-400 hover:text-cyan-400 transition-colors text-sm">
+                    +380 93 197 20 61
+                  </a>
                 </div>
               </div>
             </div>
           </div>
           
           <div className="pt-6 border-t border-slate-800">
+            <div className="text-center mb-4">
+              <p className="text-slate-500 text-xs mb-1">
+                ФОП Лисун Владислав Сергійович | РНОКПП: 3494908755
+              </p>
+              <p className="text-slate-600 text-xs">
+                Україна, 62203, Харківська обл., Богодухівський р-н, селище Золочів, вул. Народна, будинок 4
+              </p>
+            </div>
             <p className="text-slate-400 text-sm text-center">
               © 2024 TeacherPlan. Всі права захищені.
             </p>

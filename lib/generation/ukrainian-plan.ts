@@ -141,8 +141,8 @@ export async function generateUkrainianCalendarPlan(settings: UkrainianPlanSetti
     
     const { semester1, semester2 } = distributeModulesBySemesters(modules);
     
-    // Конвертуємо weekdays з рядка в масив чисел
-    const weekdays: number[] = convertWeekdays(settings.weekdays);
+    // Конвертуємо weekdays з рядка в масив рядків
+    const weekdays: string[] = convertWeekdays(settings.weekdays);
     const startDate = new Date(settings.startDate);
     
     // 🔍 ДІАГНОСТИКА
@@ -167,12 +167,12 @@ export async function generateUkrainianCalendarPlan(settings: UkrainianPlanSetti
     const SEMESTER_2_END = new Date(startDate.getFullYear() + 1, 4, 31);  // 31 травня
     
     // Функція для підрахунку уроків у періоді
-    function countLessonsInPeriod(start: Date, end: Date, weekdays: number[]): number {
+    function countLessonsInPeriod(start: Date, end: Date, weekdays: string[]): number {
       let count = 0;
       const current = new Date(start);
       
       while (current <= end) {
-        if (weekdays.includes(current.getDay())) {
+        if (weekdays.includes(getWeekdayName(current))) {
           count++;
         }
         current.setDate(current.getDate() + 1);
@@ -223,7 +223,7 @@ export async function generateUkrainianCalendarPlan(settings: UkrainianPlanSetti
           }
           
           // Знаходимо наступний день з weekdays
-          while (!weekdays.includes(currentDate.getDay()) || currentDate < semesterStart) {
+          while (!weekdays.includes(getWeekdayName(currentDate)) || currentDate < semesterStart) {
             currentDate.setDate(currentDate.getDate() + 1);
             if (currentDate > semesterEnd) break;
           }
