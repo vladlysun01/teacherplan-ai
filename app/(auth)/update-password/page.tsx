@@ -4,8 +4,9 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { Lock, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase-browser';
 import { useRouter, useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 
-// Компонент з логікою (використовує useSearchParams)
+// Компонент з логікою
 function UpdatePasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -204,18 +205,20 @@ function UpdatePasswordForm() {
   );
 }
 
-// Головний компонент з Suspense
-export default function UpdatePasswordPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">Завантаження...</p>
-        </div>
+// Динамічний імпорт з вимкненим SSR
+const DynamicUpdatePasswordForm = dynamic(() => Promise.resolve(UpdatePasswordForm), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-gray-400">Завантаження...</p>
       </div>
-    }>
-      <UpdatePasswordForm />
-    </Suspense>
-  );
+    </div>
+  )
+});
+
+// Головний компонент
+export default function UpdatePasswordPage() {
+  return <DynamicUpdatePasswordForm />;
 }
