@@ -1,64 +1,130 @@
-import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
-const LIQPAY_PUBLIC_KEY = process.env.LIQPAY_PUBLIC_KEY || '';
-const LIQPAY_PRIVATE_KEY = process.env.LIQPAY_PRIVATE_KEY || '';
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
-export async function POST(request: NextRequest) {
+const PACKAGES = {
+  '1': { id: '1', name: '1 кредит', credits: 1, price: 99 },
+  '3': { id: '3', name: '3 кредити', credits: 3, price: 249 },
+  '10': { id: '10', name: '10 кредитів', credits: 10, price: 599 },
+};
+
+async function generateSignature(fields: string[]): Promise<string> {
+  const crypto = await import('crypto');
+  const secret = process.env.WAYFORPAY_SECRET_KEY || '';
+  const string = fields.join(';');
+  
+  console.log('🔐 Signature fields:', fields);
+  console.log('📝 String to sign:', string);
+  
+  const signature = crypto.createHmac('md5', secret).update(string).digest('hex');
+  
+  console.log('✅ Generated signature:', signature);
+  
+  return signature;
+}
+
+export async function POST(req: Request) {
   try {
-    const { userId, packageId, amount, credits } = await request.json();
+    const { packageId, userId } = await req.json();
+    
+    console.log('💳 Payment request:', { packageId, userId });
 
-    if (!userId || !packageId || !amount || !credits) {
-      return NextResponse.json(
-        { success: false, error: 'Відсутні обов\'язкові параметри' },
-        { status: 400 }
-      );
+    if (!packageId || !userId) {
+      return NextResponse.json({ error: 'Missing data' }, { status: 400 });
     }
 
-    // Генеруємо унікальний ID замовлення
-    const orderId = `order_${Date.now()}_${userId.substring(0, 8)}`;
+    const pkg = PACKAGES[packageId as keyof typeof PACKAGES];
+    if (!pkg) {
+      return NextResponse.json({ error: 'Invalid package' }, { status: 400 });
+    }
 
-    // Дані для LiqPay
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('email, full_name')
+      .eq('id', userId)
+      .single();
+
+    const email = profile?.email || 'user@teacherplan.com';
+    const name = profile?.full_name || 'User';
+
+    const orderId = `TP_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const orderDate = Math.floor(Date.now() / 1000);
+    const merchant = process.env.WAYFORPAY_MERCHANT_ACCOUNT || 'test_merch_n1';
+    const domain = 'teacher-plan-ai.site';
+
+    console.log('📦 Package:', pkg);
+    console.log('👤 User:', { email, name });
+    console.log('🆔 Order:', orderId);
+    console.log('🏪 Merchant:', merchant);
+
+    // Save payment
+    try {
+      await supabase.from('payments').insert({
+        user_id: userId,
+        order_id: orderId,
+        package_id: packageId,
+        amount: pkg.price,
+        credits: pkg.credits,
+        status: 'pending',
+        payment_method: 'wayforpay',
+        created_at: new Date().toISOString(),
+      });
+      console.log('✅ Payment saved to DB');
+    } catch (e) {
+      console.error('⚠️ DB error:', e);
+    }
+
+    // ВАЖЛИВО: Порядок полів для підпису!
+    // merchantAccount;merchantDomainName;orderReference;orderDate;amount;currency;productName;productCount;productPrice
+    const signatureFields = [
+      merchant,             // merchantAccount ✅ НЕ SECRET KEY!
+      domain,               // merchantDomainName  
+      orderId,              // orderReference
+      orderDate.toString(), // orderDate
+      pkg.price.toString(), // amount
+      'UAH',                // currency
+      pkg.name,             // productName[0]
+      '1',                  // productCount[0]
+      pkg.price.toString()  // productPrice[0]
+    ];
+
+    const signature = await generateSignature(signatureFields);
+
     const paymentData = {
-      version: 3,
-      public_key: LIQPAY_PUBLIC_KEY,
-      action: 'pay',
-      amount: amount,
+      merchantAccount: merchant,
+      merchantDomainName: domain,
+      orderReference: orderId,
+      orderDate: orderDate,
+      amount: pkg.price,
       currency: 'UAH',
-      description: `Поповнення кредитів TeacherPlan: ${credits} кредитів`,
-      order_id: orderId,
-      result_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/billing?success=true`,
-      server_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/payment/callback`,
-      language: 'uk',
-      // Додаткові дані для callback
-      info: JSON.stringify({
-        userId,
-        packageId,
-        credits,
-      }),
+      productName: [pkg.name],
+      productCount: [1],
+      productPrice: [pkg.price],
+      clientEmail: email,
+      clientFirstName: name,
+      clientLastName: '',
+      language: 'UA',
+      returnUrl: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/payment/success?order=${orderId}`,
+      serviceUrl: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/payments/callback`,
+      merchantSignature: signature,
     };
 
-    // Кодуємо дані в base64
-    const dataBase64 = Buffer.from(JSON.stringify(paymentData)).toString('base64');
-
-    // Генеруємо підпис
-    const signString = LIQPAY_PRIVATE_KEY + dataBase64 + LIQPAY_PRIVATE_KEY;
-    const signature = crypto
-      .createHash('sha1')
-      .update(signString)
-      .digest('base64');
+    console.log('✅ Payment data ready');
+    console.log('📤 Sending to WayForPay...');
 
     return NextResponse.json({
       success: true,
-      paymentData: dataBase64,
-      signature: signature,
-      orderId: orderId,
+      orderId,
+      paymentData,
+      redirectUrl: 'https://secure.wayforpay.com/pay',
     });
-  } catch (error) {
-    console.error('Payment creation error:', error);
-    return NextResponse.json(
-      { success: false, error: 'Помилка створення платежу' },
-      { status: 500 }
-    );
+
+  } catch (error: any) {
+    console.error('❌ Error:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
