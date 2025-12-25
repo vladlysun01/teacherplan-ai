@@ -108,7 +108,7 @@ export async function POST(req: Request) {
       clientLastName: '',
       language: 'UA',
       // returnUrl видалено - користувач залишиться на сторінці WayForPay
-      serviceUrl: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/payments/callback`,
+      serviceUrl: 'https://teacher-plan-ai.site/api/payments/callback',
       merchantSignature: signature,
     };
 
