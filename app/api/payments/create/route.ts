@@ -17,8 +17,7 @@ async function generateSignature(fields: string[]): Promise<string> {
   const secret = process.env.WAYFORPAY_SECRET_KEY || '';
   const string = fields.join(';');
   
-  console.log('🔐 Signature data:', fields);
-  console.log('🔑 Secret key length:', secret.length);
+  console.log('🔐 Signature fields:', fields);
   console.log('📝 String to sign:', string);
   
   const signature = crypto.createHmac('md5', secret).update(string).digest('hex');
@@ -60,6 +59,7 @@ export async function POST(req: Request) {
     console.log('📦 Package:', pkg);
     console.log('👤 User:', { email, name });
     console.log('🆔 Order:', orderId);
+    console.log('🏪 Merchant:', merchant);
 
     // Save payment
     try {
@@ -80,15 +80,15 @@ export async function POST(req: Request) {
 
     // ВАЖЛИВО: Порядок полів для підпису!
     const signatureFields = [
-      merchant,           // merchantAccount
-      domain,             // merchantDomainName  
-      orderId,            // orderReference
+      merchant,             // merchantAccount
+      domain,               // merchantDomainName  
+      orderId,              // orderReference
       orderDate.toString(), // orderDate
       pkg.price.toString(), // amount
-      'UAH',              // currency
-      pkg.name,           // productName[0]
-      '1',                // productCount[0]
-      pkg.price.toString() // productPrice[0]
+      'UAH',                // currency
+      pkg.name,             // productName[0]
+      '1',                  // productCount[0]
+      pkg.price.toString()  // productPrice[0]
     ];
 
     const signature = await generateSignature(signatureFields);
@@ -107,7 +107,7 @@ export async function POST(req: Request) {
       clientFirstName: name,
       clientLastName: '',
       language: 'UA',
-      returnUrl: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/payment/success`,
+      // returnUrl видалено - користувач залишиться на сторінці WayForPay
       serviceUrl: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/payments/callback`,
       merchantSignature: signature,
     };
