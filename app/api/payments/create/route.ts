@@ -54,7 +54,7 @@ export async function POST(req: Request) {
     const orderId = `TP_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const orderDate = Math.floor(Date.now() / 1000);
     const merchant = process.env.WAYFORPAY_MERCHANT_ACCOUNT || 'test_merch_n1';
-    const domain = 'teacher-plan-ai.site';
+    const domain = 'www.teacher-plan-ai.site';
 
     console.log('📦 Package:', pkg);
     console.log('👤 User:', { email, name });
@@ -108,7 +108,7 @@ export async function POST(req: Request) {
       clientLastName: '',
       language: 'UA',
       // returnUrl видалено - користувач залишиться на сторінці WayForPay
-      serviceUrl: 'https://teacher-plan-ai.site/api/payments/callback',
+      serviceUrl: 'https://www.teacher-plan-ai.site/api/payments/callback',
       merchantSignature: signature,
     };
 
