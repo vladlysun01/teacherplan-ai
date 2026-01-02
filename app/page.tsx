@@ -20,6 +20,11 @@ export default function LandingPage() {
   const { data: { user } } = await supabase.auth.getUser();
   setUser(user);
   setLoading(false);
+  
+  // Auto-redirect authenticated users to dashboard
+  if (user) {
+    router.push('/dashboard');
+  }
 };
 
   if (loading) {

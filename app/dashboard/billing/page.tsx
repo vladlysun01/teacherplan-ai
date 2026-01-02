@@ -78,61 +78,8 @@ export default function BillingPage() {
       return;
     }
 
-    setPurchasing(packageId);
-
-    try {
-      // Call API to create payment
-      const response = await fetch('/api/payments/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          packageId,
-          userId: user.id,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Помилка створення платежу');
-      }
-
-      console.log('✅ Payment data received:', data);
-
-      // Create and submit form to WayForPay
-      if (formRef.current) {
-        // Clear previous form fields
-        formRef.current.innerHTML = '';
-
-        // Add all payment data as hidden fields
-        Object.entries(data.paymentData).forEach(([key, value]) => {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = key;
-          
-          // Handle arrays
-          if (Array.isArray(value)) {
-            input.value = value.join(';');
-          } else {
-            input.value = String(value);
-          }
-          
-          formRef.current?.appendChild(input);
-        });
-
-        // Set form action
-        formRef.current.action = data.redirectUrl;
-
-        // Submit form
-        console.log('🚀 Submitting payment form to WayForPay...');
-        formRef.current.submit();
-      }
-
-    } catch (error: any) {
-      console.error('Purchase error:', error);
-      alert('Помилка: ' + error.message);
-      setPurchasing(null);
-    }
+    // Redirect to checkout page
+    window.location.href = `/payment/checkout?package=${packageId}`;
   };
 
   if (loading) {
