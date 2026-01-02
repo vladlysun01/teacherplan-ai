@@ -2,10 +2,16 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifySignature, TRANSACTION_STATUS } from '@/lib/wayforpay';
 
-// Server-side Supabase client
+// Server-side Supabase client with SERVICE_ROLE_KEY for admin operations
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
 );
 
 export async function POST(request: Request) {
@@ -45,12 +51,19 @@ export async function POST(request: Request) {
       .single();
 
     if (paymentError || !payment) {
-      console.error('❌ Payment not found:', orderReference);
+      console.error('❌ Payment not found:', orderReference, paymentError);
       return NextResponse.json(
         { error: 'Payment not found' },
         { status: 404 }
       );
     }
+
+    console.log('💳 Payment found:', {
+      user_id: payment.user_id,
+      credits: payment.credits,
+      amount: payment.amount,
+      current_status: payment.status
+    });
 
     // Update payment status
     const updateData: any = {
@@ -76,6 +89,8 @@ export async function POST(request: Request) {
       );
     }
 
+    console.log('✅ Payment status updated to:', updateData.status);
+
     // If payment approved - add credits to user
     if (transactionStatus === TRANSACTION_STATUS.APPROVED) {
       console.log('💰 Payment approved, adding credits...');
@@ -83,7 +98,7 @@ export async function POST(request: Request) {
       // Get current credits
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('credits')
+        .select('credits, id')
         .eq('id', payment.user_id)
         .single();
 
@@ -95,14 +110,27 @@ export async function POST(request: Request) {
         );
       }
 
+      console.log('👤 Current user profile:', {
+        id: profile?.id,
+        current_credits: profile?.credits || 0
+      });
+
       const currentCredits = profile?.credits || 0;
       const newCredits = currentCredits + payment.credits;
 
+      console.log('💎 Credits calculation:', {
+        current: currentCredits,
+        adding: payment.credits,
+        new_total: newCredits
+      });
+
       // Update user credits
-      const { error: creditsError } = await supabase
+      const { data: updatedProfile, error: creditsError } = await supabase
         .from('profiles')
         .update({ credits: newCredits })
-        .eq('id', payment.user_id);
+        .eq('id', payment.user_id)
+        .select('credits')
+        .single();
 
       if (creditsError) {
         console.error('❌ Failed to add credits:', creditsError);
@@ -111,6 +139,12 @@ export async function POST(request: Request) {
           { status: 500 }
         );
       }
+
+      console.log('✅ Credits updated successfully!', {
+        old: currentCredits,
+        new: updatedProfile?.credits,
+        expected: newCredits
+      });
 
       // Create transaction record
       const { error: transactionError } = await supabase
