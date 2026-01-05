@@ -104,14 +104,8 @@ function CheckoutContent() {
         // Open WayForPay widget instead of redirect
         const wayforpay = new (window as any).Wayforpay();
         
-        // Add straightWidget parameter to keep widget on our site even on mobile
-        const widgetConfig = {
-          ...data.paymentData,
-          straightWidget: true, // Always open widget, never redirect on mobile
-        };
-        
         wayforpay.run(
-          widgetConfig,
+          data.paymentData, // Pass data directly without straightWidget
           // On approved
           function (response: any) {
             console.log('✅ Payment approved (callback):', response);
