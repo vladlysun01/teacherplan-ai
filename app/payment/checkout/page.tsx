@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 import { Sparkles, ArrowLeft, CreditCard, Lock, CheckCircle } from 'lucide-react';
+import Script from 'next/script';
 
 function CheckoutContent() {
   const router = useRouter();
@@ -13,6 +14,7 @@ function CheckoutContent() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const [widgetReady, setWidgetReady] = useState(false);
 
   const PACKAGES: {
     [key: string]: {
@@ -47,6 +49,40 @@ function CheckoutContent() {
     setLoading(false);
   };
 
+  useEffect(() => {
+    checkAuth();
+    
+    // Listen for widget events via postMessage
+    const handleWidgetMessage = (event: MessageEvent) => {
+      console.log('📨 Widget message:', event.data);
+      
+      switch (event.data) {
+        case 'WfpWidgetEventApproved':
+          console.log('✅ Payment approved via postMessage');
+          router.push('/payment/success');
+          break;
+        case 'WfpWidgetEventDeclined':
+          console.log('❌ Payment declined via postMessage');
+          setProcessing(false);
+          break;
+        case 'WfpWidgetEventPending':
+          console.log('⏳ Payment pending via postMessage');
+          setProcessing(false);
+          break;
+        case 'WfpWidgetEventClose':
+          console.log('🚪 Widget closed by user');
+          setProcessing(false);
+          break;
+      }
+    };
+
+    window.addEventListener('message', handleWidgetMessage);
+    
+    return () => {
+      window.removeEventListener('message', handleWidgetMessage);
+    };
+  }, [router]);
+
   const handlePayment = async () => {
     if (!user || !selectedPackage) return;
     
@@ -65,22 +101,35 @@ function CheckoutContent() {
       const data = await response.json();
 
       if (data.success && data.paymentData) {
-        // Create form and submit to WayForPay
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = data.redirectUrl;
-        form.style.display = 'none';
-
-        Object.entries(data.paymentData).forEach(([key, value]) => {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = key;
-          input.value = Array.isArray(value) ? value[0] : String(value);
-          form.appendChild(input);
-        });
-
-        document.body.appendChild(form);
-        form.submit();
+        // Open WayForPay widget instead of redirect
+        const wayforpay = new (window as any).Wayforpay();
+        
+        // Add straightWidget parameter to keep widget on our site even on mobile
+        const widgetConfig = {
+          ...data.paymentData,
+          straightWidget: true, // Always open widget, never redirect on mobile
+        };
+        
+        wayforpay.run(
+          widgetConfig,
+          // On approved
+          function (response: any) {
+            console.log('✅ Payment approved (callback):', response);
+            router.push('/payment/success');
+          },
+          // On declined
+          function (response: any) {
+            console.log('❌ Payment declined (callback):', response);
+            alert('Оплату відхилено. Спробуйте інший спосіб оплати.');
+            setProcessing(false);
+          },
+          // On pending
+          function (response: any) {
+            console.log('⏳ Payment pending (callback):', response);
+            alert('Оплата в обробці. Будь ласка, зачекайте.');
+            setProcessing(false);
+          }
+        );
       } else {
         alert('Помилка створення платежу');
         setProcessing(false);
@@ -122,7 +171,19 @@ function CheckoutContent() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <>
+      {/* Load WayForPay Widget Script */}
+      <Script
+        id="wayforpay-widget"
+        src="https://secure.wayforpay.com/server/pay-widget.js"
+        strategy="lazyOnload"
+        onLoad={() => {
+          console.log('✅ WayForPay widget loaded');
+          setWidgetReady(true);
+        }}
+      />
+
+      <div className="min-h-screen bg-slate-950">
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full blur-3xl opacity-20 bg-cyan-500 animate-pulse" style={{animationDuration: '4s'}}></div>
@@ -222,7 +283,7 @@ function CheckoutContent() {
 
               <button
                 onClick={handlePayment}
-                disabled={processing}
+                disabled={processing || !widgetReady}
                 className="w-full px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-xl hover:shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 font-semibold text-lg flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {processing ? (
@@ -230,16 +291,21 @@ function CheckoutContent() {
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                     <span>Обробка...</span>
                   </>
+                ) : !widgetReady ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Завантаження...</span>
+                  </>
                 ) : (
                   <>
                     <CreditCard size={24} />
-                    <span>Перейти до оплати</span>
+                    <span>Оплатити {selectedPackage.price} ₴</span>
                   </>
                 )}
               </button>
 
               <p className="text-slate-400 text-xs text-center mt-4">
-                Після натискання ви будете перенаправлені на безпечну сторінку оплати WayForPay
+                Безпечна форма оплати відкриється на цій сторінці
               </p>
 
               {/* Payment Methods */}
@@ -273,6 +339,7 @@ function CheckoutContent() {
         </div>
       </main>
     </div>
+    </>
   );
 }
 
