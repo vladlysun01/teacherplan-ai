@@ -13,6 +13,23 @@ const nextConfig = {
     }
     return config;
   },
+  async headers() {
+    return [
+      {
+        source: '/payment/:path*',
+        headers: [
+          {
+            key: 'Permissions-Policy',
+            value: 'payment=(self "https://secure.wayforpay.com")',
+          },
+          {
+            key: 'Feature-Policy',
+            value: 'payment "self" https://secure.wayforpay.com',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

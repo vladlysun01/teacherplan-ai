@@ -52,6 +52,12 @@ function CheckoutContent() {
   useEffect(() => {
     checkAuth();
     
+    // Add Permissions-Policy meta tag for Apple Pay
+    const metaTag = document.createElement('meta');
+    metaTag.httpEquiv = 'Permissions-Policy';
+    metaTag.content = 'payment=(self "https://secure.wayforpay.com")';
+    document.head.appendChild(metaTag);
+    
     // Listen for widget events via postMessage
     const handleWidgetMessage = (event: MessageEvent) => {
       console.log('📨 Widget message:', event.data);
