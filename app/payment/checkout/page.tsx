@@ -14,7 +14,15 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
 
-  const PACKAGES = {
+  const PACKAGES: {
+    [key: string]: {
+      id: string;
+      name: string;
+      credits: number;
+      price: number;
+      savings?: number;
+    };
+  } = {
     '1': { id: '1', name: '1 кредит', credits: 1, price: 99 },
     '3': { id: '3', name: '3 кредити', credits: 3, price: 249, savings: 48 },
     '10': { id: '10', name: '10 кредитів', credits: 10, price: 599, savings: 391 },
