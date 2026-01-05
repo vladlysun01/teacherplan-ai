@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 import { Sparkles, ArrowLeft, CreditCard, Lock, CheckCircle } from 'lucide-react';
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const packageId = searchParams.get('package');
@@ -273,5 +273,23 @@ export default function CheckoutPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+// Suspense wrapper for the page
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="relative">
+          <div className="absolute inset-0 blur-3xl opacity-50">
+            <div className="w-32 h-32 bg-cyan-500 rounded-full animate-pulse"></div>
+          </div>
+          <div className="relative w-16 h-16 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"></div>
+        </div>
+      </div>
+    }>
+      <CheckoutContent />
+    </Suspense>
   );
 }
