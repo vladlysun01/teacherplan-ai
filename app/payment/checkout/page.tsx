@@ -4,7 +4,6 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 import { Sparkles, ArrowLeft, CreditCard, Lock, CheckCircle } from 'lucide-react';
-import Script from 'next/script';
 
 function CheckoutContent() {
   const router = useRouter();
@@ -13,8 +12,8 @@ function CheckoutContent() {
   
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState(false);
-  const [widgetReady, setWidgetReady] = useState(false);
+  const [paymentData, setPaymentData] = useState<any>(null);
+  const [creatingPayment, setCreatingPayment] = useState(false);
 
   const PACKAGES: {
     [key: string]: {
@@ -51,48 +50,17 @@ function CheckoutContent() {
 
   useEffect(() => {
     checkAuth();
-    
-    // Add Permissions-Policy meta tag for Apple Pay
-    const metaTag = document.createElement('meta');
-    metaTag.httpEquiv = 'Permissions-Policy';
-    metaTag.content = 'payment=(self "https://secure.wayforpay.com")';
-    document.head.appendChild(metaTag);
-    
-    // Listen for widget events via postMessage
-    const handleWidgetMessage = (event: MessageEvent) => {
-      console.log('📨 Widget message:', event.data);
-      
-      switch (event.data) {
-        case 'WfpWidgetEventApproved':
-          console.log('✅ Payment approved via postMessage');
-          router.push('/payment/success');
-          break;
-        case 'WfpWidgetEventDeclined':
-          console.log('❌ Payment declined via postMessage');
-          setProcessing(false);
-          break;
-        case 'WfpWidgetEventPending':
-          console.log('⏳ Payment pending via postMessage');
-          setProcessing(false);
-          break;
-        case 'WfpWidgetEventClose':
-          console.log('🚪 Widget closed by user');
-          setProcessing(false);
-          break;
-      }
-    };
+  }, []);
 
-    window.addEventListener('message', handleWidgetMessage);
-    
-    return () => {
-      window.removeEventListener('message', handleWidgetMessage);
-    };
-  }, [router]);
+  useEffect(() => {
+    // If user is authenticated and package selected, create payment
+    if (user && selectedPackage && !paymentData && !creatingPayment) {
+      createPayment();
+    }
+  }, [user, selectedPackage]);
 
-  const handlePayment = async () => {
-    if (!user || !selectedPackage) return;
-    
-    setProcessing(true);
+  const createPayment = async () => {
+    setCreatingPayment(true);
 
     try {
       const response = await fetch('/api/payments/create', {
@@ -107,37 +75,16 @@ function CheckoutContent() {
       const data = await response.json();
 
       if (data.success && data.paymentData) {
-        // Open WayForPay widget instead of redirect
-        const wayforpay = new (window as any).Wayforpay();
-        
-        wayforpay.run(
-          data.paymentData, // Pass data directly without straightWidget
-          // On approved
-          function (response: any) {
-            console.log('✅ Payment approved (callback):', response);
-            router.push('/payment/success');
-          },
-          // On declined
-          function (response: any) {
-            console.log('❌ Payment declined (callback):', response);
-            alert('Оплату відхилено. Спробуйте інший спосіб оплати.');
-            setProcessing(false);
-          },
-          // On pending
-          function (response: any) {
-            console.log('⏳ Payment pending (callback):', response);
-            alert('Оплата в обробці. Будь ласка, зачекайте.');
-            setProcessing(false);
-          }
-        );
+        console.log('✅ Payment data ready:', data);
+        setPaymentData(data.paymentData);
       } else {
         alert('Помилка створення платежу');
-        setProcessing(false);
+        setCreatingPayment(false);
       }
     } catch (error) {
       console.error('Payment error:', error);
       alert('Помилка створення платежу');
-      setProcessing(false);
+      setCreatingPayment(false);
     }
   };
 
@@ -171,19 +118,7 @@ function CheckoutContent() {
   }
 
   return (
-    <>
-      {/* Load WayForPay Widget Script */}
-      <Script
-        id="wayforpay-widget"
-        src="https://secure.wayforpay.com/server/pay-widget.js"
-        strategy="lazyOnload"
-        onLoad={() => {
-          console.log('✅ WayForPay widget loaded');
-          setWidgetReady(true);
-        }}
-      />
-
-      <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-slate-950">
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full blur-3xl opacity-20 bg-cyan-500 animate-pulse" style={{animationDuration: '4s'}}></div>
@@ -281,31 +216,35 @@ function CheckoutContent() {
                 <span className="text-slate-300 text-sm">Захищене з'єднання</span>
               </div>
 
-              <button
-                onClick={handlePayment}
-                disabled={processing || !widgetReady}
-                className="w-full px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-xl hover:shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 font-semibold text-lg flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {processing ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span>Обробка...</span>
-                  </>
-                ) : !widgetReady ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span>Завантаження...</span>
-                  </>
-                ) : (
-                  <>
+              {!paymentData ? (
+                <div className="flex flex-col items-center justify-center py-8">
+                  <div className="w-16 h-16 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin mb-4"></div>
+                  <p className="text-slate-400">Підготовка платежу...</p>
+                </div>
+              ) : (
+                <form method="POST" action="https://secure.wayforpay.com/pay" id="payment-form">
+                  {/* Hidden fields with payment data */}
+                  {Object.entries(paymentData).map(([key, value]) => (
+                    <input
+                      key={key}
+                      type="hidden"
+                      name={key}
+                      value={Array.isArray(value) ? value.join(';') : String(value)}
+                    />
+                  ))}
+
+                  <button
+                    type="submit"
+                    className="w-full px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-xl hover:shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 font-semibold text-lg flex items-center justify-center gap-3"
+                  >
                     <CreditCard size={24} />
                     <span>Оплатити {selectedPackage.price} ₴</span>
-                  </>
-                )}
-              </button>
+                  </button>
+                </form>
+              )}
 
               <p className="text-slate-400 text-xs text-center mt-4">
-                Безпечна форма оплати відкриється на цій сторінці
+                Ви будете перенаправлені на безпечну сторінку оплати WayForPay
               </p>
 
               {/* Payment Methods */}
@@ -319,7 +258,7 @@ function CheckoutContent() {
                     Mastercard
                   </div>
                   <div className="px-4 py-2 bg-slate-800 rounded-lg text-slate-300 text-sm font-medium">
-                    Apple Pay
+                    🍎 Apple Pay
                   </div>
                   <div className="px-4 py-2 bg-slate-800 rounded-lg text-slate-300 text-sm font-medium">
                     Google Pay
@@ -339,7 +278,6 @@ function CheckoutContent() {
         </div>
       </main>
     </div>
-    </>
   );
 }
 
