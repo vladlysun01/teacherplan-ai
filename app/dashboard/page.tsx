@@ -13,6 +13,7 @@ type Program = {
   id: string;
   classes: number[];
   description: string;
+  lessonsPerWeek?: number | number[]; // кількість уроків на тиждень (число або діапазон [мін, макс])
   hasVariant: boolean;
   variantModules?: VariantModule[];
   variantRequired?: number;
@@ -30,12 +31,14 @@ const PROGRAMS: Programs = {
       id: "fizkultura-nush-5-9",
       classes: [5, 6, 7, 8, 9],
       description: "Базова програма НУШ",
+      lessonsPerWeek: 3,
       hasVariant: false,
     },
     "10-11 класи (рівень стандарту)": {
       id: "fizkultura-10-11-standart",
       classes: [10, 11],
       description: "2 год/тиждень",
+      lessonsPerWeek: 2,
       hasVariant: true,
       variantModules: [
         { id: "basketball", name: "Баскетбол" },
@@ -51,6 +54,7 @@ const PROGRAMS: Programs = {
       id: "fizkultura-10-11-profil",
       classes: [10, 11],
       description: "4-5 год/тиждень, поглиблене вивчення",
+      lessonsPerWeek: [4, 5],
       hasVariant: true,
       variantModules: [
         { id: "basketball", name: "Баскетбол (поглиблений)" },
@@ -67,18 +71,21 @@ const PROGRAMS: Programs = {
       id: "ukrainian-nush-5-9",
       classes: [5, 6, 7, 8, 9],
       description: "Базова програма НУШ",
+      lessonsPerWeek: [2, 4],
       hasVariant: false,
     },
     "10-11 класи (рівень стандарту)": {
       id: "ukrainian-10-11-standard",
       classes: [10, 11],
       description: "2-3 год/тиждень",
+      lessonsPerWeek: [2, 3],
       hasVariant: false,
     },
     "10-11 класи (профільний рівень)": {
       id: "ukrainian-10-11-profile",
       classes: [10, 11],
       description: "4-5 год/тиждень, поглиблене вивчення",
+      lessonsPerWeek: [4, 5],
       hasVariant: false,
     },
   },
@@ -87,6 +94,7 @@ const PROGRAMS: Programs = {
       id: "ukrainian-literature-nush-5-9",
       classes: [5, 6, 7, 8, 9],
       description: "Базова програма НУШ",
+      lessonsPerWeek: 2,
       hasVariant: false,
     },
   },
@@ -95,18 +103,21 @@ const PROGRAMS: Programs = {
       id: "mathematics-10-11-standard",
       classes: [10, 11],
       description: "3 год/тиждень",
+      lessonsPerWeek: 3,
       hasVariant: false,
     },
     "10-11 класи (поглиблений рівень)": {
       id: "mathematics-10-11-advanced",
       classes: [10, 11],
       description: "4 год/тиждень",
+      lessonsPerWeek: 4,
       hasVariant: false,
     },
     "10-11 класи (профільний рівень)": {
       id: "mathematics-10-11-profile",
       classes: [10, 11],
       description: "5-6 год/тиждень, поглиблене вивчення",
+      lessonsPerWeek: [5, 6],
       hasVariant: false,
     },
   },
@@ -115,6 +126,7 @@ const PROGRAMS: Programs = {
       id: "informatics-10-11-standard",
       classes: [10, 11],
       description: "1-2 год/тиждень",
+      lessonsPerWeek: [1, 2],
       hasVariant: false,
     },
   },
@@ -123,6 +135,7 @@ const PROGRAMS: Programs = {
       id: "history-ukraine-10-11",
       classes: [10, 11],
       description: "Інтегрований курс",
+      lessonsPerWeek: 2,
       hasVariant: false,
     },
   },
@@ -131,12 +144,14 @@ const PROGRAMS: Programs = {
       id: "world-history-nush-6-9",
       classes: [6, 7, 8, 9],
       description: "Базова програма НУШ",
+      lessonsPerWeek: 1,
       hasVariant: false,
     },
     "10-11 класи": {
       id: "world-history-10-11",
       classes: [10, 11],
       description: "Старша школа",
+      lessonsPerWeek: 1,
       hasVariant: false,
     },
   },
@@ -145,6 +160,7 @@ const PROGRAMS: Programs = {
       id: "art-10-11-profile",
       classes: [10, 11],
       description: "Поглиблене вивчення мистецтва",
+      lessonsPerWeek: 2,
       hasVariant: false,
     },
   },
@@ -153,12 +169,14 @@ const PROGRAMS: Programs = {
       id: "geography-10",
       classes: [10],
       description: "Регіони та країни (1.5 год/тиждень, 52 год)",
+      lessonsPerWeek: [1, 2],
       hasVariant: false,
     },
     "11 клас": {
       id: "geography-11",
       classes: [11],
       description: "Географічний простір Землі (1 год/тиждень, 35 год)",
+      lessonsPerWeek: 1,
       hasVariant: false,
     },
   },
@@ -167,6 +185,7 @@ const PROGRAMS: Programs = {
       id: "law-9",
       classes: [9],
       description: "Базовий курс (1 год/тиждень, 35 год)",
+      lessonsPerWeek: 1,
       hasVariant: false,
     },
   },
@@ -175,6 +194,7 @@ const PROGRAMS: Programs = {
       id: "defense-ukraine-10-11-profile",
       classes: [10, 11],
       description: "6 год/тиждень, 210 год на рік",
+      lessonsPerWeek: 6,
       hasVariant: false,
     },
   },
@@ -553,13 +573,63 @@ export default function Dashboard() {
                 📆 Дні тижня
               </label>
               
-              {/* Підказка */}
-              <div className="mb-4 bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-4">
-                <p className="text-cyan-300 text-sm flex items-start gap-2">
-                  <span className="text-lg">💡</span>
-                  <span>Поставте галочку на днях, коли у вас будуть проходити уроки з цього предмету</span>
-                </p>
-              </div>
+              {/* Підказка з кількістю уроків */}
+              {(() => {
+                const lpw = currentProgram?.lessonsPerWeek;
+                const selectedCount = formData.weekdays.split(',').filter(Boolean).length;
+                
+                if (!lpw) return (
+                  <div className="mb-4 bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-4">
+                    <p className="text-cyan-300 text-sm flex items-start gap-2">
+                      <span className="text-lg">💡</span>
+                      <span>Поставте галочку на днях, коли у вас будуть проходити уроки з цього предмету</span>
+                    </p>
+                  </div>
+                );
+
+                const isRange = Array.isArray(lpw);
+                const min = isRange ? lpw[0] : lpw as number;
+                const max = isRange ? lpw[1] : lpw as number;
+                const hint = isRange ? `${min}–${max} уроки на тиждень` : `${min} ${min === 1 ? 'урок' : min < 5 ? 'уроки' : 'уроків'} на тиждень`;
+                
+                const isCorrect = isRange 
+                  ? (selectedCount >= min && selectedCount <= max)
+                  : selectedCount === min;
+                const isOver = selectedCount > max;
+
+                return (
+                  <div className={`mb-4 rounded-xl p-4 border ${
+                    selectedCount === 0 
+                      ? 'bg-cyan-500/10 border-cyan-500/30'
+                      : isCorrect 
+                        ? 'bg-green-500/10 border-green-500/30'
+                        : isOver
+                          ? 'bg-red-500/10 border-red-500/30'
+                          : 'bg-amber-500/10 border-amber-500/30'
+                  }`}>
+                    <p className="text-sm flex items-start gap-2">
+                      <span className="text-lg">
+                        {selectedCount === 0 ? '💡' : isCorrect ? '✅' : isOver ? '❌' : '⚠️'}
+                      </span>
+                      <span className={
+                        selectedCount === 0 ? 'text-cyan-300' 
+                        : isCorrect ? 'text-green-300'
+                        : isOver ? 'text-red-300'
+                        : 'text-amber-300'
+                      }>
+                        {selectedCount === 0 
+                          ? <>Ця програма передбачає <strong>{hint}</strong> — оберіть відповідну кількість днів</>
+                          : isCorrect
+                            ? <>Чудово! Вибрано {selectedCount} {selectedCount === 1 ? 'день' : 'дні'} — відповідає програмі ({hint})</>
+                            : isOver
+                              ? <>Забагато днів! Вибрано {selectedCount}, а програма передбачає {hint}</>
+                              : <>Вибрано {selectedCount} {selectedCount === 1 ? 'день' : 'дні'}, а програма передбачає {hint}</>
+                        }
+                      </span>
+                    </p>
+                  </div>
+                );
+              })()}
               
               {/* Чекбокси */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

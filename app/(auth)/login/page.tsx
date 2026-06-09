@@ -44,7 +44,7 @@ export default function LoginPage() {
       
       // Отримуємо поточний URL для redirect
       const origin = window.location.origin;
-      const redirectUrl = `${origin}/callback`;
+      const redirectUrl = `${origin}/auth/callback`;
       console.log('🔐 Redirect URL:', redirectUrl);
       
       const { error } = await supabase.auth.signInWithOAuth({
