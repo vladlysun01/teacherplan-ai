@@ -20,11 +20,6 @@ export default function LandingPage() {
   const { data: { user } } = await supabase.auth.getUser();
   setUser(user);
   setLoading(false);
-  
-  // Auto-redirect authenticated users to dashboard
-  if (user) {
-    router.push('/dashboard');
-  }
 };
 
   if (loading) {
@@ -124,17 +119,17 @@ export default function LandingPage() {
                 та поурочні плани відповідно до програми МОН України.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full px-4 sm:px-0">
                 <button
                   onClick={() => router.push('/register')}
-                  className="group px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-xl hover:shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 font-semibold text-lg flex items-center gap-2"
+                  className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-xl hover:shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 font-semibold text-base sm:text-lg flex items-center justify-center gap-2"
                 >
                   Спробувати безкоштовно
                   <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
                 </button>
                 <button
                   onClick={() => router.push('/login')}
-                  className="px-8 py-4 bg-slate-800/50 border border-slate-700 text-white rounded-xl hover:bg-slate-700/50 transition-all duration-300 font-semibold text-lg"
+                  className="w-full sm:w-auto px-8 py-4 bg-slate-800/50 border border-slate-700 text-white rounded-xl hover:bg-slate-700/50 transition-all duration-300 font-semibold text-base sm:text-lg"
                 >
                   Вже є акаунт
                 </button>
@@ -476,10 +471,10 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-3 gap-10">
               {/* Step 1 */}
-              <div className="relative">
-                <div className="absolute -top-6 left-8 w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-cyan-500/50">
+              <div className="relative pt-8">
+                <div className="absolute -top-0 left-8 w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-cyan-500/50 z-10">
                   1
                 </div>
                 <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 pt-12">
@@ -492,8 +487,8 @@ export default function LandingPage() {
               </div>
 
               {/* Step 2 */}
-              <div className="relative">
-                <div className="absolute -top-6 left-8 w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-cyan-500/50">
+              <div className="relative pt-8">
+                <div className="absolute -top-0 left-8 w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-cyan-500/50 z-10">
                   2
                 </div>
                 <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 pt-12">
@@ -506,8 +501,8 @@ export default function LandingPage() {
               </div>
 
               {/* Step 3 */}
-              <div className="relative">
-                <div className="absolute -top-6 left-8 w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-cyan-500/50">
+              <div className="relative pt-8">
+                <div className="absolute -top-0 left-8 w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-cyan-500/50 z-10">
                   3
                 </div>
                 <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 pt-12">
