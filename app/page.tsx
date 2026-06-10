@@ -63,29 +63,34 @@ export default function LandingPage() {
             </div>
 
             {/* Auth Buttons */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               {user ? (
-                // Для авторизованих
                 <button
                   onClick={() => router.push('/dashboard')}
-                  className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 hover:scale-105 transition-all duration-300 font-medium"
+                  className="px-4 sm:px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 hover:scale-105 transition-all duration-300 font-medium text-sm sm:text-base"
                 >
-                  Перейти до Dashboard
+                  Dashboard
                 </button>
               ) : (
-                // Для неавторизованих
                 <>
                   <button
                     onClick={() => router.push('/login')}
-                    className="px-6 py-2 text-slate-300 hover:text-white transition-colors"
+                    className="hidden sm:block px-6 py-2 text-slate-300 hover:text-white transition-colors"
+                  >
+                    Увійти
+                  </button>
+                  <button
+                    onClick={() => router.push('/login')}
+                    className="sm:hidden px-3 py-2 text-slate-300 hover:text-white transition-colors text-sm"
                   >
                     Увійти
                   </button>
                   <button
                     onClick={() => router.push('/register')}
-                    className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 font-medium"
+                    className="px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 font-medium text-sm sm:text-base whitespace-nowrap"
                   >
-                    Зареєструватись
+                    <span className="hidden sm:inline">Зареєструватись</span>
+                    <span className="sm:hidden">Реєстрація</span>
                   </button>
                 </>
               )}
