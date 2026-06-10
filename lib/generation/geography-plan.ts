@@ -2,6 +2,10 @@
 import { convertWeekdays, convertSemester, convertStartDate } from "./utils";
 import { allModules10, type GeographyModule } from './geography-modules-10';
 import { allModules11 } from './geography-modules-11';
+import { allModules6 } from './geography-modules-6';
+import { allModules7 } from './geography-modules-7';
+import { allModules8 } from './geography-modules-8';
+import { allModules9 } from './geography-modules-9';
 
 export interface GeographyPlanSettings {
   class: string;
@@ -24,6 +28,14 @@ function getWeekdayName(date: Date): string {
 // Отримання модулів для класу
 function getModulesForClass(classNum: number): GeographyModule[] {
   switch (classNum) {
+    case 6:
+      return allModules6;
+    case 7:
+      return allModules7;
+    case 8:
+      return allModules8;
+    case 9:
+      return allModules9;
     case 10:
       return allModules10;
     case 11:
@@ -31,6 +43,27 @@ function getModulesForClass(classNum: number): GeographyModule[] {
     default:
       return [];
   }
+}
+
+// Розрахунок максимальної кількості уроків для семестру
+function getMaxLessons(classNum: number, semester: number): number {
+  // 6, 7, 8 класи: 2 год/тиждень
+  if ([6, 7, 8].includes(classNum)) {
+    return semester === 1 ? 32 : 38;
+  }
+  // 9 клас: 1.5 год/тиждень
+  if (classNum === 9) {
+    return semester === 1 ? 24 : 25;
+  }
+  // 10 клас: 1.5 год/тиждень
+  if (classNum === 10) {
+    return semester === 1 ? 24 : 25;
+  }
+  // 11 клас: 1 год/тиждень
+  if (classNum === 11) {
+    return semester === 1 ? 16 : 19;
+  }
+  return 35;
 }
 
 // Генерація змісту уроку
@@ -53,10 +86,14 @@ function generateLessonContent(topic: string, moduleName: string): string {
     content += "Вивчення нового матеріалу: пояснення вчителя з використанням карт, аналіз економіко-географічного положення, характеристика природних умов та ресурсів, особливості населення та господарства";
   } else if (topic.includes("Узагальнення")) {
     content += "Узагальнення знань: систематизація вивченого матеріалу, виконання узагальнюючих завдань, робота з картами";
-  } else if (moduleName.includes("Топографія") || moduleName.includes("Картографія")) {
-    content += "Вивчення нового матеріалу: пояснення вчителя, робота з топографічними картами, виконання вправ з визначення координат та азимутів";
-  } else if (moduleName.includes("оболонка") || moduleName.includes("сфера")) {
+  } else if (topic.includes("координат") || topic.includes("масштаб") || topic.includes("план") || topic.includes("карт")) {
+    content += "Вивчення нового матеріалу: пояснення вчителя, робота з картами та планами місцевості, виконання вправ з визначення координат, масштабу та напрямків";
+  } else if (moduleName.includes("Літосфера") || moduleName.includes("Атмосфера") || moduleName.includes("Гідросфера") || moduleName.includes("Біосфера")) {
     content += "Вивчення нового матеріалу: пояснення географічних закономірностей, робота з тематичними картами, аналіз схем та діаграм";
+  } else if (moduleName.includes("материк") || moduleName.includes("Африка") || moduleName.includes("Америка") || moduleName.includes("Євразія") || moduleName.includes("Австралія")) {
+    content += "Вивчення нового матеріалу: характеристика природи материка, робота з фізичною та тематичними картами, позначення об'єктів на контурній карті";
+  } else if (moduleName.includes("господарство") || moduleName.includes("економік") || moduleName.includes("промисловість") || moduleName.includes("сектор")) {
+    content += "Вивчення нового матеріалу: пояснення особливостей розвитку і розміщення галузі, аналіз статистичних даних та тематичних карт";
   } else {
     content += "Вивчення нового матеріалу: пояснення вчителя з використанням географічних карт, презентації, аналіз статистичної інформації";
   }
@@ -84,15 +121,7 @@ export function generateGeographyCalendarPlan(settings: GeographyPlanSettings) {
   const startDate = convertStartDate(settings.startDate);
   const semester = convertSemester(settings.semester);
   
-  // Розрахунок кількості тижнів у семестрі
-  const weeksInSemester = semester === 1 ? 16 : 19; // 1 семестр: ~16 тижнів, 2 семестр: ~19 тижнів
-  const lessonsPerWeek = weekdays.length * 1.5; // 1.5 год/тиждень для 10 класу, 1 год для 11 класу
-  let maxLessons = Math.floor(weeksInSemester * lessonsPerWeek);
-  
-  // Для 11 класу - 1 год/тиждень
-  if (classNum === 11) {
-    maxLessons = semester === 1 ? 16 : 19;
-  }
+  const maxLessons = getMaxLessons(classNum, semester);
   
   // Генеруємо уроки
   const lessons: any[] = [];
@@ -102,7 +131,6 @@ export function generateGeographyCalendarPlan(settings: GeographyPlanSettings) {
   modules.forEach(module => {
     module.topics.forEach(topic => {
       for (let h = 0; h < topic.hours; h++) {
-        // Перевіряємо чи не перевищили ліміт уроків для семестру
         if (lessons.length >= maxLessons) {
           return;
         }
