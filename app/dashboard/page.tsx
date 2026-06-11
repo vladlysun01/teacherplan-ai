@@ -165,6 +165,34 @@ const PROGRAMS: Programs = {
     },
   },
   "Географія": {
+    "6 клас": {
+      id: "geography-6",
+      classes: [6],
+      description: "Загальна географія (2 год/тиждень, 70 год)",
+      lessonsPerWeek: 2,
+      hasVariant: false,
+    },
+    "7 клас": {
+      id: "geography-7",
+      classes: [7],
+      description: "Материки та океани (2 год/тиждень, 70 год)",
+      lessonsPerWeek: 2,
+      hasVariant: false,
+    },
+    "8 клас": {
+      id: "geography-8",
+      classes: [8],
+      description: "Україна у світі: природа, населення (2 год/тиждень, 70 год)",
+      lessonsPerWeek: 2,
+      hasVariant: false,
+    },
+    "9 клас": {
+      id: "geography-9",
+      classes: [9],
+      description: "Україна і світове господарство (1.5 год/тиждень, 52 год)",
+      lessonsPerWeek: [1, 2],
+      hasVariant: false,
+    },
     "10 клас": {
       id: "geography-10",
       classes: [10],
@@ -176,15 +204,6 @@ const PROGRAMS: Programs = {
       id: "geography-11",
       classes: [11],
       description: "Географічний простір Землі (1 год/тиждень, 35 год)",
-      lessonsPerWeek: 1,
-      hasVariant: false,
-    },
-  },
-  "Основи правознавства": {
-    "9 клас": {
-      id: "law-9",
-      classes: [9],
-      description: "Базовий курс (1 год/тиждень, 35 год)",
       lessonsPerWeek: 1,
       hasVariant: false,
     },
