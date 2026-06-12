@@ -1,5 +1,4 @@
 // Централізована система генерації календарних планів для всіх предметів
-// Створено для швидкого додавання всіх предметів одразу
 export const ALL_SUBJECTS = [
   {
     id: 'physical-education',
@@ -62,6 +61,13 @@ export const ALL_SUBJECTS = [
     id: 'law',
     name: 'Основи правознавства',
     classes: ['9'],
+    hasModules: true
+  },
+  {
+    id: 'chemistry',
+    name: 'Хімія',
+    classes: ['7', '8', '9', '10', '11'],
+    levels: ['стандарт'],
     hasModules: true
   },
   {

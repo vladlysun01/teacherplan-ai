@@ -1,6 +1,9 @@
-// Генератор календарних планів для Хімії
+// Генератор календарних планів для Хімії 7-11 клас
 import { convertWeekdays, convertSemester, convertStartDate } from "./utils";
-import { allModules10, type Module } from './chemistry-modules-10';
+import { allModules7, type Module } from './chemistry-modules-7';
+import { allModules8 } from './chemistry-modules-8';
+import { allModules9 } from './chemistry-modules-9';
+import { allModules10 } from './chemistry-modules-10';
 import { allModules11 } from './chemistry-modules-11';
 
 export interface ChemistryPlanSettings {
@@ -22,24 +25,26 @@ function getWeekdayName(date: Date): string {
 
 function getModulesForClass(classNum: number): Module[] {
   switch (classNum) {
-    case 10:
-      return allModules10;
-    case 11:
-      return allModules11;
-    default:
-      return [];
+    case 7:  return allModules7;
+    case 8:  return allModules8;
+    case 9:  return allModules9;
+    case 10: return allModules10;
+    case 11: return allModules11;
+    default: return [];
   }
 }
 
-// 10 клас: 1.5 год/тиждень → 52 год/рік
-// 11 клас: 2 год/тиждень → 70 год/рік
+// 7 кл: 1.5 год/тиж → 51 год
+// 8 кл: 2 год/тиж → 68 год
+// 9 кл: 2 год/тиж → 68 год
+// 10 кл: 1.5 год/тиж → 52 год
+// 11 кл: 2 год/тиж → 70 год
 function getMaxLessons(classNum: number, semester: number): number {
-  if (classNum === 10) {
-    return semester === 1 ? 24 : 28;
-  }
-  if (classNum === 11) {
-    return semester === 1 ? 32 : 38;
-  }
+  if (classNum === 7)  return semester === 1 ? 24 : 27;
+  if (classNum === 8)  return semester === 1 ? 32 : 36;
+  if (classNum === 9)  return semester === 1 ? 32 : 36;
+  if (classNum === 10) return semester === 1 ? 24 : 28;
+  if (classNum === 11) return semester === 1 ? 32 : 38;
   return 35;
 }
 
@@ -51,21 +56,19 @@ function generateLessonContent(topic: string, moduleName: string): string {
   content += "Мотивація навчальної діяльності: повідомлення теми та мети уроку. ";
 
   if (topic.includes("Практична робота") || topic.includes("практична")) {
-    content += "Виконання практичної роботи: розв'язування експериментальних задач, дослідження властивостей речовин, оформлення результатів";
+    content += "Виконання практичної роботи: дослідження властивостей речовин, проведення хімічних дослідів, оформлення результатів";
   } else if (topic.includes("Розрахункові задачі") || topic.includes("задач")) {
-    content += "Вивчення нового матеріалу: пояснення алгоритму розв'язування задач, розбір прикладів. Самостійне розв'язування задач учнями";
-  } else if (topic.includes("будов") || topic.includes("структур") || topic.includes("склад")) {
-    content += "Вивчення нового матеріалу: пояснення будови молекул та речовин, демонстрація моделей, робота зі схемами та формулами";
-  } else if (topic.includes("властивост") || topic.includes("реакці")) {
+    content += "Вивчення нового матеріалу: пояснення алгоритму розв'язування задач, розбір прикладів. Самостійне розв'язування задач";
+  } else if (topic.includes("Повторення")) {
+    content += "Повторення та систематизація вивченого матеріалу: фронтальне опитування, виконання тренувальних вправ і задач";
+  } else if (topic.includes("будов") || topic.includes("склад") || topic.includes("структур") || topic.includes("формул")) {
+    content += "Вивчення нового матеріалу: пояснення будови молекул та речовин, демонстрація моделей, складання формул";
+  } else if (topic.includes("властивост") || topic.includes("реакці") || topic.includes("взаємоді")) {
     content += "Вивчення нового матеріалу: пояснення хімічних властивостей, демонстраційні досліди, складання рівнянь реакцій";
-  } else if (topic.includes("застосування") || topic.includes("виробництв")) {
-    content += "Вивчення нового матеріалу: характеристика практичного застосування речовин, аналіз схем виробництва, перегляд відеоматеріалів";
-  } else if (moduleName.includes("Теорія") || topic.includes("теорія") || topic.includes("закон")) {
-    content += "Вивчення нового матеріалу: пояснення теоретичних основ, аналіз наукових концепцій, розбір прикладів та вправ";
-  } else if (moduleName.includes("Полімер") || topic.includes("полімер") || topic.includes("пластмас")) {
-    content += "Вивчення нового матеріалу: характеристика будови та властивостей полімерів, обговорення екологічних проблем, аналіз сфер застосування";
+  } else if (topic.includes("застосування") || topic.includes("роль") || topic.includes("значення")) {
+    content += "Вивчення нового матеріалу: характеристика практичного застосування речовин, обговорення значення для людини і довкілля";
   } else {
-    content += "Вивчення нового матеріалу: пояснення вчителя з використанням таблиці Менделєєва, схем та моделей молекул, аналіз хімічних формул і рівнянь";
+    content += "Вивчення нового матеріалу: пояснення вчителя з використанням таблиці Менделєєва, схем і моделей молекул, аналіз хімічних формул і рівнянь";
   }
 
   content += ". Закріплення вивченого: фронтальне опитування, виконання вправ і задач, тестові завдання";
@@ -85,7 +88,6 @@ export function generateChemistryCalendarPlan(settings: ChemistryPlanSettings) {
   const weekdays = convertWeekdays(settings.weekdays);
   const startDate = convertStartDate(settings.startDate);
   const semester = convertSemester(settings.semester);
-
   const maxLessons = getMaxLessons(classNum, semester);
 
   const lessons: any[] = [];
