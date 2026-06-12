@@ -13,7 +13,7 @@ type Program = {
   id: string;
   classes: number[];
   description: string;
-  lessonsPerWeek?: number | number[]; // кількість уроків на тиждень (число або діапазон [мін, макс])
+  lessonsPerWeek?: number | number[];
   hasVariant: boolean;
   variantModules?: VariantModule[];
   variantRequired?: number;
@@ -208,6 +208,31 @@ const PROGRAMS: Programs = {
       hasVariant: false,
     },
   },
+  "Основи правознавства": {
+    "9 клас": {
+      id: "law-9",
+      classes: [9],
+      description: "Основи правознавства (1 год/тиждень, 35 год)",
+      lessonsPerWeek: 1,
+      hasVariant: false,
+    },
+  },
+  "Хімія": {
+    "10 клас (рівень стандарту)": {
+      id: "chemistry-10-standard",
+      classes: [10],
+      description: "Органічна хімія (1.5 год/тиждень, 52 год)",
+      lessonsPerWeek: [1, 2],
+      hasVariant: false,
+    },
+    "11 клас (рівень стандарту)": {
+      id: "chemistry-11-standard",
+      classes: [11],
+      description: "Загальна та неорганічна хімія (2 год/тиждень, 70 год)",
+      lessonsPerWeek: 2,
+      hasVariant: false,
+    },
+  },
   "Захист України": {
     "10-11 класи (профільний рівень)": {
       id: "defense-ukraine-10-11-profile",
@@ -241,7 +266,6 @@ export default function Dashboard() {
 
   const currentProgram = PROGRAMS[formData.subject]?.[formData.program];
 
-  // ✅ АВТОЗАПОВНЕННЯ З SETTINGS
   useEffect(() => {
     loadUserProfile();
   }, []);
@@ -260,7 +284,6 @@ export default function Dashboard() {
         .single();
       
       if (profile) {
-        // Перевіряємо чи subject існує в PROGRAMS
         const profileSubject = profile.subject && PROGRAMS[profile.subject] ? profile.subject : 'Фізична культура';
         const firstProgram = Object.keys(PROGRAMS[profileSubject])[0];
         const programData = PROGRAMS[profileSubject][firstProgram];
@@ -270,7 +293,6 @@ export default function Dashboard() {
           teacherName: profile.full_name || '',
           schoolName: profile.school_name || '',
           teacherCategory: profile.teacher_category || '',
-          // Встановлюємо subject з відповідною програмою
           subject: profileSubject,
           program: firstProgram,
           programId: programData.id,
@@ -433,7 +455,6 @@ export default function Dashboard() {
           </h1>
           <p className="text-slate-400">Заповніть форму для створення документу</p>
           
-          {/* Індикатор автозаповнення */}
           {profileLoaded && (
             <div className="mt-4 inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/30 rounded-full px-4 py-2">
               <svg className="w-4 h-4 text-cyan-400" fill="currentColor" viewBox="0 0 20 20">
@@ -592,7 +613,6 @@ export default function Dashboard() {
                 📆 Дні тижня
               </label>
               
-              {/* Підказка з кількістю уроків */}
               {(() => {
                 const lpw = currentProgram?.lessonsPerWeek;
                 const selectedCount = formData.weekdays.split(',').filter(Boolean).length;
@@ -650,7 +670,6 @@ export default function Dashboard() {
                 );
               })()}
               
-              {/* Чекбокси */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
                   { id: 'Пн', name: 'Понеділок', gradient: 'from-blue-500 to-blue-600' },
@@ -665,32 +684,22 @@ export default function Dashboard() {
                   const isSelected = selectedDays.includes(day.id);
                   
                   return (
-                    <label
-                      key={day.id}
-                      className="relative group cursor-pointer"
-                    >
+                    <label key={day.id} className="relative group cursor-pointer">
                       <input
                         type="checkbox"
                         checked={isSelected}
                         onChange={(e) => {
                           const days = formData.weekdays.split(',').map(d => d.trim()).filter(Boolean);
                           let newDays;
-                          
                           if (e.target.checked) {
                             newDays = [...days, day.id];
                           } else {
                             newDays = days.filter(d => d !== day.id);
                           }
-                          
-                          setFormData({ 
-                            ...formData, 
-                            weekdays: newDays.join(',') 
-                          });
+                          setFormData({ ...formData, weekdays: newDays.join(',') });
                         }}
                         className="peer sr-only"
                       />
-                      
-                      {/* Card */}
                       <div className={`
                         relative overflow-hidden rounded-xl p-4 border-2 transition-all duration-300
                         ${isSelected 
@@ -698,15 +707,12 @@ export default function Dashboard() {
                           : 'bg-slate-700/30 border-slate-600/50 group-hover:border-cyan-500/50 group-hover:bg-slate-700/50'
                         }
                       `}>
-                        {/* Background pattern */}
                         <div className={`absolute inset-0 opacity-10 ${isSelected ? 'block' : 'hidden'}`}>
                           <div className="absolute inset-0" style={{
                             backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
                             backgroundSize: '20px 20px'
                           }}></div>
                         </div>
-                        
-                        {/* Content */}
                         <div className="relative flex items-center justify-between">
                           <div className="flex-1">
                             <div className={`text-xl font-bold mb-1 ${isSelected ? 'text-white' : 'text-slate-300'}`}>
@@ -716,8 +722,6 @@ export default function Dashboard() {
                               {day.name}
                             </div>
                           </div>
-                          
-                          {/* Custom checkbox indicator */}
                           <div className={`
                             w-7 h-7 rounded-lg flex items-center justify-center transition-all
                             ${isSelected 
@@ -726,15 +730,7 @@ export default function Dashboard() {
                             }
                           `}>
                             {isSelected && (
-                              <svg 
-                                className="w-5 h-5 text-white drop-shadow-lg" 
-                                fill="none" 
-                                strokeLinecap="round" 
-                                strokeLinejoin="round" 
-                                strokeWidth="3" 
-                                viewBox="0 0 24 24" 
-                                stroke="currentColor"
-                              >
+                              <svg className="w-5 h-5 text-white drop-shadow-lg" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" viewBox="0 0 24 24" stroke="currentColor">
                                 <path d="M5 13l4 4L19 7" />
                               </svg>
                             )}
@@ -746,7 +742,6 @@ export default function Dashboard() {
                 })}
               </div>
               
-              {/* Відображення вибраних днів */}
               <div className="mt-4 p-4 bg-slate-700/30 rounded-xl border border-slate-600/50">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-slate-400">Вибрані дні:</span>

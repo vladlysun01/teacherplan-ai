@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
           errorCode: "INSUFFICIENT_CREDITS",
           currentCredits: profile.credits
         },
-        { status: 402 } // 402 Payment Required
+        { status: 402 }
       );
     }
 
@@ -77,125 +77,95 @@ export async function POST(request: NextRequest) {
     // ГЕНЕРАЦІЯ ДОКУМЕНТА
     // ==========================================
     
-    // Генеруємо уроки на сервері для передачі в Apps Script
     let lessons = [];
     let planSettings = formData;
     
     try {
       if (formData.subject === "Українська мова") {
-        // Імпортуємо та викликаємо генератор для української мови
         const { generateUkrainianCalendarPlan } = await import("@/lib/generation/ukrainian-plan");
         const result = await generateUkrainianCalendarPlan(formData);
-        
-        if (!result.success) {
-          throw new Error(result.error || "Помилка генерації плану");
-        }
-        
+        if (!result.success) throw new Error(result.error || "Помилка генерації плану");
         lessons = result.lessons || [];
         planSettings = result.settings || formData;
+
       } else if (formData.subject === "Фізична культура") {
-        // Імпортуємо та викликаємо генератор для фізкультури
         const { generateCalendarPlan } = await import("@/lib/generation/calendar-plan");
         const result = await generateCalendarPlan(formData);
-        
-        if (!result.success) {
-          throw new Error(result.error || "Помилка генерації плану");
-        }
-        
+        if (!result.success) throw new Error(result.error || "Помилка генерації плану");
         lessons = result.lessons || [];
         planSettings = result.settings || formData;
+
       } else if (formData.subject === "Українська література") {
-        // Імпортуємо та викликаємо генератор для української літератури
         const { generateUkrainianLiteratureCalendarPlan } = await import("@/lib/generation/ukrainian-literature-plan");
         const result = await generateUkrainianLiteratureCalendarPlan(formData);
-        
-        if (!result.success) {
-          throw new Error(result.error || "Помилка генерації плану");
-        }
-        
+        if (!result.success) throw new Error(result.error || "Помилка генерації плану");
         lessons = result.lessons || [];
         planSettings = (result as any).settings || formData;
+
       } else if (formData.subject === "Математика") {
-        // Імпортуємо та викликаємо генератор для математики
         const { generateMathematicsCalendarPlan } = await import("@/lib/generation/mathematics-plan");
         const result = await generateMathematicsCalendarPlan(formData);
-        
-        if (!result.success) {
-          throw new Error(result.error || "Помилка генерації плану");
-        }
-        
+        if (!result.success) throw new Error(result.error || "Помилка генерації плану");
         lessons = result.lessons || [];
         planSettings = (result as any).settings || formData;
+
       } else if (formData.subject === "Інформатика") {
-        // Імпортуємо та викликаємо генератор для інформатики
         const { generateInformaticsCalendarPlan } = await import("@/lib/generation/informatics-plan");
         const result = await generateInformaticsCalendarPlan(formData);
-        
-        if (!result.success) {
-          throw new Error(result.error || "Помилка генерації плану");
-        }
-        
+        if (!result.success) throw new Error(result.error || "Помилка генерації плану");
         lessons = result.lessons || [];
         planSettings = (result as any).settings || formData;
+
       } else if (formData.subject === "Історія України") {
-        // Імпортуємо та викликаємо генератор для історії України
         const { generateHistoryCalendarPlan } = await import("@/lib/generation/history-plan");
         const result = await generateHistoryCalendarPlan(formData);
-        
-        if (!result.success) {
-          throw new Error(result.error || "Помилка генерації плану");
-        }
-        
+        if (!result.success) throw new Error(result.error || "Помилка генерації плану");
         lessons = result.lessons || [];
         planSettings = result.settings || formData;
+
       } else if (formData.subject === "Всесвітня історія") {
-        // Імпортуємо та викликаємо генератор для всесвітньої історії
         const { generateWorldHistoryCalendarPlan } = await import("@/lib/generation/world-history-plan");
         const result = await generateWorldHistoryCalendarPlan(formData);
-        
-        if (!result.success) {
-          throw new Error(result.error || "Помилка генерації плану");
-        }
-        
+        if (!result.success) throw new Error(result.error || "Помилка генерації плану");
         lessons = result.lessons || [];
         planSettings = result.settings || formData;
+
       } else if (formData.subject === "Мистецтво") {
-        // Імпортуємо та викликаємо генератор для мистецтва
         const { generateArtCalendarPlan } = await import("@/lib/generation/art-plan");
         const result = await generateArtCalendarPlan(formData);
-        
-        if (!result.success) {
-          throw new Error(result.error || "Помилка генерації плану");
-        }
-        
+        if (!result.success) throw new Error(result.error || "Помилка генерації плану");
         lessons = result.lessons || [];
         planSettings = (result as any).settings || formData;
+
       } else if (formData.subject === "Географія") {
-        // Імпортуємо та викликаємо генератор для географії
         const { generateGeographyCalendarPlan } = await import("@/lib/generation/geography-plan");
         const result = generateGeographyCalendarPlan(formData);
-        
         lessons = result.lessons || [];
         planSettings = result;
+
       } else if (formData.subject === "Основи правознавства") {
-        // Імпортуємо та викликаємо генератор для основ правознавства
         const { generateLawCalendarPlan } = await import("@/lib/generation/law-plan");
         const result = generateLawCalendarPlan(formData);
-        
         lessons = result.lessons || [];
         planSettings = result;
+
+      } else if (formData.subject === "Хімія") {
+        const { generateChemistryCalendarPlan } = await import("@/lib/generation/chemistry-plan");
+        const result = generateChemistryCalendarPlan(formData);
+        lessons = result.lessons || [];
+        planSettings = result;
+
       } else if (formData.subject === "Захист України") {
-  // Імпортуємо та викликаємо генератор для захисту України
-  const { generateDefenseOfUkraineCalendarPlan } = await import("@/lib/generation/defense-ukraine-plan");
-  const result = generateDefenseOfUkraineCalendarPlan(formData);
-  
-  lessons = result.lessons || [];
-  planSettings = result;
+        const { generateDefenseOfUkraineCalendarPlan } = await import("@/lib/generation/defense-ukraine-plan");
+        const result = generateDefenseOfUkraineCalendarPlan(formData);
+        lessons = result.lessons || [];
+        planSettings = result;
+
       } else {
         throw new Error(`Предмет "${formData.subject}" ще не підтримується`);
       }
+
     } catch (generationError: any) {
-      // ВАЖЛИВО: Якщо генерація не вдалась - повертаємо кредит
       console.error("❌ Помилка генерації уроків:", generationError);
       
       await supabase.rpc('add_credits', {
@@ -207,17 +177,14 @@ export async function POST(request: NextRequest) {
       });
       
       console.log("↩️ Кредит повернуто через помилку генерації");
-      
-      throw generationError; // Прокидаємо помилку далі
+      throw generationError;
     }
     
-    // Додаємо уроки до даних для Apps Script
     const dataForAppsScript = {
       ...planSettings,
       lessons: lessons
     };
     
-    // Викликаємо Apps Script
     console.log("🚀 Calling Apps Script:", APPS_SCRIPT_URL);
     
     try {
@@ -236,7 +203,6 @@ export async function POST(request: NextRequest) {
         throw new Error(result.error || "Apps Script помилка");
       }
       
-      // Зберігаємо в БД з user_id та credits_used
       const { data: document, error: insertError } = await supabase
         .from("documents")
         .insert({ 
@@ -247,16 +213,13 @@ export async function POST(request: NextRequest) {
           file_url: result.documentUrl,
           generation_params: formData,
           metadata: { documentUrl: result.documentUrl },
-          credits_used: 1 // Зберігаємо скільки кредитів витрачено
+          credits_used: 1
         })
         .select()
         .single();
       
       if (insertError) {
         console.error("❌ Помилка збереження в БД:", insertError);
-        // Не повертаємо кредит тут, бо документ все одно згенерувався
-        
-        // Повертаємо успіх без documentId
         return NextResponse.json({ 
           success: true, 
           documentUrl: result.documentUrl,
@@ -271,12 +234,11 @@ export async function POST(request: NextRequest) {
         success: true, 
         documentId: document?.id,
         documentUrl: result.documentUrl,
-        creditsRemaining: profile.credits - 1, // Повертаємо новий баланс
+        creditsRemaining: profile.credits - 1,
         message: "Документ успішно згенеровано!" 
       });
       
     } catch (appsScriptError: any) {
-      // ВАЖЛИВО: Якщо Apps Script не вдався - повертаємо кредит
       console.error("❌ Помилка Apps Script:", appsScriptError);
       
       await supabase.rpc('add_credits', {
@@ -288,8 +250,7 @@ export async function POST(request: NextRequest) {
       });
       
       console.log("↩️ Кредит повернуто через помилку Apps Script");
-      
-      throw appsScriptError; // Прокидаємо помилку далі
+      throw appsScriptError;
     }
     
   } catch (error: any) {
