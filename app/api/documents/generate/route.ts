@@ -21,12 +21,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ==========================================
-    // ПЕРЕВІРКА КРЕДИТІВ
-    // ==========================================
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // 1. Отримати поточний баланс
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('credits')
@@ -41,7 +37,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Перевірити чи достатньо кредитів
     if (profile.credits < 1) {
       console.log("⚠️ Недостатньо кредитів. Поточний баланс:", profile.credits);
       return NextResponse.json(
@@ -57,7 +52,6 @@ export async function POST(request: NextRequest) {
 
     console.log("✅ Кредитів достатньо. Поточний баланс:", profile.credits);
 
-    // 3. Витратити кредит (викликаємо SQL функцію)
     const { data: spendResult, error: spendError } = await supabase.rpc('spend_credit', {
       p_user_id: userId,
       p_description: `Генерація: ${formData.subject} ${formData.class} клас`
@@ -72,10 +66,6 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("💳 Кредит витрачено успішно! Новий баланс:", profile.credits - 1);
-    
-    // ==========================================
-    // ГЕНЕРАЦІЯ ДОКУМЕНТА
-    // ==========================================
     
     let lessons = [];
     let planSettings = formData;
@@ -152,6 +142,12 @@ export async function POST(request: NextRequest) {
       } else if (formData.subject === "Хімія") {
         const { generateChemistryCalendarPlan } = await import("@/lib/generation/chemistry-plan");
         const result = generateChemistryCalendarPlan(formData);
+        lessons = result.lessons || [];
+        planSettings = result;
+
+      } else if (formData.subject === "Біологія") {
+        const { generateBiologyCalendarPlan } = await import("@/lib/generation/biology-plan");
+        const result = generateBiologyCalendarPlan(formData);
         lessons = result.lessons || [];
         planSettings = result;
 
