@@ -11,6 +11,7 @@ export const ALL_SUBJECTS = [
   { id: 'law', name: 'Основи правознавства', classes: ['9'], hasModules: true },
   { id: 'chemistry', name: 'Хімія', classes: ['7','8','9','10','11'], levels: ['стандарт'], hasModules: true },
   { id: 'biology', name: 'Біологія', classes: ['6','7','8','9','10','11'], levels: ['стандарт'], hasModules: true },
+  { id: 'physics', name: 'Фізика', classes: ['10','11'], levels: ['стандарт'], hasModules: true },
   { id: 'defense-of-ukraine', name: 'Захист України', classes: ['10','11'], levels: ['профільний'], hasModules: true },
 ];
 

@@ -70,6 +70,10 @@ const PROGRAMS: Programs = {
     "10 клас (рівень стандарту)": { id: "biology-10-standard", classes: [10], description: "Біологія і екологія (1.5 год/тиждень, 52 год)", lessonsPerWeek: [1,2], hasVariant: false },
     "11 клас (рівень стандарту)": { id: "biology-11-standard", classes: [11], description: "Біологія і екологія (1.5 год/тиждень, 52 год)", lessonsPerWeek: [1,2], hasVariant: false },
   },
+  "Фізика": {
+    "10 клас (рівень стандарту)": { id: "physics-10-standard", classes: [10], description: "Механіка, МКТ, електростатика (3 год/тиждень, 105 год)", lessonsPerWeek: 3, hasVariant: false },
+    "11 клас (рівень стандарту)": { id: "physics-11-standard", classes: [11], description: "Електродинаміка, оптика, ядерна фізика (3 год/тиждень, 105 год)", lessonsPerWeek: 3, hasVariant: false },
+  },
   "Захист України": {
     "10-11 класи (профільний рівень)": { id: "defense-ukraine-10-11-profile", classes: [10,11], description: "6 год/тиждень, 210 год на рік", lessonsPerWeek: 6, hasVariant: false },
   },

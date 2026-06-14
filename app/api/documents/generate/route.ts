@@ -151,6 +151,12 @@ export async function POST(request: NextRequest) {
         lessons = result.lessons || [];
         planSettings = result;
 
+      } else if (formData.subject === "Фізика") {
+        const { generatePhysicsCalendarPlan } = await import("@/lib/generation/physics-plan");
+        const result = generatePhysicsCalendarPlan(formData);
+        lessons = result.lessons || [];
+        planSettings = result;
+
       } else if (formData.subject === "Захист України") {
         const { generateDefenseOfUkraineCalendarPlan } = await import("@/lib/generation/defense-ukraine-plan");
         const result = generateDefenseOfUkraineCalendarPlan(formData);
