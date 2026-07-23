@@ -1,3 +1,12 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Про нас",
+  description:
+    "TeacherPlan AI — платформа для вчителів України, яка автоматично генерує календарно-тематичні плани відповідно до програм МОН.",
+  alternates: { canonical: "/about" },
+};
+
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-slate-950">

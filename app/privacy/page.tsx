@@ -1,3 +1,11 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Політика конфіденційності",
+  description: "Політика конфіденційності платформи TeacherPlan AI.",
+  alternates: { canonical: "/privacy" },
+};
+
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-slate-950">

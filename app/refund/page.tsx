@@ -1,3 +1,11 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Політика повернення коштів",
+  description: "Умови повернення коштів на платформі TeacherPlan AI.",
+  alternates: { canonical: "/refund" },
+};
+
 export default function RefundPage() {
   return (
     <div className="min-h-screen bg-slate-950">

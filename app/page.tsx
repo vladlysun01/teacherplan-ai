@@ -1,46 +1,16 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase-browser";
-import { useRouter } from "next/navigation";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Sparkles, FileText, Zap, Clock, CheckCircle, ArrowRight, Stars, BookOpen, Calendar, Download } from "lucide-react";
-import FactOfTheDay from "@/components/landing/FactOfTheDay";
-export default function LandingPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+import AuthHeaderButtons from "@/components/landing/AuthHeaderButtons";
 
-  useEffect(() => {
-    checkUser();
-  }, []);
-
-  const checkUser = async () => {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  setUser(user);
-  setLoading(false);
-  if (user) {
-    router.push('/dashboard');
-  }
+export const metadata: Metadata = {
+  title: "TeacherPlan AI — календарно-тематичні плани за 10 секунд",
+  description:
+    "Генеруйте календарно-тематичні та поурочні плани для 8+ предметів відповідно до програм МОН України за 10 секунд замість 4-6 годин. Автоматичний експорт у Google Docs.",
+  alternates: { canonical: "/" },
 };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="relative">
-          <div className="absolute inset-0 blur-3xl opacity-50">
-            <div className="w-32 h-32 bg-cyan-500 rounded-full animate-pulse"></div>
-          </div>
-          <div className="relative w-16 h-16 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"></div>
-        </div>
-      </div>
-    );
-  }
-
-  // Не робимо редирект - дозволяємо авторизованим бачити лендінг
-  // Якщо хочуть - можуть натиснути "Перейти до Dashboard"
-
+export default function LandingPage() {
   return (
     <div className="min-h-screen bg-slate-950">
       {/* Animated Background */}
@@ -66,37 +36,8 @@ export default function LandingPage() {
             </div>
 
             {/* Auth Buttons */}
-            <div className="flex items-center gap-2 sm:gap-4">
-              {user ? (
-                <button
-                  onClick={() => router.push('/dashboard')}
-                  className="px-4 sm:px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 hover:scale-105 transition-all duration-300 font-medium text-sm sm:text-base"
-                >
-                  Dashboard
-                </button>
-              ) : (
-                <>
-                  <button
-                    onClick={() => router.push('/login')}
-                    className="hidden sm:block px-6 py-2 text-slate-300 hover:text-white transition-colors"
-                  >
-                    Увійти
-                  </button>
-                  <button
-                    onClick={() => router.push('/login')}
-                    className="sm:hidden px-3 py-2 text-slate-300 hover:text-white transition-colors text-sm"
-                  >
-                    Увійти
-                  </button>
-                  <button
-                    onClick={() => router.push('/register')}
-                    className="px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-300 font-medium text-sm sm:text-base whitespace-nowrap"
-                  >
-                    <span className="hidden sm:inline">Зареєструватись</span>
-                    <span className="sm:hidden">Реєстрація</span>
-                  </button>
-                </>
-              )}
+            <div className="flex items-center gap-4">
+              <AuthHeaderButtons />
             </div>
           </div>
         </div>
@@ -127,20 +68,20 @@ export default function LandingPage() {
                 та поурочні плани відповідно до програми МОН України.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full px-4 sm:px-0">
-                <button
-                  onClick={() => router.push('/register')}
-                  className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-xl hover:shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 font-semibold text-base sm:text-lg flex items-center justify-center gap-2"
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  href="/register"
+                  className="group px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-xl hover:shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 font-semibold text-lg flex items-center gap-2"
                 >
                   Спробувати безкоштовно
                   <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
-                </button>
-                <button
-                  onClick={() => router.push('/login')}
-                  className="w-full sm:w-auto px-8 py-4 bg-slate-800/50 border border-slate-700 text-white rounded-xl hover:bg-slate-700/50 transition-all duration-300 font-semibold text-base sm:text-lg"
+                </Link>
+                <Link
+                  href="/login"
+                  className="px-8 py-4 bg-slate-800/50 border border-slate-700 text-white rounded-xl hover:bg-slate-700/50 transition-all duration-300 font-semibold text-lg"
                 >
                   Вже є акаунт
-                </button>
+                </Link>
               </div>
 
               <p className="mt-6 text-slate-500 text-sm">
@@ -479,10 +420,10 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-10">
+            <div className="grid md:grid-cols-3 gap-8">
               {/* Step 1 */}
-              <div className="relative pt-8">
-                <div className="absolute -top-0 left-8 w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-cyan-500/50 z-10">
+              <div className="relative">
+                <div className="absolute -top-6 left-8 w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-cyan-500/50">
                   1
                 </div>
                 <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 pt-12">
@@ -495,8 +436,8 @@ export default function LandingPage() {
               </div>
 
               {/* Step 2 */}
-              <div className="relative pt-8">
-                <div className="absolute -top-0 left-8 w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-cyan-500/50 z-10">
+              <div className="relative">
+                <div className="absolute -top-6 left-8 w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-cyan-500/50">
                   2
                 </div>
                 <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 pt-12">
@@ -509,8 +450,8 @@ export default function LandingPage() {
               </div>
 
               {/* Step 3 */}
-              <div className="relative pt-8">
-                <div className="absolute -top-0 left-8 w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-cyan-500/50 z-10">
+              <div className="relative">
+                <div className="absolute -top-6 left-8 w-12 h-12 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-cyan-500/50">
                   3
                 </div>
                 <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 pt-12">
@@ -686,13 +627,13 @@ export default function LandingPage() {
                 <p className="text-xl text-slate-400 mb-8">
                   Зареєструйтесь зараз і отримайте 1 безкоштовний кредит
                 </p>
-                <button
-                  onClick={() => router.push('/register')}
+                <Link
+                  href="/register"
                   className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-xl hover:shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 font-semibold text-lg"
                 >
                   Почати безкоштовно
                   <ArrowRight size={20} />
-                </button>
+                </Link>
               </div>
             </div>
           </div>

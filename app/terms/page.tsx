@@ -1,3 +1,11 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Умови використання",
+  description: "Умови використання платформи TeacherPlan AI.",
+  alternates: { canonical: "/terms" },
+};
+
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-slate-950">
