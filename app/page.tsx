@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Sparkles, FileText, Zap, Clock, CheckCircle, ArrowRight, Stars, BookOpen, Calendar, Download } from "lucide-react";
 import AuthHeaderButtons from "@/components/landing/AuthHeaderButtons";
+import ParallaxBlobs from "@/components/landing/ParallaxBlobs";
+import Reveal from "@/components/landing/Reveal";
 
 export const metadata: Metadata = {
   title: "TeacherPlan AI — календарно-тематичні плани за 10 секунд",
@@ -13,12 +15,8 @@ export const metadata: Metadata = {
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-slate-950">
-      {/* Animated Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full blur-3xl opacity-20 bg-cyan-500 animate-pulse" style={{animationDuration: '4s'}}></div>
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full blur-3xl opacity-10 bg-teal-500 animate-pulse" style={{animationDuration: '6s'}}></div>
-        <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] rounded-full blur-3xl opacity-5 bg-blue-500 animate-pulse" style={{animationDuration: '8s'}}></div>
-      </div>
+      {/* Animated Background — тепер із паралаксом відносно скролу */}
+      <ParallaxBlobs />
 
       {/* Header */}
       <header className="relative border-b border-slate-800/50 bg-slate-900/50 backdrop-blur-xl">
@@ -111,7 +109,7 @@ export default function LandingPage() {
                     </div>
 
                     {/* Form Fields Animation */}
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="space-y-2">
                         <div className="h-4 bg-slate-700/50 rounded w-20 animate-pulse"></div>
                         <div className="h-10 bg-slate-800/50 rounded-lg border border-slate-700/50 flex items-center px-3">
@@ -148,6 +146,11 @@ export default function LandingPage() {
                         <div className="w-1 h-4 bg-cyan-400 rounded"></div>
                         <span className="text-white font-semibold text-sm">Календарно-тематичний план</span>
                       </div>
+                      {/* На вузькому екрані grid-cols-5 стискав "Тема уроку" в
+                          щось нечитабельне — тепер сама таблиця скролиться
+                          горизонтально замість того, щоб текст ламався. */}
+                      <div className="overflow-x-auto">
+                      <div className="min-w-[420px]">
                       {/* Table Header */}
                       <div className="grid grid-cols-5 gap-2 text-xs text-slate-400 font-mono mb-2">
                         <div>№</div>
@@ -193,6 +196,8 @@ export default function LandingPage() {
                           <div className="h-5 bg-slate-700/30 rounded"></div>
                         </div>
                       </div>
+                      </div>
+                      </div>
                       
                       {/* Stats */}
                       <div className="flex gap-4 mt-4 pt-3 border-t border-slate-700/30">
@@ -231,6 +236,7 @@ export default function LandingPage() {
 
         {/* Time & Cost Comparison */}
         <section className="py-20 px-6 bg-gradient-to-b from-slate-900/50 to-transparent">
+          <Reveal>
           <div className="max-w-7xl mx-auto">
             <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
               {/* Time Saving */}
@@ -300,10 +306,12 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
+          </Reveal>
         </section>
 
         {/* Features Section */}
         <section className="py-20 px-6">
+          <Reveal>
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-white mb-4">
@@ -406,10 +414,12 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
+          </Reveal>
         </section>
 
         {/* How it Works */}
         <section className="py-20 px-6 bg-gradient-to-b from-transparent to-slate-900/50">
+          <Reveal>
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-white mb-4">
@@ -464,10 +474,12 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
+          </Reveal>
         </section>
 
         {/* Value Proposition - Real Cost */}
         <section className="py-16 px-6 bg-gradient-to-b from-transparent via-slate-900/30 to-transparent">
+          <Reveal>
           <div className="max-w-5xl mx-auto">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-3xl blur-2xl"></div>
@@ -513,10 +525,12 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
+          </Reveal>
         </section>
 
         {/* Pricing */}
         <section className="py-20 px-6">
+          <Reveal>
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold text-white mb-4">
@@ -613,10 +627,12 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
+          </Reveal>
         </section>
 
         {/* CTA Section */}
         <section className="py-20 px-6">
+          <Reveal>
           <div className="max-w-4xl mx-auto">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-teal-500/20 blur-3xl"></div>
@@ -637,6 +653,7 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
+          </Reveal>
         </section>
       </main>
 
@@ -701,7 +718,7 @@ export default function LandingPage() {
                 ФОП Лисун Владислав Сергійович | РНОКПП: 3494908755
               </p>
               <p className="text-slate-600 text-xs">
-                Україна, 62203, Харківська обл., Богодухівський р-н, селище Золочів, вул. Народна, будинок 4
+                Україна, Харківська область
               </p>
             </div>
             <p className="text-slate-400 text-sm text-center">

@@ -161,7 +161,7 @@ export default function RefundPage() {
                   <div>
                     <p className="font-medium text-white mb-1">Зв'яжіться з підтримкою</p>
                     <p className="text-slate-400 text-sm">
-                      Надішліть email на support@teacherplan.com з теми "Повернення коштів"
+                      Надішліть email на teacher_plan_ai@proton.me з теми "Повернення коштів"
                     </p>
                   </div>
                 </li>
@@ -283,14 +283,14 @@ export default function RefundPage() {
                 <p className="flex items-center gap-3">
                   <span>📧</span>
                   <span className="text-slate-400">Email:</span>
-                  <a href="mailto:support@teacherplan.com" className="text-cyan-400 hover:text-cyan-300">
+                  <a href="mailto:teacher_plan_ai@proton.me" className="text-cyan-400 hover:text-cyan-300">
                     teacher_plan_ai@proton.me
                   </a>
                 </p>
                 <p className="flex items-center gap-3">
                   <span>📞</span>
                   <span className="text-slate-400">Телефон:</span>
-                  <span className="text-white">+380 XX XXX XX XX</span>
+                  <span className="text-white">+380 93 197 20 61</span>
                 </p>
                 <p className="flex items-center gap-3">
                   <span>⏰</span>

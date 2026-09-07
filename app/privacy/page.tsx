@@ -271,7 +271,7 @@ export default function PrivacyPage() {
               </div>
             </div>
             <p className="text-slate-400 text-sm mt-4">
-              Для реалізації цих прав зв'яжіться з нами: support@teacherplan.com
+              Для реалізації цих прав зв'яжіться з нами: teacher_plan_ai@proton.me
             </p>
           </section>
 
@@ -351,19 +351,19 @@ export default function PrivacyPage() {
                 <p className="flex items-center gap-3">
                   <span>📧</span>
                   <span className="text-slate-400">Email:</span>
-                  <a href="mailto:support@teacherplan.com" className="text-cyan-400 hover:text-cyan-300">
-                    support@teacherplan.com
+                  <a href="mailto:teacher_plan_ai@proton.me" className="text-cyan-400 hover:text-cyan-300">
+                    teacher_plan_ai@proton.me
                   </a>
                 </p>
                 <p className="flex items-center gap-3">
                   <span>📞</span>
                   <span className="text-slate-400">Телефон:</span>
-                  <span className="text-white">+380 XX XXX XX XX</span>
+                  <span className="text-white">+380 93 197 20 61</span>
                 </p>
                 <p className="flex items-center gap-3">
                   <span>🏢</span>
                   <span className="text-slate-400">Адреса:</span>
-                  <span className="text-white">[Ваша адреса]</span>
+                  <span className="text-white">Україна, Харківська область</span>
                 </p>
               </div>
             </div>

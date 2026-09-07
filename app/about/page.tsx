@@ -94,7 +94,7 @@ export default function AboutPage() {
                 </div>
                 <div className="md:col-span-2">
                   <p className="text-slate-400 text-sm mb-1">Місцезнаходження</p>
-                  <p className="text-white font-medium">Україна, 62203, Харківська обл., Богодухівський р-н, селище Золочів, вул. Народна, будинок 4</p>
+                  <p className="text-white font-medium">Україна, Харківська область</p>
                 </div>
                 <div>
                   <p className="text-slate-400 text-sm mb-1">Електронна пошта</p>

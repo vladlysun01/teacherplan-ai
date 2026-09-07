@@ -197,13 +197,13 @@ export default function TermsPage() {
               <div className="space-y-2">
                 <p className="flex items-center gap-3">
                   <span>📧</span>
-                  <a href="mailto:support@teacherplan.com" className="text-cyan-400 hover:text-cyan-300">
-                    support@teacherplan.com
+                  <a href="mailto:teacher_plan_ai@proton.me" className="text-cyan-400 hover:text-cyan-300">
+                    teacher_plan_ai@proton.me
                   </a>
                 </p>
                 <p className="flex items-center gap-3">
                   <span>📞</span>
-                  <span>+380 XX XXX XX XX</span>
+                  <span>+380 93 197 20 61</span>
                 </p>
               </div>
             </div>
