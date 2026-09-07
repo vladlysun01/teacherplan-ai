@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Wallet, TrendingUp, FileText, ShoppingCart, Loader } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase-browser';
-import { getUserStats } from '@/lib/credits';
+import { getUserStats, pluralUk } from '@/lib/credits';
 
 export default function CreditsBalance() {
   const [loading, setLoading] = useState(true);
@@ -70,12 +70,13 @@ export default function CreditsBalance() {
         </div>
         
         <div className="text-gray-300 text-sm">
-          {stats.currentCredits === 1 ? 'Кредит' : 'Кредитів'} доступно
+          {pluralUk(stats.currentCredits, 'Кредит', 'Кредити', 'Кредитів')} доступно
         </div>
-        
+
         {stats.currentCredits > 0 && (
           <div className="mt-3 text-xs text-gray-400">
-            Ви можете згенерувати ще {stats.currentCredits} {stats.currentCredits === 1 ? 'документ' : 'документи'}
+            Ви можете згенерувати ще {stats.currentCredits}{' '}
+            {pluralUk(stats.currentCredits, 'документ', 'документи', 'документів')}
           </div>
         )}
 

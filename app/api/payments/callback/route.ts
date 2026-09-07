@@ -65,6 +65,25 @@ export async function POST(request: Request) {
       current_status: payment.status
     });
 
+    // ⚠️ ЗАХИСТ ВІД ПОДВІЙНОГО НАРАХУВАННЯ: WayForPay може надіслати цей
+    // callback повторно (мережеві збої, повільна відповідь з нашого боку,
+    // або хтось просто повторно надішле раніше перехоплений валідний
+    // підписаний запит — сигнатура сама по собі не захищає від replay).
+    // Раніше тут кредити нараховувались БЕЗУМОВНО на кожен Approved-виклик:
+    // другий виклик з тим самим orderReference додавав ще +N кредитів,
+    // хоча оплата була рівно одна. Умовний UPDATE (тільки з 'pending')
+    // гарантує, що обробити платіж до 'completed'/'failed' може лише
+    // ОДИН виклик — усі наступні побачать affected rows = 0 і вийдуть,
+    // не чіпаючи кредити вдруге.
+    if (payment.status !== 'pending') {
+      console.log('⏭️ Payment already processed, skipping (status:', payment.status, ') — acking anyway so WayForPay stops retrying');
+      return NextResponse.json({
+        orderReference,
+        status: 'accept',
+        time: Math.floor(Date.now() / 1000),
+      });
+    }
+
     // Update payment status
     const updateData: any = {
       status: transactionStatus === TRANSACTION_STATUS.APPROVED ? 'completed' : 'failed',
@@ -76,10 +95,12 @@ export async function POST(request: Request) {
       updated_at: new Date().toISOString(),
     };
 
-    const { error: updateError } = await supabase
+    const { data: updatedRows, error: updateError } = await supabase
       .from('payments')
       .update(updateData)
-      .eq('order_id', orderReference);
+      .eq('order_id', orderReference)
+      .eq('status', 'pending') // атомарна умова — див. коментар вище
+      .select('id');
 
     if (updateError) {
       console.error('❌ Failed to update payment:', updateError);
@@ -87,6 +108,18 @@ export async function POST(request: Request) {
         { error: 'Failed to update payment' },
         { status: 500 }
       );
+    }
+
+    if (!updatedRows || updatedRows.length === 0) {
+      // Хтось інший (паралельний виклик цього ж вебхука) щойно забрав
+      // цей платіж собі між нашим SELECT і цим UPDATE — не наш випадок,
+      // кредити вже нараховує той, інший запит.
+      console.log('⏭️ Lost the race to process this payment, skipping credit — acking anyway');
+      return NextResponse.json({
+        orderReference,
+        status: 'accept',
+        time: Math.floor(Date.now() / 1000),
+      });
     }
 
     console.log('✅ Payment status updated to:', updateData.status);

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
+import { pluralUk } from '@/lib/credits';
 import { Sparkles, CheckCircle, ArrowRight, PartyPopper } from 'lucide-react';
 
 export default function PaymentSuccessPage() {
@@ -157,7 +158,7 @@ export default function PaymentSuccessPage() {
               {profile?.credits || 0}
             </div>
             <div className="text-slate-400 text-sm mt-2">
-              {profile?.credits === 1 ? 'кредит' : profile?.credits < 5 ? 'кредити' : 'кредитів'}
+              {pluralUk(profile?.credits || 0, 'кредит', 'кредити', 'кредитів')}
             </div>
           </div>
 
@@ -181,7 +182,7 @@ export default function PaymentSuccessPage() {
 
           {/* Auto-redirect Notice */}
           <p className="mt-8 text-slate-400 text-sm">
-            Автоматичне перенаправлення через {countdown} {countdown === 1 ? 'секунду' : 'секунд'}...
+            Автоматичне перенаправлення через {countdown} {pluralUk(countdown, 'секунду', 'секунди', 'секунд')}...
           </p>
         </div>
 

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
+import { pluralUk } from '@/lib/credits';
 import { Sparkles, FileText, Plus, Settings, CreditCard, LogOut, Zap, Menu, X } from 'lucide-react';
 
 export default function DashboardLayout({
@@ -222,7 +223,7 @@ export default function DashboardLayout({
               <div className="flex items-baseline gap-2 mb-3">
                 <span className="text-3xl font-bold text-white">{credits}</span>
                 <span className="text-sm text-slate-400">
-                  {credits === 1 ? 'кредит' : credits < 5 ? 'кредити' : 'кредитів'}
+                  {pluralUk(credits, 'кредит', 'кредити', 'кредитів')}
                 </span>
               </div>
 

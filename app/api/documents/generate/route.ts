@@ -182,7 +182,21 @@ export async function POST(request: NextRequest) {
       throw generationError;
     }
     
+    // БАГ: для Географії/Правознавства/Хімії/Біології/Фізики/Захисту України
+    // (гілки вище, де planSettings = result, а не result.settings || formData)
+    // генератор уроків повертає СВІЙ ВЛАСНИЙ обʼєкт полів — і, наприклад,
+    // generateBiologyCalendarPlan() не повертає program/programId/weekdays/
+    // startDate взагалі. planSettings повністю ЗАМІНЯВ formData, тому ці
+    // поля летіли в Apps Script як undefined — введені в дашборді дані
+    // (програма, дати, дні тижня) губились у готовому документі, хоча
+    // teacherName/schoolName/class/schoolYear там таки були (їх генератори
+    // поверталу явно).
+    //
+    // Фікс: спершу formData (усе, що ввів користувач), зверху — те, що
+    // явно повернув генератор (там, де він щось уточнює/дораховує).
+    // Жодне поле з форми більше не може мовчки зникнути.
     const dataForAppsScript = {
+      ...formData,
       ...planSettings,
       lessons: lessons
     };

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { CreditCard, Sparkles, TrendingUp, Zap, History, Loader } from 'lucide-react';
 import { createClient } from '@/lib/supabase-browser';
+import { pluralUk } from '@/lib/credits';
 
 // Updated credit packages with correct prices
 const CREDIT_PACKAGES = [
@@ -113,11 +114,11 @@ export default function BillingPage() {
             <div className="flex items-baseline gap-2 mb-1">
               <span className="text-3xl sm:text-5xl font-bold text-white">{credits}</span>
               <span className="text-sm sm:text-lg text-gray-400">
-                {credits === 1 ? 'кредит' : credits < 5 ? 'кредити' : 'кредитів'}
+                {pluralUk(credits, 'кредит', 'кредити', 'кредитів')}
               </span>
             </div>
             <p className="text-xs sm:text-sm text-gray-400">
-              {credits > 0 ? `${credits} ${credits === 1 ? 'документ' : 'документи'}` : 'Купіть кредити'}
+              {credits > 0 ? `${credits} ${pluralUk(credits, 'документ', 'документи', 'документів')}` : 'Купіть кредити'}
             </p>
           </div>
           <Sparkles className="w-12 sm:w-16 h-12 sm:h-16 text-cyan-400 opacity-30 flex-shrink-0" />
@@ -161,7 +162,7 @@ export default function BillingPage() {
                       {pkg.credits}
                     </div>
                     <div className="text-gray-400 text-xs mt-0.5">
-                      {pkg.credits === 1 ? 'документ' : 'документи'}
+                      {pluralUk(pkg.credits, 'документ', 'документи', 'документів')}
                     </div>
                   </div>
 
