@@ -1,27 +1,24 @@
-// Google Apps Script для генерації календарних планів
-// Цей код треба додати до вашого Google Apps Script проекту
+// ============================================================
+// Google Apps Script - КАЛЕНДАРНІ ПЛАНИ
+// Версія 4.2 - Повний титульний лист (школа, категорія вчителя,
+// правильні відмінки) замість мінімальної шапки з версії 4.1
+// ============================================================
 
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
-    
-    console.log("Отримано дані:", data.subject, data.class);
-    
-    // Визначаємо який предмет генерувати
-    if (data.subject === "Українська мова") {
-      return ContentService.createTextOutput(
-        JSON.stringify(generateUkrainianPlan(data))
-      ).setMimeType(ContentService.MimeType.JSON);
-    } else if (data.subject === "Фізична культура") {
-      return ContentService.createTextOutput(
-        JSON.stringify(generatePhysicalEducationPlan(data))
-      ).setMimeType(ContentService.MimeType.JSON);
-    } else {
-      throw new Error("Невідомий предмет: " + data.subject);
-    }
-    
+
+    console.log("📝 Отримано дані:", data.subject, data['class']);
+    console.log("📊 Уроків:", data.lessons?.length || 0);
+
+    const result = generateUniversalPlan(data);
+
+    return ContentService.createTextOutput(
+      JSON.stringify(result)
+    ).setMimeType(ContentService.MimeType.JSON);
+
   } catch (error) {
-    console.error("Помилка:", error);
+    console.error("❌ Помилка:", error);
     return ContentService.createTextOutput(
       JSON.stringify({
         success: false,
@@ -31,190 +28,376 @@ function doPost(e) {
   }
 }
 
-// =====================================================
-// УКРАЇНСЬКА МОВА
-// =====================================================
+// ============================================================
+// УНІВЕРСАЛЬНА ФУНКЦІЯ для ВСІХ предметів
+// ============================================================
 
-function generateUkrainianPlan(data) {
-  const doc = DocumentApp.create(`Календарний план: ${data.subject} ${data.class} клас`);
+function generateUniversalPlan(data) {
+  const className = data['class'] || '';
+  const doc = DocumentApp.create('Календарний план: ' + data.subject + ' ' + className + ' клас');
   const body = doc.getBody();
-  
-  // Стилі
-  const titleStyle = {};
-  titleStyle[DocumentApp.Attribute.FONT_SIZE] = 16;
-  titleStyle[DocumentApp.Attribute.BOLD] = true;
-  titleStyle[DocumentApp.Attribute.HORIZONTAL_ALIGNMENT] = DocumentApp.HorizontalAlignment.CENTER;
-  
-  // Заголовок
-  const title1 = body.appendParagraph('КАЛЕНДАРНО-ТЕМАТИЧНИЙ ПЛАН');
-  title1.setAttributes(titleStyle);
-  
-  const title2 = body.appendParagraph('З УКРАЇНСЬКОЇ МОВИ');
-  title2.setAttributes(titleStyle);
-  
-  body.appendParagraph(''); // Порожній рядок
-  
-  // Дані школи
-  const header = [
-    data.schoolName,
-    `Вчитель: ${data.teacherName}, ${data.teacherCategory}`,
-    `Клас: ${data.class}`,
-    `Навчальний рік: ${data.schoolYear}`,
-    `Програма: ${data.program}`
-  ];
-  
-  header.forEach(line => {
-    const p = body.appendParagraph(line);
-    p.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
-    p.setSpacingAfter(2);
-  });
-  
-  body.appendParagraph(''); // Порожній рядок
-  
-  // Парсимо дані з фронтенду (якщо вони передані)
+
+  // ✅ ВІДКРИВАЄМО ДОСТУП ЗА ПОСИЛАННЯМ (редагування)
+  DriveApp.getFileById(doc.getId()).setSharing(
+    DriveApp.Access.ANYONE_WITH_LINK,
+    DriveApp.Permission.EDIT
+  );
+
+  // Налаштування сторінки
+  body.setMarginTop(50);
+  body.setMarginBottom(50);
+  body.setMarginLeft(50);
+  body.setMarginRight(50);
+
+  // ============================================================
+  // ТИТУЛЬНИЙ ЛИСТ (v4.2) — школа, повна назва плану, вчитель
+  // праворуч, підпис знизу з правильним відмінком предмету.
+  // ============================================================
+  addTitlePage(body, data, className);
+  body.appendPageBreak();
+
+  // Парсимо уроки
   const lessons = data.lessons || [];
-  
+
   if (lessons.length === 0) {
-    body.appendParagraph('Помилка: не знайдено уроків для генерації');
+    body.appendParagraph('❌ Помилка: не знайдено уроків для генерації');
     return {
       success: false,
       error: "Не знайдено уроків"
     };
   }
-  
-  // Групуємо уроки по модулях
-  const lessonsByModule = {};
-  lessons.forEach(lesson => {
-    if (!lessonsByModule[lesson.moduleName]) {
-      lessonsByModule[lesson.moduleName] = [];
+
+  console.log('✅ Генерую ' + lessons.length + ' уроків');
+
+  globalLessonCounter = 1;
+
+  const hasModules = lessons[0] && lessons[0].moduleName;
+
+  if (hasModules) {
+    const lessonsByModule = {};
+    lessons.forEach(function(lesson) {
+      const moduleName = lesson.moduleName || 'Без модуля';
+      if (!lessonsByModule[moduleName]) {
+        lessonsByModule[moduleName] = [];
+      }
+      lessonsByModule[moduleName].push(lesson);
+    });
+
+    Object.keys(lessonsByModule).forEach(function(moduleName) {
+      createModuleTable(body, moduleName, lessonsByModule[moduleName], data.subject);
+    });
+  } else {
+    createSimpleTable(body, lessons, data.subject);
+  }
+
+  body.appendParagraph('');
+  const signatureText = body.appendParagraph('Календарно-тематичний план складено відповідно до чинної навчальної програми з предмету "' + data.subject + '".');
+  signatureText.setForegroundColor('#000000');
+
+  body.appendParagraph('');
+  const signature = body.appendParagraph('Вчитель: _________________ ' + (data.teacherName || ''));
+  signature.setSpacingBefore(20);
+  signature.setForegroundColor('#000000');
+
+  console.log('✅ Документ створено: ' + doc.getUrl());
+
+  return {
+    success: true,
+    documentUrl: doc.getUrl(),
+    documentId: doc.getId()
+  };
+}
+
+// ============================================================
+// ТИТУЛЬНИЙ ЛИСТ — окрема функція, щоб не роздувати
+// generateUniversalPlan і легше було ще колись поправити саме вигляд
+// титульної сторінки, не чіпаючи логіку генерації таблиць.
+// ============================================================
+
+function addTitlePage(body, data, className) {
+  function center(text, size, bold) {
+    const p = body.appendParagraph(text);
+    p.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+    const t = p.editAsText();
+    t.setFontSize(size || 12);
+    t.setForegroundColor('#000000');
+    if (bold) t.setBold(true);
+    return p;
+  }
+  function blank() {
+    body.appendParagraph('');
+  }
+
+  // --- Назва закладу — одне поле, довгий текст сам перенесеться на
+  // кілька рядків (Word wrap), так само як у зразку. ---
+  if (data.schoolName) {
+    center(data.schoolName, 12, false);
+  }
+
+  blank(); blank(); blank(); blank();
+
+  // --- Заголовок і підзаголовки ---
+  center('Календарне планування', 14, true);
+  center('з предмету «' + data.subject + '» у ' + className + ' класі', 12, false);
+  center('курсу інваріантної складової навчального плану,', 12, false);
+  center('на ' + (data.schoolYear || '2024/2025') + ' навчальний рік', 12, false);
+
+  blank(); blank(); blank(); blank(); blank(); blank();
+
+  // --- Вчитель — праворуч, як у зразку ---
+  const teacherLines = [
+    'Вчитель предмету',
+    '«' + data.subject + '»',
+    data.teacherCategory || '',
+    formatTeacherName(data.teacherName),
+  ].filter(function (line) { return line && line.trim(); });
+
+  teacherLines.forEach(function (line) {
+    const p = body.appendParagraph(line);
+    p.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
+    const t = p.editAsText();
+    t.setFontSize(12);
+    t.setForegroundColor('#000000');
+  });
+
+  blank(); blank(); blank(); blank();
+
+  // --- Нижній рядок сторінки, з правильним відмінком предмету ---
+  const footer = body.appendParagraph('Календарне планування з ' + genitiveSubject(data.subject));
+  footer.setAlignment(DocumentApp.HorizontalAlignment.LEFT);
+  footer.setForegroundColor('#000000');
+}
+
+// "Іванов Іван Іванович" → "Іванов І.І." (як у зразку "Завадський В.В.").
+// Якщо вчитель уже ввів скорочено чи лишив 1-2 слова — не ламаємо.
+function formatTeacherName(fullName) {
+  if (!fullName) return '';
+  if (fullName.indexOf('.') !== -1) return fullName; // вже скорочено
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 3) {
+    return parts[0] + ' ' + parts[1][0] + '.' + parts[2][0] + '.';
+  }
+  if (parts.length === 2) {
+    return parts[0] + ' ' + parts[1][0] + '.';
+  }
+  return fullName;
+}
+
+// Родовий відмінок назви предмету для "Календарне планування з ..." —
+// фіксований словник на 14 предметів, а не алгоритм відмінювання
+// (для довільного українського тексту це ненадійно).
+function genitiveSubject(subject) {
+  const map = {
+    'Фізична культура': 'фізичної культури',
+    'Українська мова': 'української мови',
+    'Українська література': 'української літератури',
+    'Математика': 'математики',
+    'Інформатика': 'інформатики',
+    'Історія України': 'історії України',
+    'Всесвітня історія': 'всесвітньої історії',
+    'Мистецтво': 'мистецтва',
+    'Географія': 'географії',
+    'Основи правознавства': 'основ правознавства',
+    'Хімія': 'хімії',
+    'Біологія': 'біології',
+    'Фізика': 'фізики',
+    'Захист України': 'захисту України',
+  };
+  return map[subject] || subject;
+}
+
+// ============================================================
+// СТВОРЕННЯ ТАБЛИЦІ З МОДУЛЕМ
+// ============================================================
+
+var globalLessonCounter = 1;
+
+function createModuleTable(body, moduleName, lessons, subject) {
+  const moduleTitle = body.appendParagraph(moduleName);
+  const moduleAttrs = {};
+  moduleAttrs[DocumentApp.Attribute.FONT_SIZE] = 12;
+  moduleAttrs[DocumentApp.Attribute.BOLD] = true;
+  moduleAttrs[DocumentApp.Attribute.FOREGROUND_COLOR] = '#000000';
+  moduleAttrs[DocumentApp.Attribute.SPACING_BEFORE] = 8;
+  moduleAttrs[DocumentApp.Attribute.SPACING_AFTER] = 4;
+  moduleTitle.setAttributes(moduleAttrs);
+
+  const table = body.appendTable();
+
+  const headerRow = table.appendTableRow();
+  const headers = ['№', 'Дата', 'Тема уроку', 'Зміст', 'Прим.'];
+
+  headers.forEach(function(header) {
+    const cell = headerRow.appendTableCell(header);
+    cell.setBackgroundColor('#ffffff');
+    const para = cell.getChild(0).asParagraph();
+    para.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+    para.setBold(true);
+    para.setForegroundColor('#000000');
+    para.setFontSize(11);
+  });
+
+  headerRow.getCell(0).setWidth(40);
+  headerRow.getCell(1).setWidth(70);
+  headerRow.getCell(2).setWidth(160);
+  headerRow.getCell(3).setWidth(186);
+  headerRow.getCell(4).setWidth(40);
+
+  lessons.forEach(function(lesson) {
+    const row = table.appendTableRow();
+
+    const lessonNum = lesson.number || lesson.lessonNumber || globalLessonCounter;
+    addCell(row, lessonNum.toString(), 40, 11, true);
+
+    if (!lesson.number && !lesson.lessonNumber) {
+      globalLessonCounter++;
     }
-    lessonsByModule[lesson.moduleName].push(lesson);
+
+    addCell(row, lesson.date || '', 70, 11, true);
+    addCell(row, lesson.topic || '', 160, 11, false);
+
+    let content = '';
+    if (typeof lesson.content === 'string') {
+      content = lesson.content;
+    } else if (lesson.content && typeof lesson.content === 'object') {
+      const parts = [];
+      if (lesson.content.organizationalMoment) parts.push('Орг. момент: ' + lesson.content.organizationalMoment);
+      if (lesson.content.actualization) parts.push('Актуалізація: ' + lesson.content.actualization);
+      if (lesson.content.motivation) parts.push('Мотивація: ' + lesson.content.motivation);
+      if (lesson.content.mainPart) parts.push('Основна частина: ' + lesson.content.mainPart);
+      if (lesson.content.practice) parts.push('Практика: ' + lesson.content.practice);
+      if (lesson.content.consolidation) parts.push('Закріплення: ' + lesson.content.consolidation);
+      if (lesson.content.homework) parts.push('Д/З: ' + lesson.content.homework);
+      content = parts.join('; ');
+    } else {
+      content = lesson.homework || '';
+    }
+    addCell(row, content, 186, 10, false);
+    addCell(row, '', 40, 10, false);
   });
-  
-  // Створюємо таблиці для кожного модуля
-  Object.keys(lessonsByModule).forEach(moduleName => {
-    // Назва модуля
-    const moduleTitle = body.appendParagraph(moduleName);
-    moduleTitle.setAttributes({
-      [DocumentApp.Attribute.FONT_SIZE]: 14,
-      [DocumentApp.Attribute.BOLD]: true,
-      [DocumentApp.Attribute.BACKGROUND_COLOR]: '#f5f5f5',
-      [DocumentApp.Attribute.SPACING_BEFORE]: 10,
-      [DocumentApp.Attribute.SPACING_AFTER]: 5
-    });
-    
-    // Таблиця
-    const moduleLessons = lessonsByModule[moduleName];
-    const table = body.appendTable();
-    
-    // Заголовок таблиці
-    const headerRow = table.appendTableRow();
-    const headers = ['№ уроку', 'Дата', 'Тема уроку', 'Зміст навчального матеріалу', 'Примітки'];
-    const widths = [50, 80, 200, 350, 50];
-    
-    headers.forEach((header, i) => {
-      const cell = headerRow.appendTableCell(header);
-      cell.setWidth(widths[i]);
-      cell.setBackgroundColor('#e0e0e0');
-      cell.getChild(0).asParagraph().setAlignment(DocumentApp.HorizontalAlignment.CENTER);
-      cell.getChild(0).asParagraph().setBold(true);
-    });
-    
-    // Рядки з уроками
-    moduleLessons.forEach(lesson => {
-      const row = table.appendTableRow();
-      
-      // № уроку
-      const cellNum = row.appendTableCell(lesson.number.toString());
-      cellNum.setWidth(50);
-      cellNum.getChild(0).asParagraph().setAlignment(DocumentApp.HorizontalAlignment.CENTER);
-      
-      // Дата
-      const cellDate = row.appendTableCell(lesson.date);
-      cellDate.setWidth(80);
-      cellDate.getChild(0).asParagraph().setAlignment(DocumentApp.HorizontalAlignment.CENTER);
-      
-      // Тема
-      const cellTopic = row.appendTableCell(lesson.topic);
-      cellTopic.setWidth(200);
-      cellTopic.getChild(0).asParagraph().setBold(true);
-      
-      // Зміст
-      const cellContent = row.appendTableCell(lesson.content);
-      cellContent.setWidth(350);
-      
-      // Примітки
-      const cellNotes = row.appendTableCell('');
-      cellNotes.setWidth(50);
-    });
-    
-    // Стилі таблиці
-    table.setBorderWidth(1);
-    table.setBorderColor('#000000');
-    
-    body.appendParagraph(''); // Порожній рядок після таблиці
-  });
-  
-  // Підпис
+
+  table.setBorderWidth(1);
+  table.setBorderColor('#000000');
+
   body.appendParagraph('');
-  body.appendParagraph('Календарно-тематичний план складено відповідно до чинної навчальної програми з української мови.');
-  body.appendParagraph('');
-  body.appendParagraph(`Вчитель: _________________ ${data.teacherName}`);
-  
-  return {
-    success: true,
-    documentUrl: doc.getUrl(),
-    documentId: doc.getId()
-  };
 }
 
-// =====================================================
-// ФІЗИЧНА КУЛЬТУРА (існуючий код)
-// =====================================================
+// ============================================================
+// ПРОСТА ТАБЛИЦЯ (без модулів)
+// ============================================================
 
-function generatePhysicalEducationPlan(data) {
-  // Тут ваш існуючий код для фізкультури
-  // ...
-  const doc = DocumentApp.create(`Календарний план: ${data.subject} ${data.class} клас`);
-  const body = doc.getBody();
-  
-  // (весь існуючий код для фізкультури)
-  
-  return {
-    success: true,
-    documentUrl: doc.getUrl(),
-    documentId: doc.getId()
-  };
+function createSimpleTable(body, lessons, subject) {
+  const table = body.appendTable();
+
+  const headerRow = table.appendTableRow();
+  const headers = ['№', 'Дата', 'Тема уроку', 'Зміст', 'Прим.'];
+
+  headers.forEach(function(header) {
+    const cell = headerRow.appendTableCell(header);
+    cell.setBackgroundColor('#ffffff');
+    const para = cell.getChild(0).asParagraph();
+    para.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+    para.setBold(true);
+    para.setForegroundColor('#000000');
+    para.setFontSize(11);
+  });
+
+  headerRow.getCell(0).setWidth(40);
+  headerRow.getCell(1).setWidth(70);
+  headerRow.getCell(2).setWidth(160);
+  headerRow.getCell(3).setWidth(186);
+  headerRow.getCell(4).setWidth(40);
+
+  lessons.forEach(function(lesson) {
+    const row = table.appendTableRow();
+
+    const lessonNum = lesson.number || lesson.lessonNumber || globalLessonCounter;
+    addCell(row, lessonNum.toString(), 40, 11, true);
+
+    if (!lesson.number && !lesson.lessonNumber) {
+      globalLessonCounter++;
+    }
+
+    addCell(row, lesson.date || '', 70, 11, true);
+    addCell(row, lesson.topic || '', 160, 11, false);
+
+    let content = '';
+    if (typeof lesson.content === 'string') {
+      content = lesson.content;
+    } else if (lesson.content && typeof lesson.content === 'object') {
+      const parts = [];
+      if (lesson.content.organizationalMoment) parts.push('Орг. момент: ' + lesson.content.organizationalMoment);
+      if (lesson.content.actualization) parts.push('Актуалізація: ' + lesson.content.actualization);
+      if (lesson.content.motivation) parts.push('Мотивація: ' + lesson.content.motivation);
+      if (lesson.content.mainPart) parts.push('Основна частина: ' + lesson.content.mainPart);
+      if (lesson.content.practice) parts.push('Практика: ' + lesson.content.practice);
+      if (lesson.content.consolidation) parts.push('Закріплення: ' + lesson.content.consolidation);
+      if (lesson.content.homework) parts.push('Д/З: ' + lesson.content.homework);
+      content = parts.join('; ');
+    } else {
+      content = lesson.homework || '';
+    }
+    addCell(row, content, 186, 10, false);
+    addCell(row, '', 40, 10, false);
+  });
+
+  table.setBorderWidth(1);
+  table.setBorderColor('#000000');
+
+  body.appendParagraph('');
 }
 
-// =====================================================
+// ============================================================
+// ДОПОМІЖНА ФУНКЦІЯ
+// ============================================================
+
+function addCell(row, text, width, fontSize, center) {
+  const cell = row.appendTableCell(text);
+  cell.setWidth(width);
+  cell.setBackgroundColor('#ffffff');
+
+  const para = cell.getChild(0).asParagraph();
+  para.setForegroundColor('#000000');
+  para.setFontSize(fontSize);
+
+  if (center) {
+    para.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+  }
+
+  return cell;
+}
+
+// ============================================================
 // ТЕСТУВАННЯ
-// =====================================================
+// ============================================================
 
-function testUkrainianGeneration() {
+function testGeography10() {
   const testData = {
-    subject: "Українська мова",
-    class: "5",
-    program: "НУШ 5-9 класи",
-    programId: "ukrainian-nush-5-9",
-    schoolYear: "2024/2025",
+    subject: "Географія",
+    class: "10",
+    schoolName: 'Золочівської селищної ради\nКомунальний заклад «Олександрівський ліцей»\nЗолочівської селищної ради',
+    schoolYear: "2026/2027",
     semester: "1",
-    weekdays: "Пн,Ср",
-    startDate: "2024-09-01",
-    teacherName: "Іванова О.П.",
-    teacherCategory: "вчитель вищої категорії",
-    schoolName: "Київська ЗОШ №10",
+    teacherName: "Коваленко Марія Іванівна",
+    teacherCategory: "Спеціаліст вищої категорії",
     lessons: [
       {
         number: 1,
-        date: "02.09.2024",
-        moduleName: "Лексикологія",
-        topic: "Лексичне значення слова",
-        content: "Організаційний момент. Вивчення нового матеріалу..."
+        date: "02.09.2026",
+        moduleName: "Вступ",
+        topic: "Що вивчає курс «Географія: регіони і країни»",
+        content: "Організаційний момент. Пояснення мети та завдань курсу. Робота з картами."
+      },
+      {
+        number: 2,
+        date: "06.09.2026",
+        moduleName: "Вступ",
+        topic: "Джерела знань про регіони та країни світу",
+        content: "Актуалізація знань. Вивчення різних джерел географічної інформації. Практична робота."
       }
     ]
   };
-  
-  const result = generateUkrainianPlan(testData);
+
+  const result = generateUniversalPlan(testData);
   console.log(result);
 }
