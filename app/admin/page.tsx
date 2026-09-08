@@ -14,7 +14,9 @@ import {
   Search,
   ArrowLeft,
   ShieldAlert,
+  BookOpen,
 } from "lucide-react";
+import { PROGRAMS } from "@/lib/programs";
 import {
   ResponsiveContainer,
   BarChart,
@@ -144,6 +146,7 @@ export default function AdminPage() {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const [granularity, setGranularity] = useState<Granularity>("week");
+  const [showPrograms, setShowPrograms] = useState(false);
 
   useEffect(() => {
     void load();
@@ -368,6 +371,45 @@ export default function AdminPage() {
               </ResponsiveContainer>
             )}
           </div>
+        </div>
+
+        {/* Programs */}
+        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl mb-6 overflow-hidden">
+          <button
+            onClick={() => setShowPrograms((v) => !v)}
+            className="w-full flex items-center justify-between p-5 hover:bg-white/[0.03] transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <BookOpen size={18} className="text-teal-400" />
+              <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wide">Навчальні програми</h2>
+              <span className="text-xs text-slate-500">
+                {Object.keys(PROGRAMS).length} предметів ·{" "}
+                {Object.values(PROGRAMS).reduce((sum, progs) => sum + Object.keys(progs).length, 0)} програм
+              </span>
+            </div>
+            {showPrograms ? <ChevronDown size={16} className="text-slate-500" /> : <ChevronRight size={16} className="text-slate-500" />}
+          </button>
+
+          {showPrograms && (
+            <div className="px-5 pb-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {Object.entries(PROGRAMS).map(([subject, programs]) => (
+                <div key={subject} className="bg-slate-900/40 rounded-xl p-4">
+                  <h3 className="text-white font-semibold text-sm mb-2">{subject}</h3>
+                  <div className="space-y-2">
+                    {Object.entries(programs).map(([name, p]) => (
+                      <div key={p.id} className="text-xs">
+                        <div className="text-slate-300">{name}</div>
+                        <div className="text-slate-500">
+                          {p.classes.join(", ")} клас{p.classes.length > 1 ? "и" : ""} · {p.description}
+                          {p.hasVariant && <span className="text-amber-400"> · варіативні модулі</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Users table */}
