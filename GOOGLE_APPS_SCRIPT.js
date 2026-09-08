@@ -115,36 +115,36 @@ function generateUniversalPlan(data) {
 // ============================================================
 
 function addTitlePage(body, data, className) {
-  function center(text, size, bold) {
+  // Порожні абзаци для відступу — ненадійно (висота залежить від шрифту й
+  // Google щоразу трохи по-різному рендерить). Натомість точний відступ У
+  // ПУНКТАХ (setSpacingBefore) на першому абзаці кожного блоку — так текст
+  // розтягується на всю сторінку керовано, а не купчиться вгорі.
+  function center(text, opts) {
+    opts = opts || {};
     const p = body.appendParagraph(text);
     p.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+    if (opts.spacingBefore) p.setSpacingBefore(opts.spacingBefore);
     const t = p.editAsText();
-    t.setFontSize(size || 12);
+    t.setFontSize(opts.size || 12);
     t.setForegroundColor('#000000');
-    if (bold) t.setBold(true);
+    if (opts.bold) t.setBold(true);
     return p;
-  }
-  function blank() {
-    body.appendParagraph('');
   }
 
   // --- Назва закладу — одне поле, довгий текст сам перенесеться на
   // кілька рядків (Word wrap), так само як у зразку. ---
   if (data.schoolName) {
-    center(data.schoolName, 12, false);
+    center(data.schoolName, {});
   }
 
-  blank(); blank(); blank(); blank();
+  // --- Заголовок і підзаголовки — великий відступ зверху опускає блок
+  // приблизно до третини сторінки. ---
+  center('Календарне планування', { size: 14, bold: true, spacingBefore: 170 });
+  center('з предмету «' + data.subject + '» у ' + className + ' класі', { spacingBefore: 6 });
+  center('курсу інваріантної складової навчального плану,', { spacingBefore: 6 });
+  center('на ' + (data.schoolYear || '2024/2025') + ' навчальний рік', { spacingBefore: 6 });
 
-  // --- Заголовок і підзаголовки ---
-  center('Календарне планування', 14, true);
-  center('з предмету «' + data.subject + '» у ' + className + ' класі', 12, false);
-  center('курсу інваріантної складової навчального плану,', 12, false);
-  center('на ' + (data.schoolYear || '2024/2025') + ' навчальний рік', 12, false);
-
-  blank(); blank(); blank(); blank(); blank(); blank();
-
-  // --- Вчитель — праворуч, як у зразку ---
+  // --- Вчитель — праворуч, ще нижче (ближче до двох третин сторінки) ---
   const teacherLines = [
     'Вчитель предмету',
     '«' + data.subject + '»',
@@ -152,19 +152,20 @@ function addTitlePage(body, data, className) {
     formatTeacherName(data.teacherName),
   ].filter(function (line) { return line && line.trim(); });
 
-  teacherLines.forEach(function (line) {
+  teacherLines.forEach(function (line, i) {
     const p = body.appendParagraph(line);
     p.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
+    p.setSpacingBefore(i === 0 ? 230 : 2);
     const t = p.editAsText();
     t.setFontSize(12);
     t.setForegroundColor('#000000');
   });
 
-  blank(); blank(); blank(); blank();
-
-  // --- Нижній рядок сторінки, з правильним відмінком предмету ---
+  // --- Нижній рядок сторінки, з правильним відмінком предмету — великий
+  // відступ притискає його ближче до низу сторінки. ---
   const footer = body.appendParagraph('Календарне планування з ' + genitiveSubject(data.subject));
   footer.setAlignment(DocumentApp.HorizontalAlignment.LEFT);
+  footer.setSpacingBefore(170);
   footer.setForegroundColor('#000000');
 }
 

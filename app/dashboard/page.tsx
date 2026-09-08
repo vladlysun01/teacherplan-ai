@@ -5,10 +5,46 @@ import { createClient } from "@/lib/supabase-browser";
 import { CheckCircle, FileText, ArrowRight, X } from 'lucide-react';
 import { PROGRAMS, type VariantModule } from "@/lib/programs";
 
+// Якщо дата випадає на сб/нд — переносимо на найближчий будній день
+// (понеділок), а не лишаємо як є: перший урок семестру не може бути
+// у вихідний.
+function toNearestWeekday(date: Date): Date {
+  const day = date.getDay(); // 0 = нд, 6 = сб
+  if (day === 0) date.setDate(date.getDate() + 1);
+  else if (day === 6) date.setDate(date.getDate() + 2);
+  return date;
+}
+
+function toDateInputValue(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+// I семестр традиційно починається 1 вересня, II — після зимових канікул,
+// орієнтовно 9 січня (немає єдиної законодавчо фіксованої дати для II
+// семестру, це усталений орієнтир, який вчитель завжди може підправити
+// вручну). schoolYear у форматі "2024/2025" — I семестр припадає на
+// перший рік, II — на другий.
+function getSemesterStartDate(semester: string, schoolYear: string): string {
+  const parts = schoolYear.split("/").map((p) => parseInt(p.trim(), 10));
+  const startYear = Number.isFinite(parts[0]) ? parts[0] : new Date().getFullYear();
+  const endYear = Number.isFinite(parts[1]) ? parts[1] : startYear + 1;
+
+  const date =
+    semester === "2"
+      ? new Date(endYear, 0, 9) // 9 січня
+      : new Date(startYear, 8, 1); // 1 вересня
+
+  return toDateInputValue(toNearestWeekday(date));
+}
+
 export default function Dashboard() {
   const [formData, setFormData] = useState({
     subject: "Фізична культура", program: "НУШ 5-9 класи", programId: "fizkultura-nush-5-9",
-    class: "5", semester: "1", weekdays: "", startDate: "2024-09-01", schoolYear: "2024/2025",
+    class: "5", semester: "1", weekdays: "",
+    startDate: getSemesterStartDate("1", "2026/2027"), schoolYear: "2026/2027",
     teacherName: "", teacherCategory: "", schoolName: "", variantModules: [] as string[],
   });
   const [loading, setLoading] = useState(false);
@@ -170,7 +206,18 @@ export default function Dashboard() {
               <div>
                 <label className="block text-cyan-400 font-semibold mb-3 text-sm uppercase tracking-wide">📅 Семестр</label>
                 <div className="relative">
-                  <select value={formData.semester} onChange={(e) => setFormData({ ...formData, semester: e.target.value })} className="w-full bg-slate-700/50 border-2 border-slate-600 rounded-xl px-4 py-3.5 text-white font-medium appearance-none cursor-pointer hover:border-cyan-500 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 transition-all">
+                  <select
+                    value={formData.semester}
+                    onChange={(e) => {
+                      const semester = e.target.value;
+                      setFormData({
+                        ...formData,
+                        semester,
+                        startDate: getSemesterStartDate(semester, formData.schoolYear),
+                      });
+                    }}
+                    className="w-full bg-slate-700/50 border-2 border-slate-600 rounded-xl px-4 py-3.5 text-white font-medium appearance-none cursor-pointer hover:border-cyan-500 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 transition-all"
+                  >
                     <option value="1" className="bg-slate-800">1️⃣ Перший семестр (Вересень - Грудень)</option>
                     <option value="2" className="bg-slate-800">2️⃣ Другий семестр (Січень - Травень)</option>
                   </select>
