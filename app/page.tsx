@@ -8,13 +8,58 @@ import Reveal from "@/components/landing/Reveal";
 export const metadata: Metadata = {
   title: "TeacherPlan AI — календарно-тематичні плани за 10 секунд",
   description:
-    "Генеруйте календарно-тематичні та поурочні плани для 8+ предметів відповідно до програм МОН України за 10 секунд замість 4-6 годин. Автоматичний експорт у Google Docs.",
+    "Генеруйте календарно-тематичні та поурочні плани для 14 предметів відповідно до програм МОН України за 10 секунд замість 4-6 годин. Автоматичний експорт у Google Docs.",
   alternates: { canonical: "/" },
 };
 
+const FAQ = [
+  {
+    q: "Чи відповідає план програмі МОН України?",
+    a: "Так, теми й кількість годин відповідають чинним навчальним програмам Міністерства освіти і науки України для кожного предмету й класу.",
+  },
+  {
+    q: "Скільки коштує один план?",
+    a: "99 ₴ за один документ, або дешевше за пакетами — 249 ₴ за 3 документи чи 599 ₴ за 10. Перший кредит при реєстрації — безкоштовно.",
+  },
+  {
+    q: "У якому форматі я отримаю готовий план?",
+    a: "План автоматично створюється як документ Google Docs — його одразу можна редагувати, роздрукувати або зберегти у своєму Google Drive.",
+  },
+  {
+    q: "Які предмети підтримуються?",
+    a: "14 предметів: українська мова та література, математика, інформатика, історія України, всесвітня історія, мистецтво, географія, основи правознавства, хімія, біологія, фізика, фізична культура, захист України.",
+  },
+];
+
 export default function LandingPage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        name: "TeacherPlan AI",
+        applicationCategory: "EducationalApplication",
+        operatingSystem: "Web",
+        description:
+          "Автоматична генерація календарно-тематичних та поурочних планів для вчителів України відповідно до програм МОН.",
+        offers: { "@type": "Offer", price: "99", priceCurrency: "UAH" },
+        url: "https://teacher-plan-ai.site",
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: FAQ.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-slate-950">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+
       {/* Animated Background — тепер із паралаксом відносно скролу */}
       <ParallaxBlobs />
 
@@ -630,6 +675,33 @@ export default function LandingPage() {
           </Reveal>
         </section>
 
+        {/* FAQ — видимий контент, що збігається з FAQPage JSON-LD вище */}
+        <section className="py-20 px-6">
+          <Reveal>
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-14">
+              <h2 className="text-4xl font-bold text-white mb-4">Часті запитання</h2>
+            </div>
+            <div className="space-y-4">
+              {FAQ.map((item) => (
+                <div
+                  key={item.q}
+                  className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-6"
+                >
+                  <h3 className="text-white font-semibold text-lg mb-2">{item.q}</h3>
+                  <p className="text-slate-400 leading-relaxed">{item.a}</p>
+                </div>
+              ))}
+            </div>
+            <div className="text-center mt-10">
+              <Link href="/plans" className="text-cyan-400 hover:text-cyan-300 transition-colors">
+                Переглянути всі 14 предметів →
+              </Link>
+            </div>
+          </div>
+          </Reveal>
+        </section>
+
         {/* CTA Section */}
         <section className="py-20 px-6">
           <Reveal>
@@ -675,8 +747,11 @@ export default function LandingPage() {
             
             <div className="flex flex-wrap gap-8">
               <div>
-                <h4 className="text-white font-semibold mb-3">Компанія</h4>
+                <h4 className="text-white font-semibold mb-3">Продукт</h4>
                 <div className="space-y-2">
+                  <Link href="/plans" className="block text-slate-400 hover:text-cyan-400 transition-colors text-sm">
+                    Плани за предметами
+                  </Link>
                   <Link href="/about" className="block text-slate-400 hover:text-cyan-400 transition-colors text-sm">
                     Про нас
                   </Link>
