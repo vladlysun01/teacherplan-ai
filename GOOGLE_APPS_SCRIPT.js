@@ -127,7 +127,11 @@ function addTitlePage(body, data, className) {
     const t = p.editAsText();
     t.setFontSize(opts.size || 12);
     t.setForegroundColor('#000000');
-    if (opts.bold) t.setBold(true);
+    // ВАЖЛИВО: завжди явно вказувати true/false, а не тільки true —
+    // інакше жирність успадковується з того, що Google Docs вважає
+    // "типовим" для конкретного документа (саме тому назва школи
+    // виходила жирною без жодної причини в коді).
+    t.setBold(!!opts.bold);
     return p;
   }
 
@@ -161,14 +165,16 @@ function addTitlePage(body, data, className) {
     const t = p.editAsText();
     t.setFontSize(12);
     t.setForegroundColor('#000000');
+    t.setBold(false);
   });
 
   // --- Нижній рядок сторінки, з правильним відмінком предмету — великий
   // відступ притискає його ближче до низу сторінки. ---
   const footer = body.appendParagraph('Календарне планування з ' + genitiveSubject(data.subject));
   footer.setAlignment(DocumentApp.HorizontalAlignment.LEFT);
-  footer.setSpacingBefore(120);
+  footer.setSpacingBefore(210); // трохи більше — притиснути ближче до низу сторінки
   footer.setForegroundColor('#000000');
+  footer.editAsText().setBold(false);
 }
 
 // "Іванов Іван Іванович" → "Іванов І.І." (як у зразку "Завадський В.В.").
