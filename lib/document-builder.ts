@@ -160,8 +160,25 @@ const TITLE_TARGET_PT = 0.3585 * PAGE_HEIGHT_PT;
 const TEACHER_TARGET_PT = 0.6702 * PAGE_HEIGHT_PT;
 const FOOTER_TARGET_PT = 0.9168 * PAGE_HEIGHT_PT;
 
+// Запобіжник від переповнення на другу сторінку. LINE_HEIGHT_PT=12 —
+// емпіричне наближення; на короткій назві школи (1 рядок замість 3)
+// накопичена похибка за ~45 порожніх абзаців виявилась достатньою,
+// щоб нижній рядок фактично зʼїхав на сторінку 2, хоча розрахунок "на
+// папері" мав ще запас. 40pt запасу знизу — краще трохи не дотягнути
+// до ідеальних 91.68%, ніж гарантовано провалитись на другу сторінку.
+const SAFE_BOTTOM_PT = PAGE_HEIGHT_PT - MARGIN_PT - 40;
+
 function gapLinesTo(currentPt: number, targetPt: number): number {
   return Math.max(0, Math.round((targetPt - currentPt) / LINE_HEIGHT_PT));
+}
+
+// Не дає жодному відступу штовхнути контент за межі безпечної зони
+// внизу сторінки — рахує, скільки рядків реально лишається "в бюджеті"
+// з урахуванням того, що ПІСЛЯ цього відступу ще йде принаймні один
+// рядок тексту.
+function clampToBudget(currentPt: number, lines: number): number {
+  const maxLines = Math.max(0, Math.floor((SAFE_BOTTOM_PT - LINE_HEIGHT_PT - currentPt) / LINE_HEIGHT_PT));
+  return Math.min(lines, maxLines);
 }
 
 function buildTitlePage(data: PlanData, className: string): Paragraph[] {
@@ -177,7 +194,7 @@ function buildTitlePage(data: PlanData, className: string): Paragraph[] {
     pos += schoolLines.length * LINE_HEIGHT_PT;
   }
 
-  const n1 = gapLinesTo(pos, TITLE_TARGET_PT);
+  const n1 = clampToBudget(pos, gapLinesTo(pos, TITLE_TARGET_PT));
   paras.push(...blankLines(n1));
   pos += n1 * LINE_HEIGHT_PT;
 
@@ -190,7 +207,7 @@ function buildTitlePage(data: PlanData, className: string): Paragraph[] {
   titleLines.forEach(({ text, opts }) => paras.push(centerParagraph(text, opts)));
   pos += titleLines.length * LINE_HEIGHT_PT;
 
-  const n2 = gapLinesTo(pos, TEACHER_TARGET_PT);
+  const n2 = clampToBudget(pos, gapLinesTo(pos, TEACHER_TARGET_PT));
   paras.push(...blankLines(n2));
   pos += n2 * LINE_HEIGHT_PT;
 
@@ -204,14 +221,16 @@ function buildTitlePage(data: PlanData, className: string): Paragraph[] {
   teacherLines.forEach((line) => {
     paras.push(
       new Paragraph({
-        alignment: AlignmentType.RIGHT,
+        // По центру, а не по правому краю — явний запит користувача
+        // (обведено на скріні панелі форматування).
+        alignment: AlignmentType.CENTER,
         children: [new TextRun({ text: line, size: 12 * HP, color: BLACK, bold: false })],
       })
     );
   });
   pos += teacherLines.length * LINE_HEIGHT_PT;
 
-  const n3 = gapLinesTo(pos, FOOTER_TARGET_PT);
+  const n3 = clampToBudget(pos, gapLinesTo(pos, FOOTER_TARGET_PT));
   paras.push(...blankLines(n3));
 
   paras.push(
