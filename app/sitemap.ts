@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { SUBJECT_SLUGS } from "@/lib/programs";
 
-const siteUrl = "https://teacher-plan-ai.site";
+const siteUrl = "https://www.teacher-plan-ai.site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticPages = ["", "/about", "/terms", "/privacy", "/refund", "/login", "/register", "/plans"];

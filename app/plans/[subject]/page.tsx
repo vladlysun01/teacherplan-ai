@@ -56,7 +56,7 @@ export default async function SubjectPlanPage({
     provider: {
       "@type": "Organization",
       name: "TeacherPlan AI",
-      sameAs: "https://teacher-plan-ai.site",
+      sameAs: "https://www.teacher-plan-ai.site",
     },
   };
 

@@ -43,7 +43,7 @@ export default function LandingPage() {
         description:
           "Автоматична генерація календарно-тематичних та поурочних планів для вчителів України відповідно до програм МОН.",
         offers: { "@type": "Offer", price: "99", priceCurrency: "UAH" },
-        url: "https://teacher-plan-ai.site",
+        url: "https://www.teacher-plan-ai.site",
       },
       {
         "@type": "FAQPage",

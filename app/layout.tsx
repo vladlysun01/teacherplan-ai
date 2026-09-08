@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = "https://teacher-plan-ai.site";
+const siteUrl = "https://www.teacher-plan-ai.site";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
