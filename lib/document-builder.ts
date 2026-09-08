@@ -147,15 +147,18 @@ function buildTitlePage(data: PlanData, className: string): Paragraph[] {
     data.schoolName.split("\n").forEach((line) => paras.push(centerParagraph(line.trim())));
   }
 
-  paras.push(...blankLines(40));
+  paras.push(...blankLines(30));
   paras.push(centerParagraph("Календарне планування", { size: 14, bold: true }));
   paras.push(centerParagraph(`з предмету «${data.subject}» у ${className} класі`));
   paras.push(centerParagraph("курсу інваріантної складової навчального плану,"));
   paras.push(centerParagraph(`на ${data.schoolYear || "2024/2025"} навчальний рік`));
 
-  // Відступ до блоку вчителя — приблизно середина сторінки, як на
-  // офіційному зразку (праворуч, нижче за основний блок).
-  paras.push(...blankLines(260));
+  // Відступи нижче виміряні прямо з оригінального зразка-скріна (той
+  // самий, що користувач присилав раніше): школа ~7-11% висоти
+  // сторінки, титул ~35-44%, блок вчителя ~66-74%, нижній рядок ~91%.
+  // Переведено у пропорції відносно printable-висоти сторінки (A4,
+  // мінус відступи 50pt згори/знизу).
+  paras.push(...blankLines(190));
 
   const teacherLines = [
     "Вчитель предмету",
@@ -174,7 +177,7 @@ function buildTitlePage(data: PlanData, className: string): Paragraph[] {
   });
 
   // Відступ до нижнього рядка — ближче до низу сторінки.
-  paras.push(...blankLines(240));
+  paras.push(...blankLines(145));
 
   paras.push(
     new Paragraph({
