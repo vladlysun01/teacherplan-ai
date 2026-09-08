@@ -138,8 +138,10 @@ function addTitlePage(body, data, className) {
   }
 
   // --- Заголовок і підзаголовки — великий відступ зверху опускає блок
-  // приблизно до третини сторінки. ---
-  center('Календарне планування', { size: 14, bold: true, spacingBefore: 170 });
+  // приблизно до третини сторінки. (Було 170 — разом із блоком вчителя й
+  // футером це виходило за межі однієї сторінки, і футер провалювався на
+  // окрему другу сторінку. Зменшено з запасом.) ---
+  center('Календарне планування', { size: 14, bold: true, spacingBefore: 120 });
   center('з предмету «' + data.subject + '» у ' + className + ' класі', { spacingBefore: 6 });
   center('курсу інваріантної складової навчального плану,', { spacingBefore: 6 });
   center('на ' + (data.schoolYear || '2024/2025') + ' навчальний рік', { spacingBefore: 6 });
@@ -155,7 +157,7 @@ function addTitlePage(body, data, className) {
   teacherLines.forEach(function (line, i) {
     const p = body.appendParagraph(line);
     p.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
-    p.setSpacingBefore(i === 0 ? 230 : 2);
+    p.setSpacingBefore(i === 0 ? 160 : 2);
     const t = p.editAsText();
     t.setFontSize(12);
     t.setForegroundColor('#000000');
@@ -165,7 +167,7 @@ function addTitlePage(body, data, className) {
   // відступ притискає його ближче до низу сторінки. ---
   const footer = body.appendParagraph('Календарне планування з ' + genitiveSubject(data.subject));
   footer.setAlignment(DocumentApp.HorizontalAlignment.LEFT);
-  footer.setSpacingBefore(170);
+  footer.setSpacingBefore(120);
   footer.setForegroundColor('#000000');
 }
 
