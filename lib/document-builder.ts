@@ -131,10 +131,15 @@ function centerParagraph(text: string, opts: { size?: number; bold?: boolean } =
 // разів. Це не спеціальна фіча, яку можна проігнорувати чи по-своєму
 // трактувати — це базове верстання тексту, однакове в будь-якому
 // редакторі.
-function blankLines(pt: number): Paragraph[] {
-  const LINE_HEIGHT_PT = 14; // приблизна висота рядка при 12pt шрифті
-  const count = Math.max(1, Math.round(pt / LINE_HEIGHT_PT));
-  return Array.from({ length: count }, () => new Paragraph({ children: [new TextRun({ text: " " })] }));
+//
+// Приймає КІЛЬКІСТЬ рядків напряму (не pt) — два реальні заміри (2
+// рядки і 17 рядків відступу дали позиції 0.109 і 0.324 висоти
+// сторінки на A4 = 841.9pt) дають фактичну висоту одного порожнього
+// рядка в Pages: (0.324-0.109)*841.9 / (17-2) ≈ 12pt, а не ті ~14pt,
+// які припускались "на око" раніше. pt→round(pt/14) лише додавав
+// зайву похибку округлення — тому рахуємо кількість рядків одразу.
+function blankLines(count: number): Paragraph[] {
+  return Array.from({ length: Math.max(0, count) }, () => new Paragraph({ children: [new TextRun({ text: " " })] }));
 }
 
 function buildTitlePage(data: PlanData, className: string): Paragraph[] {
@@ -147,20 +152,18 @@ function buildTitlePage(data: PlanData, className: string): Paragraph[] {
     data.schoolName.split("\n").forEach((line) => paras.push(centerParagraph(line.trim())));
   }
 
-  // Відступи нижче відкалібровані за оригінальним зразком-скріном (той
-  // самий, що користувач присилав раніше): школа ~7-11% висоти сторінки,
-  // титул ~35-44%, блок вчителя ~66-74%, нижній рядок ~91%. Перший
-  // варіант (30pt) був суттєво заниженим — перевірив за фактично
-  // згенерованим документом, скільки % висоти сторінки займає 1pt
-  // відступу в blankLines(), і перерахував відступи так, щоб реальні
-  // позиції збігались із зразком, а не з пунктами "на око".
-  paras.push(...blankLines(240));
+  // Цілі за оригінальним зразком-скріном: школа ~7-11% висоти сторінки,
+  // титульний блок ("Календарне планування...") — приблизно по центру
+  // сторінки, блок вчителя — ближче до низу справа, нижній рядок — біля
+  // самого низу. Кількість рядків нижче підібрана під ці позиції з
+  // урахуванням реальної (виміряної) висоти одного порожнього рядка.
+  paras.push(...blankLines(19));
   paras.push(centerParagraph("Календарне планування", { size: 14, bold: true }));
   paras.push(centerParagraph(`з предмету «${data.subject}» у ${className} класі`));
   paras.push(centerParagraph("курсу інваріантної складової навчального плану,"));
   paras.push(centerParagraph(`на ${data.schoolYear || "2024/2025"} навчальний рік`));
 
-  paras.push(...blankLines(190));
+  paras.push(...blankLines(15));
 
   const teacherLines = [
     "Вчитель предмету",
@@ -179,11 +182,13 @@ function buildTitlePage(data: PlanData, className: string): Paragraph[] {
   });
 
   // Відступ до нижнього рядка — ближче до низу сторінки.
-  paras.push(...blankLines(145));
+  paras.push(...blankLines(10));
 
   paras.push(
     new Paragraph({
-      alignment: AlignmentType.LEFT,
+      // Відцентровано, а не по лівому краю — так само, як інші рядки
+      // титульної сторінки.
+      alignment: AlignmentType.CENTER,
       children: [
         new TextRun({
           text: `Календарне планування з ${genitiveSubject(data.subject)}`,
