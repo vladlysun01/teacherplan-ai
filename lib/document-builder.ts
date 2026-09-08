@@ -29,7 +29,6 @@ import {
   Packer,
   VerticalAlign,
   TableLayoutType,
-  LineRuleType,
 } from "docx";
 
 const PT = 20; // twips на пункт (spacing)
@@ -114,27 +113,28 @@ function centerParagraph(text: string, opts: { size?: number; bold?: boolean } =
   });
 }
 
-// Порожній абзац із ТОЧНОЮ висотою рядка (lineRule: EXACT) — надійний
-// спосіб зробити вертикальний відступ на титульній сторінці.
+// Вертикальний відступ на титульній сторінці — просто N окремих
+// порожніх абзаців БЕЗ жодних спеціальних властивостей (не
+// spacing.before, не line/lineRule).
 //
-// Раніше відступи робились через paragraph.spacing.before (twips) — це
-// коректний OOXML, і в експортованому XML значення були саме такі, як
-// задумано (120pt/160pt/210pt), перевірено прямо в document.xml. Але
-// на реальному скріні з Pages текст усе одно ліг щільно вгорі сторінки
-// майже без відступів, а решта сторінки лишилась порожньою "молоком" —
-// тобто Pages ці "spacing before" значення на практиці проігнорував.
-// Порожній рядок із власною висотою (line/lineRule) — набагато
-// приземленіший прийом (буквально те, що вчитель зробив би вручну
-// клавішею Enter), і його однаково розуміє і Word, і Pages, і
-// LibreOffice, і Google Docs.
-function blankLine(pt: number): Paragraph {
-  return new Paragraph({
-    spacing: { before: 0, after: 0, line: pt * PT, lineRule: LineRuleType.EXACT },
-    // Невидимий нерозривний пробіл, а не порожній рядок: у порожньому
-    // текстовому runі деякі рушії рахують висоту рядка зі шрифту, а не
-    // з line/lineRule — символ гарантує, що рядок реально є.
-    children: [new TextRun({ text: " " })],
-  });
+// Історія двох попередніх спроб, обидві провалились на реальному
+// скріні з Pages:
+//   1) paragraph.spacing.before (twips) — у XML значення були рівно
+//      такі, як задумано (120pt/160pt/210pt), перевірено прямо в
+//      document.xml, але Pages текст усе одно стягнув угору сторінки.
+//   2) один порожній абзац із spacing.line + lineRule: EXACT — та сама
+//      історія, Pages і це проігнорував.
+// Обидва рази Pages явно не рахує "розумні" властивості відступу на
+// майже порожньому абзаці. Тому тепер — найпримітивніший можливий
+// прийом: просто N абзаців зі звичайним пробілом, кожен своєї
+// стандартної висоти, буквально як людина натиснула б Enter кілька
+// разів. Це не спеціальна фіча, яку можна проігнорувати чи по-своєму
+// трактувати — це базове верстання тексту, однакове в будь-якому
+// редакторі.
+function blankLines(pt: number): Paragraph[] {
+  const LINE_HEIGHT_PT = 14; // приблизна висота рядка при 12pt шрифті
+  const count = Math.max(1, Math.round(pt / LINE_HEIGHT_PT));
+  return Array.from({ length: count }, () => new Paragraph({ children: [new TextRun({ text: " " })] }));
 }
 
 function buildTitlePage(data: PlanData, className: string): Paragraph[] {
@@ -147,7 +147,7 @@ function buildTitlePage(data: PlanData, className: string): Paragraph[] {
     data.schoolName.split("\n").forEach((line) => paras.push(centerParagraph(line.trim())));
   }
 
-  paras.push(blankLine(40));
+  paras.push(...blankLines(40));
   paras.push(centerParagraph("Календарне планування", { size: 14, bold: true }));
   paras.push(centerParagraph(`з предмету «${data.subject}» у ${className} класі`));
   paras.push(centerParagraph("курсу інваріантної складової навчального плану,"));
@@ -155,7 +155,7 @@ function buildTitlePage(data: PlanData, className: string): Paragraph[] {
 
   // Відступ до блоку вчителя — приблизно середина сторінки, як на
   // офіційному зразку (праворуч, нижче за основний блок).
-  paras.push(blankLine(260));
+  paras.push(...blankLines(260));
 
   const teacherLines = [
     "Вчитель предмету",
@@ -174,7 +174,7 @@ function buildTitlePage(data: PlanData, className: string): Paragraph[] {
   });
 
   // Відступ до нижнього рядка — ближче до низу сторінки.
-  paras.push(blankLine(240));
+  paras.push(...blankLines(240));
 
   paras.push(
     new Paragraph({
