@@ -160,7 +160,14 @@ export default function DocumentsPage() {
                   <div className="flex gap-2 pt-1">
                     <a
                       href={doc.file_url}
-                      target="_blank"
+                      // Без target="_blank": Safari при "_blank" спершу
+                      // відкриває НОВУ порожню вкладку і лиш тоді туди
+                      // вантажить attachment — і лишає about:blank без
+                      // завантаження (реальний баг з реального скріну
+                      // користувача; Chrome цю ж комбінацію обробляє
+                      // без проблем, тому там усе працювало). Посилання
+                      // на файл із Content-Disposition: attachment качає
+                      // файл у поточній вкладці, нікуди не переходячи.
                       rel="noopener noreferrer"
                       className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 text-cyan-400 rounded-lg transition-all duration-300 text-sm font-medium"
                     >

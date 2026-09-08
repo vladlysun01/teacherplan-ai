@@ -28,6 +28,7 @@ import {
   PageBreak,
   Packer,
   VerticalAlign,
+  TableLayoutType,
 } from "docx";
 
 const PT = 20; // twips на пункт (spacing)
@@ -243,6 +244,13 @@ function lessonsTable(lessons: Lesson[], startCounter: { value: number }): Table
   });
   return new Table({
     width: { size: COL_WIDTHS_DXA.reduce((a, b) => a + b, 0), type: WidthType.DXA },
+    // Без layout: FIXED Word/Pages рахують ширину колонок за вмістом
+    // ("autofit"), ігноруючи наші width у клітинках — саме тому текст
+    // ліг по одній букві в рядок (реальний баг, зловлений на скріні
+    // з готовим .docx). columnWidths дублює ширини на рівні таблиці
+    // (<w:tblGrid>), яку читають і Word, і Pages.
+    layout: TableLayoutType.FIXED,
+    columnWidths: COL_WIDTHS_DXA,
     borders: {
       top: { style: BorderStyle.SINGLE, size: 4, color: BLACK },
       bottom: { style: BorderStyle.SINGLE, size: 4, color: BLACK },
