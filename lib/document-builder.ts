@@ -29,6 +29,7 @@ import {
   Packer,
   VerticalAlign,
   TableLayoutType,
+  LineRuleType,
 } from "docx";
 
 const PT = 20; // twips на пункт (spacing)
@@ -99,13 +100,9 @@ function genitiveSubject(subject: string): string {
   return GENITIVE[subject] || subject;
 }
 
-function centerParagraph(
-  text: string,
-  opts: { size?: number; bold?: boolean; spacingBeforePt?: number } = {}
-): Paragraph {
+function centerParagraph(text: string, opts: { size?: number; bold?: boolean } = {}): Paragraph {
   return new Paragraph({
     alignment: AlignmentType.CENTER,
-    spacing: opts.spacingBeforePt ? { before: opts.spacingBeforePt * PT } : undefined,
     children: [
       new TextRun({
         text,
@@ -114,6 +111,29 @@ function centerParagraph(
         color: BLACK,
       }),
     ],
+  });
+}
+
+// Порожній абзац із ТОЧНОЮ висотою рядка (lineRule: EXACT) — надійний
+// спосіб зробити вертикальний відступ на титульній сторінці.
+//
+// Раніше відступи робились через paragraph.spacing.before (twips) — це
+// коректний OOXML, і в експортованому XML значення були саме такі, як
+// задумано (120pt/160pt/210pt), перевірено прямо в document.xml. Але
+// на реальному скріні з Pages текст усе одно ліг щільно вгорі сторінки
+// майже без відступів, а решта сторінки лишилась порожньою "молоком" —
+// тобто Pages ці "spacing before" значення на практиці проігнорував.
+// Порожній рядок із власною висотою (line/lineRule) — набагато
+// приземленіший прийом (буквально те, що вчитель зробив би вручну
+// клавішею Enter), і його однаково розуміє і Word, і Pages, і
+// LibreOffice, і Google Docs.
+function blankLine(pt: number): Paragraph {
+  return new Paragraph({
+    spacing: { before: 0, after: 0, line: pt * PT, lineRule: LineRuleType.EXACT },
+    // Невидимий нерозривний пробіл, а не порожній рядок: у порожньому
+    // текстовому runі деякі рушії рахують висоту рядка зі шрифту, а не
+    // з line/lineRule — символ гарантує, що рядок реально є.
+    children: [new TextRun({ text: " " })],
   });
 }
 
@@ -127,10 +147,15 @@ function buildTitlePage(data: PlanData, className: string): Paragraph[] {
     data.schoolName.split("\n").forEach((line) => paras.push(centerParagraph(line.trim())));
   }
 
-  paras.push(centerParagraph("Календарне планування", { size: 14, bold: true, spacingBeforePt: 120 }));
-  paras.push(centerParagraph(`з предмету «${data.subject}» у ${className} класі`, { spacingBeforePt: 6 }));
-  paras.push(centerParagraph("курсу інваріантної складової навчального плану,", { spacingBeforePt: 6 }));
-  paras.push(centerParagraph(`на ${data.schoolYear || "2024/2025"} навчальний рік`, { spacingBeforePt: 6 }));
+  paras.push(blankLine(40));
+  paras.push(centerParagraph("Календарне планування", { size: 14, bold: true }));
+  paras.push(centerParagraph(`з предмету «${data.subject}» у ${className} класі`));
+  paras.push(centerParagraph("курсу інваріантної складової навчального плану,"));
+  paras.push(centerParagraph(`на ${data.schoolYear || "2024/2025"} навчальний рік`));
+
+  // Відступ до блоку вчителя — приблизно середина сторінки, як на
+  // офіційному зразку (праворуч, нижче за основний блок).
+  paras.push(blankLine(260));
 
   const teacherLines = [
     "Вчитель предмету",
@@ -139,20 +164,21 @@ function buildTitlePage(data: PlanData, className: string): Paragraph[] {
     formatTeacherName(data.teacherName),
   ].filter((line) => line && line.trim());
 
-  teacherLines.forEach((line, i) => {
+  teacherLines.forEach((line) => {
     paras.push(
       new Paragraph({
         alignment: AlignmentType.RIGHT,
-        spacing: { before: (i === 0 ? 160 : 2) * PT },
         children: [new TextRun({ text: line, size: 12 * HP, color: BLACK, bold: false })],
       })
     );
   });
 
+  // Відступ до нижнього рядка — ближче до низу сторінки.
+  paras.push(blankLine(240));
+
   paras.push(
     new Paragraph({
       alignment: AlignmentType.LEFT,
-      spacing: { before: 210 * PT },
       children: [
         new TextRun({
           text: `Календарне планування з ${genitiveSubject(data.subject)}`,
