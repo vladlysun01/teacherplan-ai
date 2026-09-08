@@ -1,6 +1,7 @@
 // Force rebuild - v2
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { isMaintenanceModeOn, canBypassMaintenance } from "@/lib/admin";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('credits')
+      .select('credits, email')
       .eq('id', userId)
       .single();
 
@@ -33,6 +34,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: "Помилка перевірки балансу" },
         { status: 500 }
+      );
+    }
+
+    // Режим тестування: поки доробляємо генератор, звичайні користувачі
+    // тимчасово не можуть генерувати (щоб не отримати зламаний .docx) —
+    // окрім адміна й тестових акаунтів. Перевірка тут — справжня; та, що
+    // на фронтенді, лише вимикає кнопку заздалегідь.
+    if (isMaintenanceModeOn() && !canBypassMaintenance(profile.email)) {
+      console.log("🚧 Режим тестування: генерацію тимчасово призупинено для", profile.email);
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Ми зараз тестуємо та покращуємо генерацію документів. Спробуйте, будь ласка, трохи пізніше — це ненадовго!",
+          errorCode: "MAINTENANCE_MODE",
+        },
+        { status: 503 }
       );
     }
 

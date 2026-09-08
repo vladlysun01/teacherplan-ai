@@ -19,3 +19,28 @@ export function isAdminEmail(email?: string | null): boolean {
   if (!email) return false;
   return getAdminEmails().includes(email.toLowerCase());
 }
+
+// Власні тестові акаунти (власник + друг-вчитель, який здебільшого
+// тестує "Фізичну культуру") — їх генерації не відображають реальних
+// вчителів-користувачів і лише спотворюють статистику в адмінці.
+const TEST_USER_EMAILS = ["vladlysun01@gmail.com", "bykypy@gmail.com"];
+
+export function isTestEmail(email?: string | null): boolean {
+  if (!email) return false;
+  return TEST_USER_EMAILS.includes(email.toLowerCase());
+}
+
+// Режим тестування: коли NEXT_PUBLIC_MAINTENANCE_MODE=true, генерацію
+// документів бачать вимкненою всі, КРІМ адміна й тестових акаунтів —
+// щоб поки ми доробляємо генератор, звичайний вчитель не отримав
+// зламаний .docx. NEXT_PUBLIC_-префікс навмисний: одна змінна працює
+// і на клієнті (сіра кнопка "Генерувати" без зайвого кліку в помилку),
+// і на сервері (справжня блокуюча перевірка в /api/documents/generate,
+// яка не залежить від того, що намалював фронтенд).
+export function isMaintenanceModeOn(): boolean {
+  return process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "true";
+}
+
+export function canBypassMaintenance(email?: string | null): boolean {
+  return isAdminEmail(email) || isTestEmail(email);
+}

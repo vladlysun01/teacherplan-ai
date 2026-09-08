@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail, isTestEmail } from "@/lib/admin";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -55,9 +55,25 @@ export async function GET(request: NextRequest) {
     if (documentsRes.error) throw documentsRes.error;
     if (purchasesRes.error) throw purchasesRes.error;
 
-    const profiles = profilesRes.data || [];
-    const documents = documentsRes.data || [];
-    const purchases = purchasesRes.data || [];
+    // Власні тестові акаунти (власник + друг, що тестує "Фізичну
+    // культуру") прибираємо звідусіль — інакше вони спотворюють і
+    // кількість користувачів, і розбивку по предметах, і графік
+    // реєстрацій.
+    const testIds = new Set(
+      (profilesRes.data || []).filter((p) => isTestEmail(p.email)).map((p) => p.id)
+    );
+    const profiles = (profilesRes.data || []).filter((p) => !testIds.has(p.id));
+    const documents = (documentsRes.data || []).filter((d) => !testIds.has(d.user_id));
+    const purchases = (purchasesRes.data || []).filter((p) => !testIds.has(p.user_id));
+
+    // Наскрізний порядковий номер — "хто який по рахунку" — рахуємо за
+    // хронологією реєстрації (найперший користувач = №1), незалежно від
+    // того, в якому порядку рядки показуються в таблиці.
+    const byCreatedAsc = [...profiles].sort(
+      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+    const signupNumberById = new Map<string, number>();
+    byCreatedAsc.forEach((p, i) => signupNumberById.set(p.id, i + 1));
 
     const docsByUser = new Map<string, typeof documents>();
     for (const doc of documents) {
@@ -78,6 +94,7 @@ export async function GET(request: NextRequest) {
       const totalSpentUAH = paidTotalsByUser.get(p.id) || 0;
       return {
         id: p.id,
+        signupNumber: signupNumberById.get(p.id)!,
         email: p.email,
         fullName: p.full_name,
         schoolName: p.school_name,
@@ -107,22 +124,32 @@ export async function GET(request: NextRequest) {
       docsByStatus[d.status] = (docsByStatus[d.status] || 0) + 1;
     }
 
-    // Реєстрації за останні 14 днів — для швидкого погляду на динаміку.
+    // Реєстрації по днях за ВЕСЬ час (від першого користувача до
+    // сьогодні) — клієнт сам згортає це у тижні/місяці і дає тягати
+    // повзунок вибору діапазону (Brush), тож тут краще віддати найдрібнішу
+    // гранулярність один раз, ніж повторно смикати API на кожен зум.
     const signupsByDay: { date: string; count: number }[] = [];
     const dayMs = 24 * 60 * 60 * 1000;
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
-    for (let i = 13; i >= 0; i--) {
-      const dayStart = new Date(today.getTime() - i * dayMs);
-      const dayEnd = new Date(dayStart.getTime() + dayMs);
-      const count = profiles.filter((p) => {
-        const t = new Date(p.created_at).getTime();
-        return t >= dayStart.getTime() && t < dayEnd.getTime();
-      }).length;
-      signupsByDay.push({
-        date: dayStart.toISOString().slice(0, 10),
-        count,
-      });
+    const countsByDate = new Map<string, number>();
+    for (const p of profiles) {
+      const d = new Date(p.created_at);
+      d.setUTCHours(0, 0, 0, 0);
+      const key = d.toISOString().slice(0, 10);
+      countsByDate.set(key, (countsByDate.get(key) || 0) + 1);
+    }
+    const firstSignup =
+      byCreatedAsc.length > 0
+        ? (() => {
+            const d = new Date(byCreatedAsc[0].created_at);
+            d.setUTCHours(0, 0, 0, 0);
+            return d;
+          })()
+        : today;
+    for (let t = firstSignup.getTime(); t <= today.getTime(); t += dayMs) {
+      const key = new Date(t).toISOString().slice(0, 10);
+      signupsByDay.push({ date: key, count: countsByDate.get(key) || 0 });
     }
 
     const totalPaidUsers = users.filter((u) => u.paid).length;

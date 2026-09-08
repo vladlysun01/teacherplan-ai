@@ -10,10 +10,61 @@ import {
   Sparkles,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
   Search,
   ArrowLeft,
   ShieldAlert,
 } from "lucide-react";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Brush,
+} from "recharts";
+
+const PAGE_SIZE = 20;
+type Granularity = "day" | "week" | "month";
+
+// Дата-мітка "початку тижня" (понеділок) / "початку місяця" для
+// групування щоденних лічильників у грубші відрізки на графіку.
+function bucketKey(dateStr: string, granularity: Granularity): string {
+  if (granularity === "day") return dateStr;
+  const d = new Date(dateStr + "T00:00:00Z");
+  if (granularity === "month") {
+    return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+  }
+  // week: відкат до понеділка цього тижня (ISO)
+  const day = d.getUTCDay() || 7; // нд=0 -> 7
+  d.setUTCDate(d.getUTCDate() - (day - 1));
+  return d.toISOString().slice(0, 10);
+}
+
+function bucketLabel(key: string, granularity: Granularity): string {
+  if (granularity === "month") {
+    const [y, m] = key.split("-");
+    return `${m}.${y.slice(2)}`;
+  }
+  const d = new Date(key + "T00:00:00Z");
+  return d.toLocaleDateString("uk-UA", { day: "2-digit", month: "2-digit" });
+}
+
+function aggregateSignups(
+  daily: { date: string; count: number }[],
+  granularity: Granularity
+): { key: string; label: string; count: number }[] {
+  const map = new Map<string, number>();
+  for (const d of daily) {
+    const key = bucketKey(d.date, granularity);
+    map.set(key, (map.get(key) || 0) + d.count);
+  }
+  return Array.from(map.entries())
+    .sort((a, b) => (a[0] < b[0] ? -1 : 1))
+    .map(([key, count]) => ({ key, label: bucketLabel(key, granularity), count }));
+}
 
 type AdminDocument = {
   id: string;
@@ -27,6 +78,7 @@ type AdminDocument = {
 
 type AdminUser = {
   id: string;
+  signupNumber: number;
   email: string;
   fullName: string | null;
   schoolName: string | null;
@@ -90,6 +142,8 @@ export default function AdminPage() {
   const [data, setData] = useState<AdminStats | null>(null);
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [page, setPage] = useState(1);
+  const [granularity, setGranularity] = useState<Granularity>("week");
 
   useEffect(() => {
     void load();
@@ -154,6 +208,23 @@ export default function AdminPage() {
     );
   }, [data, search]);
 
+  // Скидаємо на першу сторінку щоразу, як змінюється пошук — інакше
+  // легко залишитись на "сторінці 4", де після фільтра вже нічого нема.
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
+  const pagedUsers = useMemo(
+    () => filteredUsers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filteredUsers, page]
+  );
+
+  const signupChartData = useMemo(() => {
+    if (!data) return [];
+    return aggregateSignups(data.summary.signupsByDay, granularity);
+  }, [data, granularity]);
+
   const topSubjects = useMemo(() => {
     if (!data) return [];
     return Object.entries(data.summary.docsBySubject)
@@ -162,7 +233,6 @@ export default function AdminPage() {
   }, [data]);
 
   const maxSubjectCount = topSubjects.length > 0 ? topSubjects[0][1] : 1;
-  const maxSignups = data ? Math.max(1, ...data.summary.signupsByDay.map((d) => d.count)) : 1;
 
   if (loading) {
     return (
@@ -250,24 +320,53 @@ export default function AdminPage() {
             )}
           </div>
 
-          {/* Signups by day */}
+          {/* Signups over time */}
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl p-5">
-            <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wide mb-4">Реєстрації за 14 днів</h2>
-            <div className="flex items-end gap-1 h-24">
-              {summary.signupsByDay.map((d) => (
-                <div key={d.date} className="flex-1 flex flex-col items-center justify-end h-full group relative">
-                  <div
-                    className="w-full bg-gradient-to-t from-cyan-500 to-teal-400 rounded-sm min-h-[2px]"
-                    style={{ height: `${(d.count / maxSignups) * 100}%` }}
-                    title={`${d.date}: ${d.count}`}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wide">Реєстрації за весь час</h2>
+              <div className="flex bg-slate-900/50 rounded-lg p-0.5 gap-0.5">
+                {(["day", "week", "month"] as Granularity[]).map((g) => (
+                  <button
+                    key={g}
+                    onClick={() => setGranularity(g)}
+                    className={`px-2.5 py-1 text-[11px] rounded-md transition-colors ${
+                      granularity === g ? "bg-cyan-500/20 text-cyan-400" : "text-slate-500 hover:text-slate-300"
+                    }`}
+                  >
+                    {g === "day" ? "День" : g === "week" ? "Тиждень" : "Місяць"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {signupChartData.length === 0 ? (
+              <p className="text-slate-500 text-sm">Ще немає даних</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={signupChartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                  <XAxis dataKey="label" tick={{ fill: "#64748b", fontSize: 10 }} axisLine={{ stroke: "#334155" }} tickLine={false} />
+                  <YAxis allowDecimals={false} tick={{ fill: "#64748b", fontSize: 10 }} axisLine={false} tickLine={false} width={28} />
+                  <Tooltip
+                    cursor={{ fill: "rgba(6, 182, 212, 0.08)" }}
+                    contentStyle={{ background: "#0f172a", border: "1px solid #334155", borderRadius: 8, fontSize: 12 }}
+                    labelStyle={{ color: "#94a3b8" }}
+                    itemStyle={{ color: "#22d3ee" }}
+                    formatter={(value) => `${value} реєстрацій`}
                   />
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-between text-[10px] text-slate-500 mt-1.5">
-              <span>{summary.signupsByDay[0]?.date.slice(5)}</span>
-              <span>{summary.signupsByDay[summary.signupsByDay.length - 1]?.date.slice(5)}</span>
-            </div>
+                  <Bar dataKey="count" fill="#22d3ee" radius={[3, 3, 0, 0]} />
+                  {signupChartData.length > 8 && (
+                    <Brush
+                      dataKey="label"
+                      height={22}
+                      travellerWidth={8}
+                      stroke="#0891b2"
+                      fill="#0f172a"
+                      startIndex={Math.max(0, signupChartData.length - 12)}
+                    />
+                  )}
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
@@ -285,7 +384,7 @@ export default function AdminPage() {
           </div>
 
           <div className="divide-y divide-slate-700/60">
-            {filteredUsers.map((u) => {
+            {pagedUsers.map((u) => {
               const isOpen = expanded.has(u.id);
               return (
                 <div key={u.id}>
@@ -298,6 +397,9 @@ export default function AdminPage() {
                     ) : (
                       <ChevronRight size={16} className="text-slate-500 shrink-0" />
                     )}
+                    <span className="text-xs text-slate-500 shrink-0 w-8 tabular-nums" title="Порядковий номер реєстрації">
+                      №{u.signupNumber}
+                    </span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-white font-medium text-sm truncate">{u.fullName || "Без імені"}</span>
@@ -366,6 +468,45 @@ export default function AdminPage() {
               );
             })}
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between p-4 border-t border-slate-700">
+              <span className="text-xs text-slate-500">
+                Сторінка {page} з {totalPages}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="p-2 rounded-lg bg-slate-900/50 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((n) => n === 1 || n === totalPages || Math.abs(n - page) <= 1)
+                  .map((n, i, arr) => (
+                    <span key={n} className="flex items-center">
+                      {i > 0 && arr[i - 1] !== n - 1 && <span className="text-slate-600 px-1">…</span>}
+                      <button
+                        onClick={() => setPage(n)}
+                        className={`w-8 h-8 text-xs rounded-lg transition-colors ${
+                          n === page ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "text-slate-400 hover:text-white hover:bg-slate-900/50"
+                        }`}
+                      >
+                        {n}
+                      </button>
+                    </span>
+                  ))}
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="p-2 rounded-lg bg-slate-900/50 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import { CheckCircle, FileText, ArrowRight, X } from 'lucide-react';
 import { PROGRAMS, type VariantModule } from "@/lib/programs";
+import { isMaintenanceModeOn, canBypassMaintenance } from "@/lib/admin";
 
 // Якщо дата випадає на сб/нд — переносимо на найближчий будній день
 // (понеділок), а не лишаємо як є: перший урок семестру не може бути
@@ -50,7 +51,14 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const currentProgram = PROGRAMS[formData.subject]?.[formData.program];
+  // Режим тестування: доки доробляємо генератор, звичайні користувачі
+  // тимчасово не генерують (щоб не отримати зламаний .docx) — окрім
+  // адміна й тестових акаунтів. Справжня блокуюча перевірка — на
+  // сервері (/api/documents/generate), тут лише завчасно вимикаємо
+  // кнопку, щоб людина не тицяла в неї даремно.
+  const maintenanceBlocked = isMaintenanceModeOn() && !canBypassMaintenance(userEmail);
 
   useEffect(() => { loadUserProfile(); }, []);
 
@@ -59,6 +67,7 @@ export default function Dashboard() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+      setUserEmail(user.email ?? null);
       const { data: profile } = await supabase.from('profiles').select('full_name, school_name, subject, teacher_category').eq('id', user.id).single();
       if (profile) {
         const profileSubject = profile.subject && PROGRAMS[profile.subject] ? profile.subject : 'Фізична культура';
@@ -88,6 +97,10 @@ export default function Dashboard() {
   };
 
   const handleGenerate = async () => {
+    if (maintenanceBlocked) {
+      alert("Ми зараз тестуємо та покращуємо генерацію документів. Спробуйте, будь ласка, трохи пізніше — це ненадовго!");
+      return;
+    }
     if (currentProgram?.hasVariant) {
       const required = currentProgram.variantRequired || 1;
       if (formData.variantModules.length < required) { alert(`Оберіть мінімум ${required} модулі для вивчення`); return; }
@@ -163,6 +176,19 @@ export default function Dashboard() {
               </div>
             )}
           </div>
+
+          {maintenanceBlocked && (
+            <div className="mb-6 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-start gap-3">
+              <span className="text-xl">🚧</span>
+              <div>
+                <p className="text-amber-300 font-semibold text-sm">Тимчасово на технічному обслуговуванні</p>
+                <p className="text-amber-200/70 text-sm mt-0.5">
+                  Ми зараз тестуємо та покращуємо генерацію документів, щоб ви отримували ідеальний файл із першого разу.
+                  Це ненадовго — спробуйте, будь ласка, трохи пізніше.
+                </p>
+              </div>
+            </div>
+          )}
 
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl p-8 shadow-2xl">
             <div className="space-y-6">
@@ -339,9 +365,11 @@ export default function Dashboard() {
               </div>
 
               {/* Кнопка генерації */}
-              <button onClick={handleGenerate} disabled={loading} className="w-full bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3">
+              <button onClick={handleGenerate} disabled={loading || maintenanceBlocked} className="w-full bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 disabled:from-slate-600 disabled:to-slate-600 disabled:cursor-not-allowed shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3">
                 {loading ? (
                   <><svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Генерується...</span></>
+                ) : maintenanceBlocked ? (
+                  <><span>🚧</span><span>Тимчасово недоступно</span></>
                 ) : (
                   <><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span>Згенерувати план</span></>
                 )}
