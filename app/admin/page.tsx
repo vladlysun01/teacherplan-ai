@@ -147,6 +147,9 @@ export default function AdminPage() {
   const [page, setPage] = useState(1);
   const [granularity, setGranularity] = useState<Granularity>("week");
   const [showPrograms, setShowPrograms] = useState(false);
+  const [creditInputs, setCreditInputs] = useState<Record<string, { amount: string; note: string }>>({});
+  const [creditSaving, setCreditSaving] = useState<string | null>(null);
+  const [creditMessage, setCreditMessage] = useState<{ userId: string; text: string; ok: boolean } | null>(null);
 
   useEffect(() => {
     void load();
@@ -197,6 +200,47 @@ export default function AdminPage() {
       else next.add(id);
       return next;
     });
+  };
+
+  const handleGrantCredits = async (userId: string) => {
+    const input = creditInputs[userId];
+    const amount = Number(input?.amount);
+    if (!input?.amount || !Number.isInteger(amount) || amount === 0) {
+      setCreditMessage({ userId, text: "Введи ціле число, не 0", ok: false });
+      return;
+    }
+    setCreditSaving(userId);
+    setCreditMessage(null);
+    try {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        router.push("/login");
+        return;
+      }
+      const res = await fetch("/api/admin/add-credits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ userId, amount, note: input.note }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Помилка");
+
+      setCreditMessage({ userId, text: `Готово, новий баланс: ${json.newBalance}`, ok: true });
+      setCreditInputs((prev) => ({ ...prev, [userId]: { amount: "", note: "" } }));
+      // Оновлюємо баланс у вже завантажених даних, не перезавантажуючи все.
+      setData((prev) =>
+        prev
+          ? { ...prev, users: prev.users.map((u) => (u.id === userId ? { ...u, credits: json.newBalance } : u)) }
+          : prev
+      );
+    } catch (e: any) {
+      setCreditMessage({ userId, text: e.message || "Помилка", ok: false });
+    } finally {
+      setCreditSaving(null);
+    }
   };
 
   const filteredUsers = useMemo(() => {
@@ -473,6 +517,42 @@ export default function AdminPage() {
                       {u.schoolName && (
                         <div className="text-xs text-slate-500 mb-2">🏫 {u.schoolName}</div>
                       )}
+
+                      {/* Ручне нарахування/списання кредитів — для компенсацій, бонусів
+                          першим користувачам тощо. */}
+                      <div className="flex flex-wrap items-center gap-2 mb-3 bg-slate-900/40 rounded-lg p-2.5">
+                        <input
+                          type="number"
+                          placeholder="±кредити"
+                          value={creditInputs[u.id]?.amount ?? ""}
+                          onChange={(e) =>
+                            setCreditInputs((prev) => ({ ...prev, [u.id]: { amount: e.target.value, note: prev[u.id]?.note ?? "" } }))
+                          }
+                          className="w-24 bg-slate-800 border border-slate-700 rounded-md px-2 py-1 text-xs text-white focus:outline-none focus:border-cyan-500"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Причина (необов'язково)"
+                          value={creditInputs[u.id]?.note ?? ""}
+                          onChange={(e) =>
+                            setCreditInputs((prev) => ({ ...prev, [u.id]: { amount: prev[u.id]?.amount ?? "", note: e.target.value } }))
+                          }
+                          className="flex-1 min-w-[140px] bg-slate-800 border border-slate-700 rounded-md px-2 py-1 text-xs text-white focus:outline-none focus:border-cyan-500"
+                        />
+                        <button
+                          onClick={() => handleGrantCredits(u.id)}
+                          disabled={creditSaving === u.id}
+                          className="px-3 py-1 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 text-cyan-400 rounded-md text-xs font-medium disabled:opacity-50 transition-colors"
+                        >
+                          {creditSaving === u.id ? "..." : "Застосувати"}
+                        </button>
+                        {creditMessage?.userId === u.id && (
+                          <span className={`text-xs ${creditMessage.ok ? "text-green-400" : "text-red-400"}`}>
+                            {creditMessage.text}
+                          </span>
+                        )}
+                      </div>
+
                       {u.documents.length === 0 ? (
                         <p className="text-xs text-slate-500">Ще не генерував документів</p>
                       ) : (
