@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 import { pluralUk } from '@/lib/credits';
-import { Sparkles, FileText, Plus, User, CreditCard, LogOut, Zap, Menu, X } from 'lucide-react';
+import { isAdminEmail } from '@/lib/admin';
+import { Sparkles, FileText, Plus, User, CreditCard, LogOut, Zap, Menu, X, ShieldCheck } from 'lucide-react';
 
 export default function DashboardLayout({
   children,
@@ -202,6 +203,17 @@ export default function DashboardLayout({
             <CreditCard size={20} />
             <span className="font-medium">Кредити</span>
           </a>
+
+          {isAdminEmail(user?.email) && (
+            <a
+              href="/admin"
+              onClick={() => setSidebarOpen(false)}
+              className="group w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-amber-400/80 hover:text-amber-300 hover:bg-amber-500/10 border border-amber-500/20"
+            >
+              <ShieldCheck size={20} />
+              <span className="font-medium">Адмінка</span>
+            </a>
+          )}
         </nav>
 
         {/* Credits Card */}
