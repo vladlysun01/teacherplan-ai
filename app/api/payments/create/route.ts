@@ -1,9 +1,15 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+// SERVICE_ROLE, не anon: цей роут — довірений сервер (userId вже
+// приходить із клієнтської сесії, як і в /api/documents/generate).
+// З anon-ключем тут insert у payments йшов би без auth.uid() (сесія
+// користувача сюди не прокидається), тож RLS-політика "auth.uid() =
+// user_id" все одно відхилила б запис — тихо, бо insert був обгорнутий
+// у try/catch, який лише логував помилку.
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
 const PACKAGES = {
@@ -62,21 +68,31 @@ export async function POST(req: Request) {
     console.log('🏪 Merchant:', merchant);
 
     // Save payment
-    try {
-      await supabase.from('payments').insert({
-        user_id: userId,
-        order_id: orderId,
-        package_id: packageId,
-        amount: pkg.price,
-        credits: pkg.credits,
-        status: 'pending',
-        payment_method: 'wayforpay',
-        created_at: new Date().toISOString(),
-      });
-      console.log('✅ Payment saved to DB');
-    } catch (e) {
-      console.error('⚠️ DB error:', e);
+    // ВАЖЛИВО: раніше ця помилка лише логувалась (catch { console.error }),
+    // і користувача однаково відправляло платити на WayForPay — навіть
+    // якщо запис у payments не створився. Тоді вебхук callback/route.ts
+    // не знаходив order_id і кредити НІКОЛИ не нараховувались після
+    // реальної оплати. Тепер при помилці запису зупиняємось ДО того, як
+    // людина побачить форму оплати.
+    const { error: paymentInsertError } = await supabase.from('payments').insert({
+      user_id: userId,
+      order_id: orderId,
+      package_id: packageId,
+      amount: pkg.price,
+      credits: pkg.credits,
+      status: 'pending',
+      payment_method: 'wayforpay',
+      created_at: new Date().toISOString(),
+    });
+
+    if (paymentInsertError) {
+      console.error('❌ Не вдалось зберегти платіж, зупиняємось до оплати:', paymentInsertError);
+      return NextResponse.json(
+        { error: 'Не вдалось підготувати оплату. Спробуйте ще раз або напишіть у підтримку.' },
+        { status: 500 }
+      );
     }
+    console.log('✅ Payment saved to DB');
 
     // ВАЖЛИВО: Порядок полів для підпису!
     const signatureFields = [

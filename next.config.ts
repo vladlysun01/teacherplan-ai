@@ -19,6 +19,24 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  // Базові security-заголовки — застосовуються до всіх відповідей.
+  // Захищають від clickjacking (сайт у чужому iframe), MIME-sniffing
+  // атак та випадкового витоку повного URL (з токенами в query) через
+  // заголовок Referer при переході на сторонні сайти.
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+        ],
+      },
+    ];
+  },
   // Перенесено з видаленого next.config.js — виключаємо Node.js модулі з client-side bundle
   webpack: (config, { isServer }) => {
     if (!isServer) {
