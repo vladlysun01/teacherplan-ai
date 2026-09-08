@@ -132,38 +132,67 @@ function centerParagraph(text: string, opts: { size?: number; bold?: boolean } =
 // трактувати — це базове верстання тексту, однакове в будь-якому
 // редакторі.
 //
-// Приймає КІЛЬКІСТЬ рядків напряму (не pt) — два реальні заміри (2
-// рядки і 17 рядків відступу дали позиції 0.109 і 0.324 висоти
-// сторінки на A4 = 841.9pt) дають фактичну висоту одного порожнього
-// рядка в Pages: (0.324-0.109)*841.9 / (17-2) ≈ 12pt, а не ті ~14pt,
-// які припускались "на око" раніше. pt→round(pt/14) лише додавав
-// зайву похибку округлення — тому рахуємо кількість рядків одразу.
+// Приймає КІЛЬКІСТЬ рядків напряму (не pt) — щоб позиція завжди
+// рахувалась від конкретної цілі (buildTitlePage нижче), а не від
+// зашитого наперед числа.
 function blankLines(count: number): Paragraph[] {
   return Array.from({ length: Math.max(0, count) }, () => new Paragraph({ children: [new TextRun({ text: " " })] }));
 }
 
+// Параметри сторінки й калібрування — з реального зразка користувача
+// (той самий Word-документ, що показує, як має виглядати титулка) і з
+// прямих замірів того, як Pages насправді рендерить наш .docx:
+//   - сторінка за замовчуванням у бібліотеці docx — A4 (841.9pt);
+//   - висота ОДНОГО порожнього/текстового рядка в Pages ≈ 12pt —
+//     виміряно з двох реальних генерацій (2 рядки відступу дали 10.9%
+//     висоти сторінки, 17 рядків — 32.4%: (0.324-0.109)*841.9/15 ≈ 12pt);
+//   - цільові позиції (частка висоти сторінки, де має починатись кожен
+//     блок) — виміряні напряму зі скріна оригінального зразка: титул
+//     35.85%, блок вчителя 67.02%, нижній рядок 91.68%.
+// Оскільки довжина назви школи чи кількість рядків вчителя можуть бути
+// різними, відступи рахуються ДИНАМІЧНО від поточної позиції до цілі —
+// а не фіксованою кількістю рядків, яка "розповзається" при зміні
+// вхідних даних.
+const PAGE_HEIGHT_PT = 841.9; // A4
+const MARGIN_PT = 50; // ті самі 50pt, що і page.margin.top/bottom нижче
+const LINE_HEIGHT_PT = 12;
+const TITLE_TARGET_PT = 0.3585 * PAGE_HEIGHT_PT;
+const TEACHER_TARGET_PT = 0.6702 * PAGE_HEIGHT_PT;
+const FOOTER_TARGET_PT = 0.9168 * PAGE_HEIGHT_PT;
+
+function gapLinesTo(currentPt: number, targetPt: number): number {
+  return Math.max(0, Math.round((targetPt - currentPt) / LINE_HEIGHT_PT));
+}
+
 function buildTitlePage(data: PlanData, className: string): Paragraph[] {
   const paras: Paragraph[] = [];
+  let pos = MARGIN_PT; // поточна позиція від верху сторінки (pt)
 
   // Назва закладу — підтримуємо той самий формат: користувач може ввести
   // текст із \n (кілька рядків) або одним абзацом, що сам перенесеться
   // (word wrap робить Word/Google Docs автоматично).
   if (data.schoolName) {
-    data.schoolName.split("\n").forEach((line) => paras.push(centerParagraph(line.trim())));
+    const schoolLines = data.schoolName.split("\n");
+    schoolLines.forEach((line) => paras.push(centerParagraph(line.trim())));
+    pos += schoolLines.length * LINE_HEIGHT_PT;
   }
 
-  // Цілі за оригінальним зразком-скріном: школа ~7-11% висоти сторінки,
-  // титульний блок ("Календарне планування...") — приблизно по центру
-  // сторінки, блок вчителя — ближче до низу справа, нижній рядок — біля
-  // самого низу. Кількість рядків нижче підібрана під ці позиції з
-  // урахуванням реальної (виміряної) висоти одного порожнього рядка.
-  paras.push(...blankLines(19));
-  paras.push(centerParagraph("Календарне планування", { size: 14, bold: true }));
-  paras.push(centerParagraph(`з предмету «${data.subject}» у ${className} класі`));
-  paras.push(centerParagraph("курсу інваріантної складової навчального плану,"));
-  paras.push(centerParagraph(`на ${data.schoolYear || "2024/2025"} навчальний рік`));
+  const n1 = gapLinesTo(pos, TITLE_TARGET_PT);
+  paras.push(...blankLines(n1));
+  pos += n1 * LINE_HEIGHT_PT;
 
-  paras.push(...blankLines(15));
+  const titleLines = [
+    { text: "Календарне планування", opts: { size: 14, bold: true } },
+    { text: `з предмету «${data.subject}» у ${className} класі`, opts: {} },
+    { text: "курсу інваріантної складової навчального плану,", opts: {} },
+    { text: `на ${data.schoolYear || "2024/2025"} навчальний рік`, opts: {} },
+  ];
+  titleLines.forEach(({ text, opts }) => paras.push(centerParagraph(text, opts)));
+  pos += titleLines.length * LINE_HEIGHT_PT;
+
+  const n2 = gapLinesTo(pos, TEACHER_TARGET_PT);
+  paras.push(...blankLines(n2));
+  pos += n2 * LINE_HEIGHT_PT;
 
   const teacherLines = [
     "Вчитель предмету",
@@ -180,9 +209,10 @@ function buildTitlePage(data: PlanData, className: string): Paragraph[] {
       })
     );
   });
+  pos += teacherLines.length * LINE_HEIGHT_PT;
 
-  // Відступ до нижнього рядка — ближче до низу сторінки.
-  paras.push(...blankLines(10));
+  const n3 = gapLinesTo(pos, FOOTER_TARGET_PT);
+  paras.push(...blankLines(n3));
 
   paras.push(
     new Paragraph({
