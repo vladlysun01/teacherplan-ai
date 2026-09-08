@@ -221,7 +221,15 @@ export async function POST(request: NextRequest) {
 
       if (uploadError) throw new Error("Не вдалось завантажити файл: " + uploadError.message);
 
-      const { data: publicUrlData } = supabase.storage.from("documents").getPublicUrl(fileName);
+      // download: без цього параметра публічне посилання не має заголовку
+      // Content-Disposition: attachment — Safari намагається відкрити .docx
+      // як сторінку прямо в новій вкладці, не вміє його показати і лишає
+      // порожній about:blank ("документ не скачується"). З download=<назва>
+      // сервер віддає файл із attachment-заголовком, і браузер завжди качає.
+      const downloadName = `Календарний_план_${formData.subject}_${finalData.class}_клас.docx`;
+      const { data: publicUrlData } = supabase.storage
+        .from("documents")
+        .getPublicUrl(fileName, { download: downloadName });
       const documentUrl = publicUrlData.publicUrl;
 
       const { data: document, error: insertError } = await supabase
