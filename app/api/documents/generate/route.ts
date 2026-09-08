@@ -2,7 +2,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const APPS_SCRIPT_URL = process.env.APPS_SCRIPT_URL || "";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -195,80 +194,82 @@ export async function POST(request: NextRequest) {
     // Фікс: спершу formData (усе, що ввів користувач), зверху — те, що
     // явно повернув генератор (там, де він щось уточнює/дораховує).
     // Жодне поле з форми більше не може мовчки зникнути.
-    const dataForAppsScript = {
+    const finalData = {
       ...formData,
       ...planSettings,
       lessons: lessons
     };
-    
-    console.log("🚀 Calling Apps Script:", APPS_SCRIPT_URL);
-    
+
+    console.log("📄 Генерую .docx локально (без Google Apps Script)...");
+
     try {
-      const appsScriptResponse = await fetch(APPS_SCRIPT_URL, { 
-        method: "POST", 
-        headers: { "Content-Type": "application/json" }, 
-        body: JSON.stringify(dataForAppsScript), 
-        redirect: "follow" 
-      });
-      
-      const responseText = await appsScriptResponse.text();
-      console.log("📄 Apps Script response:", responseText);
-      const result = JSON.parse(responseText);
-      
-      if (!result.success) {
-        throw new Error(result.error || "Apps Script помилка");
-      }
-      
+      const { buildCalendarPlanDocx } = await import("@/lib/document-builder");
+      const fileBuffer = await buildCalendarPlanDocx(finalData);
+
+      const fileName = `${userId}/${Date.now()}-${finalData.subject}-${finalData.class}.docx`.replace(/\s+/g, "_");
+
+      const { error: uploadError } = await supabase.storage
+        .from("documents")
+        .upload(fileName, fileBuffer, {
+          contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          upsert: false,
+        });
+
+      if (uploadError) throw new Error("Не вдалось завантажити файл: " + uploadError.message);
+
+      const { data: publicUrlData } = supabase.storage.from("documents").getPublicUrl(fileName);
+      const documentUrl = publicUrlData.publicUrl;
+
       const { data: document, error: insertError } = await supabase
         .from("documents")
-        .insert({ 
+        .insert({
           user_id: userId,
-          title: `Календарний план: ${formData.subject} ${formData.class} клас`, 
-          type: "calendar_plan", 
+          title: `Календарний план: ${formData.subject} ${formData.class} клас`,
+          type: "calendar_plan",
           status: "ready",
-          file_url: result.documentUrl,
+          file_url: documentUrl,
           generation_params: formData,
-          metadata: { documentUrl: result.documentUrl },
+          metadata: { storagePath: fileName },
           credits_used: 1
         })
         .select()
         .single();
-      
+
       if (insertError) {
         console.error("❌ Помилка збереження в БД:", insertError);
-        return NextResponse.json({ 
-          success: true, 
-          documentUrl: result.documentUrl,
+        return NextResponse.json({
+          success: true,
+          documentUrl,
           creditsRemaining: profile.credits - 1,
-          message: "Документ успішно згенеровано!" 
+          message: "Документ успішно згенеровано!"
         });
       }
-      
+
       console.log("✅ Документ збережено в БД:", document?.id);
-      
-      return NextResponse.json({ 
-        success: true, 
+
+      return NextResponse.json({
+        success: true,
         documentId: document?.id,
-        documentUrl: result.documentUrl,
+        documentUrl,
         creditsRemaining: profile.credits - 1,
-        message: "Документ успішно згенеровано!" 
+        message: "Документ успішно згенеровано!"
       });
-      
-    } catch (appsScriptError: any) {
-      console.error("❌ Помилка Apps Script:", appsScriptError);
-      
+
+    } catch (genError: any) {
+      console.error("❌ Помилка генерації .docx:", genError);
+
       await supabase.rpc('add_credits', {
         p_user_id: userId,
         p_amount: 1,
         p_package: 'refund',
         p_price: 0,
-        p_description: 'Повернення кредиту через помилку Apps Script'
+        p_description: 'Повернення кредиту через помилку генерації документа'
       });
-      
-      console.log("↩️ Кредит повернуто через помилку Apps Script");
-      throw appsScriptError;
+
+      console.log("↩️ Кредит повернуто через помилку генерації документа");
+      throw genError;
     }
-    
+
   } catch (error: any) {
     console.error("❌ Загальна помилка генерації:", error);
     return NextResponse.json({ 
