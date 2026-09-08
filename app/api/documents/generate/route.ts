@@ -206,7 +206,11 @@ export async function POST(request: NextRequest) {
       const { buildCalendarPlanDocx } = await import("@/lib/document-builder");
       const fileBuffer = await buildCalendarPlanDocx(finalData);
 
-      const fileName = `${userId}/${Date.now()}-${finalData.subject}-${finalData.class}.docx`.replace(/\s+/g, "_");
+      // Ключ сховища Supabase Storage не приймає кирилицю ("Invalid key") —
+      // українська назва предмету лишається окремо в documents.title для
+      // показу користувачу, а сам шлях у сховищі — лише безпечні символи.
+      const safeClass = String(finalData.class ?? "").replace(/[^a-zA-Z0-9]/g, "") || "0";
+      const fileName = `${userId}/${Date.now()}-${safeClass}.docx`;
 
       const { error: uploadError } = await supabase.storage
         .from("documents")
