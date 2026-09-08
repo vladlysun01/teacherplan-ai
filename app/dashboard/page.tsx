@@ -97,6 +97,24 @@ export default function Dashboard() {
       const supabase = createClient();
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError || !user) { alert("❌ Помилка авторизації. Будь ласка, увійдіть знову."); window.location.href = "/login"; return; }
+
+      // Автозбереження профілю — щоб ПІБ/школу/категорію не доводилось
+      // вводити щоразу заново, навіть якщо вчитель ніколи не заходив на
+      // окрему сторінку "Мій профіль". Не блокує генерацію, якщо впаде.
+      if (formData.teacherName || formData.schoolName || formData.teacherCategory) {
+        supabase
+          .from('profiles')
+          .upsert({
+            id: user.id,
+            full_name: formData.teacherName || undefined,
+            school_name: formData.schoolName || undefined,
+            teacher_category: formData.teacherCategory || undefined,
+            subject: formData.subject,
+            updated_at: new Date().toISOString(),
+          })
+          .then(({ error }) => { if (error) console.error('Не вдалось зберегти профіль:', error); });
+      }
+
       const response = await fetch("/api/documents/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...formData, userId: user.id }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Помилка генерації");

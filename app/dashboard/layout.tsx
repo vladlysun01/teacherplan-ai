@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 import { pluralUk } from '@/lib/credits';
-import { Sparkles, FileText, Plus, Settings, CreditCard, LogOut, Zap, Menu, X } from 'lucide-react';
+import { Sparkles, FileText, Plus, User, CreditCard, LogOut, Zap, Menu, X } from 'lucide-react';
 
 export default function DashboardLayout({
   children,
@@ -190,8 +190,8 @@ export default function DashboardLayout({
             onClick={() => setSidebarOpen(false)}
             className="group w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-slate-400 hover:text-white hover:bg-slate-800/50"
           >
-            <Settings size={20} />
-            <span className="font-medium">Налаштування</span>
+            <User size={20} />
+            <span className="font-medium">Мій профіль</span>
           </a>
 
           <a 

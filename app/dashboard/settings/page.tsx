@@ -109,9 +109,12 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-teal-400 mb-2">
-          Налаштування профілю
+          Мій профіль
         </h1>
-        <p className="text-slate-400">Керуйте вашою особистою інформацією</p>
+        <p className="text-slate-400">
+          Заповни один раз — і ці дані самі підставлятимуться в кожен новий план, без повторного введення.
+          На сторінці генерації їх завжди можна буде змінити для конкретного випадку.
+        </p>
       </div>
 
       {/* Profile Form */}
@@ -133,8 +136,12 @@ export default function SettingsPage() {
                 value={profile.full_name}
                 onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
                 className="w-full bg-slate-700/50 border-2 border-slate-600 rounded-xl px-4 py-3.5 text-white font-medium placeholder-slate-500 hover:border-cyan-500 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 transition-all"
-                placeholder="Ваше повне ім'я"
+                placeholder="Наприклад: Коваленко Марія Іванівна"
               />
+              <p className="text-xs text-slate-500 mt-2">
+                Повністю, як на зразку: Прізвище Ім'я По батькові. У документі саме воно автоматично скоротиться до
+                "Коваленко М.І." в підписі.
+              </p>
             </div>
 
             <div>
@@ -163,15 +170,21 @@ export default function SettingsPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-cyan-400 font-semibold mb-3 text-sm uppercase tracking-wide">
-                🏫 Назва школи
+                🏫 Повна офіційна назва закладу
               </label>
-              <input
-                type="text"
+              <textarea
                 value={profile.school_name}
                 onChange={(e) => setProfile({ ...profile, school_name: e.target.value })}
-                className="w-full bg-slate-700/50 border-2 border-slate-600 rounded-xl px-4 py-3.5 text-white font-medium placeholder-slate-500 hover:border-cyan-500 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 transition-all"
-                placeholder="Назва вашої школи"
+                rows={3}
+                className="w-full bg-slate-700/50 border-2 border-slate-600 rounded-xl px-4 py-3.5 text-white font-medium placeholder-slate-500 hover:border-cyan-500 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 transition-all resize-none"
+                placeholder={
+                  'Наприклад:\nЗолочівської селищної ради\nКомунальний заклад «Олександрівський ліцей»\nЗолочівської селищної ради'
+                }
               />
+              <p className="text-xs text-slate-500 mt-2">
+                Візьми повну назву зі статуту закладу (засновник + повна назва). Можна написати одним рядком або
+                перенести на кілька, як у зразку вище — на титульній сторінці плану вона автоматично зцентрується.
+              </p>
             </div>
 
             <div>
@@ -197,6 +210,10 @@ export default function SettingsPage() {
                   </svg>
                 </div>
               </div>
+              <p className="text-xs text-slate-500 mt-2">
+                З'явиться в шапці плану так: "Вчитель предмету / Спеціаліст вищої категорії / ...". Немає категорії —
+                просто лиши поле порожнім.
+              </p>
             </div>
           </div>
         </div>
