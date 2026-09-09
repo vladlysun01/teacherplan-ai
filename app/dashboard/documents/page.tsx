@@ -44,41 +44,6 @@ export default function DocumentsPage() {
     }
   };
 
-  const handleDownload = async (doc: Document) => {
-    if (!doc.file_url) return;
-
-    try {
-      // Пряме href на Supabase Storage (cross-origin) Safari надійно НЕ качає,
-      // навіть коли сервер віддає коректний Content-Disposition: attachment
-      // (перевірено curl'ом — заголовок на місці). Це давня прикмета WebKit:
-      // top-level навігація на чужий origin не завжди сама ініціює скачування.
-      // Тому качаємо файл через fetch() (бакет має access-control-allow-origin: *,
-      // CORS не заважає) і зберігаємо як blob: — той самий origin, що й сторінка,
-      // тож атрибут download Safari виконує завжди, без винятків.
-      const response = await fetch(doc.file_url);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-
-      const fileName = new URL(doc.file_url).searchParams.get('download') || `${doc.title}.docx`;
-
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      // Safari забирає вміст blob: посилання асинхронно, вже ПІСЛЯ click().
-      // Миттєвий revokeObjectURL() встигає відкликати його раніше, ніж Safari
-      // дочитає дані — саме тому завантаження показувало "0 КБ з 12 КБ —
-      // остановлена". Даємо Safari час дійсно забрати вміст перед відкликанням.
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
-    } catch (error) {
-      console.error('Error downloading document:', error);
-      alert('Не вдалось завантажити документ. Спробуйте ще раз.');
-    }
-  };
-
   const handleDelete = async (id: string) => {
     if (!confirm('Ви впевнені що хочете видалити цей документ?')) return;
 
@@ -193,14 +158,21 @@ export default function DocumentsPage() {
                 {/* Row 2: Action Buttons - BIG and EASY TO TAP */}
                 {doc.status === 'ready' && doc.file_url && (
                   <div className="flex gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => handleDownload(doc)}
+                    <a
+                      href={`/api/documents/download?id=${doc.id}`}
+                      // Звичайне синхронне href на ВЛАСНИЙ домен (не на
+                      // supabase.co) — Safari якісно обробляє завантаження
+                      // лише коли воно: (а) той самий origin, що й сторінка,
+                      // (б) запущене прямим кліком, без await/fetch() між
+                      // жестом користувача і власне завантаженням. Файл
+                      // фактично тягнеться зі Storage на сервері й віддається
+                      // тут уже як звичайний attachment.
+                      rel="noopener noreferrer"
                       className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 text-cyan-400 rounded-lg transition-all duration-300 text-sm font-medium"
                     >
                       <Download size={16} />
                       <span>Скачати</span>
-                    </button>
+                    </a>
                     
                     <button
                       onClick={() => handleDelete(doc.id)}
