@@ -217,6 +217,19 @@ export default function Dashboard() {
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"><svg className="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg></div>
                 </div>
                 {currentProgram?.description && <p className="text-sm text-slate-400 mt-2 flex items-center gap-2"><span className="text-cyan-400">💡</span>{currentProgram.description}</p>}
+                {(currentProgram?.officialName || currentProgram?.authors || currentProgram?.approvedBy) && (
+                  <div className="mt-2 p-3 bg-slate-900/40 border border-slate-700/50 rounded-lg text-xs text-slate-500 space-y-1">
+                    {currentProgram?.officialName && (
+                      <p><span className="text-slate-400">Офіційна програма:</span> «{currentProgram.officialName}»</p>
+                    )}
+                    {currentProgram?.authors && (
+                      <p><span className="text-slate-400">Автори:</span> {currentProgram.authors}</p>
+                    )}
+                    {currentProgram?.approvedBy && (
+                      <p><span className="text-slate-400">Затверджено:</span> {currentProgram.approvedBy}</p>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Клас */}

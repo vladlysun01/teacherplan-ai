@@ -14,33 +14,44 @@ export type Program = {
   hasVariant: boolean;
   variantModules?: VariantModule[];
   variantRequired?: number;
+  // Офіційна назва документа МОН/ІМЗО, з якого розібрана ця програма,
+  // її автори та реквізити затвердження — показуємо користувачу при
+  // виборі програми, щоб було видно, що план спирається на конкретний
+  // офіційний документ, а не на щось абстрактне. Необов'язкові: для
+  // частини програм (додавалися раніше) ці дані ще не звірені.
+  officialName?: string;
+  authors?: string;
+  approvedBy?: string;
 };
 export type Programs = { [subject: string]: { [program: string]: Program } };
 
 export const PROGRAMS: Programs = {
   "Англійська мова": {
-    "10-11 класи (поглиблене вивчення)": { id: "english-10-11-advanced", classes: [10,11], description: "Спецшколи з поглибленим вивченням, 5 год/тиждень (рівень В2)", lessonsPerWeek: 5, hasVariant: false },
-    "10-11 класи (перша іноземна, рівень стандарту)": { id: "english-10-11-standard", classes: [10,11], description: "Рівень стандарту, 2 год/тиждень (рівень В1)", lessonsPerWeek: 2, hasVariant: false },
-    "10-11 класи (друга іноземна мова)": { id: "english-10-11-second", classes: [10,11], description: "Друга іноземна мова, 2 год/тиждень (рівень А2+)", lessonsPerWeek: 2, hasVariant: false },
+    "10-11 класи (поглиблене вивчення)": { id: "english-10-11-advanced", classes: [10,11], description: "Спецшколи з поглибленим вивченням, 5 год/тиждень (рівень В2)", lessonsPerWeek: 5, hasVariant: false, officialName: "Навчальні програми з іноземних мов для спеціалізованих шкіл із поглибленим вивченням іноземних мов. 10-11 класи", approvedBy: "Наказ МОН України від 19.09.2017" },
+    "10-11 класи (перша іноземна, рівень стандарту)": { id: "english-10-11-standard", classes: [10,11], description: "Рівень стандарту, 2 год/тиждень (рівень В1)", lessonsPerWeek: 2, hasVariant: false, officialName: "Навчальні програми з іноземних мов для загальноосвітніх навчальних закладів. 10-11 класи", approvedBy: "Наказ МОН України від 19.09.2017" },
+    "10-11 класи (друга іноземна мова)": { id: "english-10-11-second", classes: [10,11], description: "Друга іноземна мова, 2 год/тиждень (рівень А2+)", lessonsPerWeek: 2, hasVariant: false, officialName: "Навчальні програми з іноземних мов як другої. 10-11 класи", approvedBy: "Наказ МОН України від 19.09.2017" },
   },
   "Німецька мова": {
-    "10-11 класи (поглиблене вивчення)": { id: "german-10-11-advanced", classes: [10,11], description: "Спецшколи з поглибленим вивченням, 5 год/тиждень (рівень В2)", lessonsPerWeek: 5, hasVariant: false },
-    "10-11 класи (перша іноземна, рівень стандарту)": { id: "german-10-11-standard", classes: [10,11], description: "Рівень стандарту, 2 год/тиждень (рівень В1)", lessonsPerWeek: 2, hasVariant: false },
-    "10-11 класи (друга іноземна мова)": { id: "german-10-11-second", classes: [10,11], description: "Друга іноземна мова, 2 год/тиждень (рівень А2+)", lessonsPerWeek: 2, hasVariant: false },
+    "10-11 класи (поглиблене вивчення)": { id: "german-10-11-advanced", classes: [10,11], description: "Спецшколи з поглибленим вивченням, 5 год/тиждень (рівень В2)", lessonsPerWeek: 5, hasVariant: false, officialName: "Навчальні програми з іноземних мов для спеціалізованих шкіл із поглибленим вивченням іноземних мов. 10-11 класи", approvedBy: "Наказ МОН України від 19.09.2017" },
+    "10-11 класи (перша іноземна, рівень стандарту)": { id: "german-10-11-standard", classes: [10,11], description: "Рівень стандарту, 2 год/тиждень (рівень В1)", lessonsPerWeek: 2, hasVariant: false, officialName: "Навчальні програми з іноземних мов для загальноосвітніх навчальних закладів. 10-11 класи", approvedBy: "Наказ МОН України від 19.09.2017" },
+    "10-11 класи (друга іноземна мова)": { id: "german-10-11-second", classes: [10,11], description: "Друга іноземна мова, 2 год/тиждень (рівень А2+)", lessonsPerWeek: 2, hasVariant: false, officialName: "Навчальні програми з іноземних мов як другої. 10-11 класи", approvedBy: "Наказ МОН України від 19.09.2017" },
   },
   "Французька мова": {
-    "10-11 класи (поглиблене вивчення)": { id: "french-10-11-advanced", classes: [10,11], description: "Спецшколи з поглибленим вивченням, 5 год/тиждень (рівень В2)", lessonsPerWeek: 5, hasVariant: false },
-    "10-11 класи (перша іноземна, рівень стандарту)": { id: "french-10-11-standard", classes: [10,11], description: "Рівень стандарту, 2 год/тиждень (рівень В1)", lessonsPerWeek: 2, hasVariant: false },
-    "10-11 класи (друга іноземна мова)": { id: "french-10-11-second", classes: [10,11], description: "Друга іноземна мова, 2 год/тиждень (рівень А2+)", lessonsPerWeek: 2, hasVariant: false },
+    "10-11 класи (поглиблене вивчення)": { id: "french-10-11-advanced", classes: [10,11], description: "Спецшколи з поглибленим вивченням, 5 год/тиждень (рівень В2)", lessonsPerWeek: 5, hasVariant: false, officialName: "Навчальні програми з іноземних мов для спеціалізованих шкіл із поглибленим вивченням іноземних мов. 10-11 класи", approvedBy: "Наказ МОН України від 19.09.2017" },
+    "10-11 класи (перша іноземна, рівень стандарту)": { id: "french-10-11-standard", classes: [10,11], description: "Рівень стандарту, 2 год/тиждень (рівень В1)", lessonsPerWeek: 2, hasVariant: false, officialName: "Навчальні програми з іноземних мов для загальноосвітніх навчальних закладів. 10-11 класи", approvedBy: "Наказ МОН України від 19.09.2017" },
+    "10-11 класи (друга іноземна мова)": { id: "french-10-11-second", classes: [10,11], description: "Друга іноземна мова, 2 год/тиждень (рівень А2+)", lessonsPerWeek: 2, hasVariant: false, officialName: "Навчальні програми з іноземних мов як другої. 10-11 класи", approvedBy: "Наказ МОН України від 19.09.2017" },
   },
   "Іспанська мова": {
-    "10-11 класи (поглиблене вивчення)": { id: "spanish-10-11-advanced", classes: [10,11], description: "Спецшколи з поглибленим вивченням, 5 год/тиждень (рівень В2)", lessonsPerWeek: 5, hasVariant: false },
-    "10-11 класи (перша іноземна, рівень стандарту)": { id: "spanish-10-11-standard", classes: [10,11], description: "Рівень стандарту, 2 год/тиждень (рівень В1)", lessonsPerWeek: 2, hasVariant: false },
-    "10-11 класи (друга іноземна мова)": { id: "spanish-10-11-second", classes: [10,11], description: "Друга іноземна мова, 2 год/тиждень (рівень А2+)", lessonsPerWeek: 2, hasVariant: false },
+    "10-11 класи (поглиблене вивчення)": { id: "spanish-10-11-advanced", classes: [10,11], description: "Спецшколи з поглибленим вивченням, 5 год/тиждень (рівень В2)", lessonsPerWeek: 5, hasVariant: false, officialName: "Навчальні програми з іноземних мов для спеціалізованих шкіл із поглибленим вивченням іноземних мов. 10-11 класи", approvedBy: "Наказ МОН України від 19.09.2017" },
+    "10-11 класи (перша іноземна, рівень стандарту)": { id: "spanish-10-11-standard", classes: [10,11], description: "Рівень стандарту, 2 год/тиждень (рівень В1)", lessonsPerWeek: 2, hasVariant: false, officialName: "Навчальні програми з іноземних мов для загальноосвітніх навчальних закладів. 10-11 класи", approvedBy: "Наказ МОН України від 19.09.2017" },
+    "10-11 класи (друга іноземна мова)": { id: "spanish-10-11-second", classes: [10,11], description: "Друга іноземна мова, 2 год/тиждень (рівень А2+)", lessonsPerWeek: 2, hasVariant: false, officialName: "Навчальні програми з іноземних мов як другої. 10-11 класи", approvedBy: "Наказ МОН України від 19.09.2017" },
   },
   "Зарубіжна література": {
-    "10-11 класи (рівень стандарту)": { id: "zarubizhna-literatura-10-11-standard", classes: [10,11], description: "1 год/тиждень, 34-35 год/рік", lessonsPerWeek: 1, hasVariant: false },
-    "10-11 класи (профільний рівень)": { id: "zarubizhna-literatura-10-11-profile", classes: [10,11], description: "3 год/тиждень, 102-105 год/рік", lessonsPerWeek: 3, hasVariant: false },
+    "10-11 класи (рівень стандарту)": { id: "zarubizhna-literatura-10-11-standard", classes: [10,11], description: "1 год/тиждень, 34-35 год/рік", lessonsPerWeek: 1, hasVariant: false, officialName: "Зарубіжна література. 10-11 класи. Рівень стандарту", approvedBy: "Наказ МОН України №698 від 03.08.2022" },
+    "10-11 класи (профільний рівень)": { id: "zarubizhna-literatura-10-11-profile", classes: [10,11], description: "3 год/тиждень, 102-105 год/рік", lessonsPerWeek: 3, hasVariant: false, officialName: "Зарубіжна література. 10-11 класи. Профільний рівень", approvedBy: "Наказ МОН України №698 від 03.08.2022" },
+  },
+  "Технології": {
+    "10-11 класи (рівень стандарту)": { id: "tehnologii-10-11-standard", classes: [10,11], description: "Проєктні модулі: Кулінарія, Декоративно-ужиткове мистецтво, Основи підприємництва", lessonsPerWeek: 1, hasVariant: false, officialName: "Технології. 10-11 класи (рівень стандарту)", authors: "Терещук А. І. (голова робочої групи), Боринець Н. І., Боровик Д. В., Гащак В. М., Гедзик А. М., Горобець О. В., Дятленко С. М., Жерноклєєв І. В., Лапінський В. В., Лещук Р. М., Медвідь О. Ю., Павич Н. М., Приходько Ю. М., Ходзицька І. Ю., Цина А. Ю." },
   },
   "Фізична культура": {
     "НУШ 5-9 класи": { id: "fizkultura-nush-5-9", classes: [5,6,7,8,9], description: "Базова програма НУШ", lessonsPerWeek: 3, hasVariant: false },
@@ -107,7 +118,7 @@ export const PROGRAMS: Programs = {
     "10-11 класи (профільний рівень)": { id: "defense-ukraine-10-11-profile", classes: [10,11], description: "6 год/тиждень, 210 год на рік", lessonsPerWeek: 6, hasVariant: false },
   },
   "Фінансова грамотність": {
-    "10-11 класи (курс за вибором)": { id: "financial-literacy-10-11", classes: [10,11], description: "Курс за вибором, 3 год/тиждень, 105 год", lessonsPerWeek: 3, hasVariant: false },
+    "10-11 класи (курс за вибором)": { id: "financial-literacy-10-11", classes: [10,11], description: "Курс за вибором, 3 год/тиждень, 105 год", lessonsPerWeek: 3, hasVariant: false, officialName: "Навчальна програма курсу за вибором «Фінансова грамотність» для учнів 10, 11 класів" },
   },
 };
 
@@ -119,6 +130,7 @@ export const SUBJECT_SLUGS: Record<string, string> = {
   "Французька мова": "frantsuzka-mova",
   "Іспанська мова": "ispanska-mova",
   "Зарубіжна література": "zarubizhna-literatura",
+  "Технології": "tehnologii",
   "Фізична культура": "fizkultura",
   "Українська мова": "ukrainska-mova",
   "Українська література": "ukrainska-literatura",
