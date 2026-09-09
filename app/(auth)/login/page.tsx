@@ -42,9 +42,15 @@ export default function LoginPage() {
       console.log('🔐 Starting Google OAuth...');
       const supabase = createClient();
       
-      // Отримуємо поточний URL для redirect
+      // Отримуємо поточний URL для redirect. РЕАЛЬНИЙ маршрут — /callback
+      // (app/(auth)/callback/route.ts): "(auth)" — це route group, вона
+      // НЕ входить в URL. "/auth/callback" (як тут було раніше) віддає
+      // 404 — Google OAuth успішно завершується, а сесія так і не
+      // створюється, бо код обміну на сесію ніколи не виконується.
+      // register/page.tsx завжди мав правильний шлях, тому реєстрація
+      // через Google працювала, а повторний вхід — ні.
       const origin = window.location.origin;
-      const redirectUrl = `${origin}/auth/callback`;
+      const redirectUrl = `${origin}/callback`;
       console.log('🔐 Redirect URL:', redirectUrl);
       
       const { error } = await supabase.auth.signInWithOAuth({
