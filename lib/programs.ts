@@ -82,6 +82,9 @@ export const PROGRAMS: Programs = {
   "Захист України": {
     "10-11 класи (профільний рівень)": { id: "defense-ukraine-10-11-profile", classes: [10,11], description: "6 год/тиждень, 210 год на рік", lessonsPerWeek: 6, hasVariant: false },
   },
+  "Фінансова грамотність": {
+    "10-11 класи (курс за вибором)": { id: "financial-literacy-10-11", classes: [10,11], description: "Курс за вибором, 3 год/тиждень, 105 год", lessonsPerWeek: 3, hasVariant: false },
+  },
 };
 
 // Явні слаги замість автотранслітерації — передбачувані URL, без ризику,
@@ -101,6 +104,7 @@ export const SUBJECT_SLUGS: Record<string, string> = {
   "Біологія": "biologiya",
   "Фізика": "fizyka",
   "Захист України": "zahyst-ukrayiny",
+  "Фінансова грамотність": "finansova-hramotnist",
 };
 
 export const SLUG_TO_SUBJECT: Record<string, string> = Object.fromEntries(
