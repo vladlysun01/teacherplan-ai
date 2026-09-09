@@ -155,6 +155,12 @@ export async function POST(request: NextRequest) {
         lessons = result.lessons || [];
         planSettings = result;
 
+      } else if (formData.subject === "Англійська мова") {
+        const { generateEnglishCalendarPlan } = await import("@/lib/generation/english-plan");
+        const result = generateEnglishCalendarPlan(formData);
+        lessons = result.lessons || [];
+        planSettings = result;
+
       } else if (formData.subject === "Фінансова грамотність") {
         const { generateFinancialLiteracyCalendarPlan } = await import("@/lib/generation/financial-literacy-plan");
         const result = generateFinancialLiteracyCalendarPlan(formData);
