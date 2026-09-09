@@ -161,6 +161,24 @@ export async function POST(request: NextRequest) {
         lessons = result.lessons || [];
         planSettings = result;
 
+      } else if (formData.subject === "Німецька мова") {
+        const { generateGermanCalendarPlan } = await import("@/lib/generation/german-plan");
+        const result = generateGermanCalendarPlan(formData);
+        lessons = result.lessons || [];
+        planSettings = result;
+
+      } else if (formData.subject === "Французька мова") {
+        const { generateFrenchCalendarPlan } = await import("@/lib/generation/french-plan");
+        const result = generateFrenchCalendarPlan(formData);
+        lessons = result.lessons || [];
+        planSettings = result;
+
+      } else if (formData.subject === "Іспанська мова") {
+        const { generateSpanishCalendarPlan } = await import("@/lib/generation/spanish-plan");
+        const result = generateSpanishCalendarPlan(formData);
+        lessons = result.lessons || [];
+        planSettings = result;
+
       } else if (formData.subject === "Фінансова грамотність") {
         const { generateFinancialLiteracyCalendarPlan } = await import("@/lib/generation/financial-literacy-plan");
         const result = generateFinancialLiteracyCalendarPlan(formData);

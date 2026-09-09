@@ -23,6 +23,21 @@ export const PROGRAMS: Programs = {
     "10-11 класи (перша іноземна, рівень стандарту)": { id: "english-10-11-standard", classes: [10,11], description: "Рівень стандарту, 2 год/тиждень (рівень В1)", lessonsPerWeek: 2, hasVariant: false },
     "10-11 класи (друга іноземна мова)": { id: "english-10-11-second", classes: [10,11], description: "Друга іноземна мова, 2 год/тиждень (рівень А2+)", lessonsPerWeek: 2, hasVariant: false },
   },
+  "Німецька мова": {
+    "10-11 класи (поглиблене вивчення)": { id: "german-10-11-advanced", classes: [10,11], description: "Спецшколи з поглибленим вивченням, 5 год/тиждень (рівень В2)", lessonsPerWeek: 5, hasVariant: false },
+    "10-11 класи (перша іноземна, рівень стандарту)": { id: "german-10-11-standard", classes: [10,11], description: "Рівень стандарту, 2 год/тиждень (рівень В1)", lessonsPerWeek: 2, hasVariant: false },
+    "10-11 класи (друга іноземна мова)": { id: "german-10-11-second", classes: [10,11], description: "Друга іноземна мова, 2 год/тиждень (рівень А2+)", lessonsPerWeek: 2, hasVariant: false },
+  },
+  "Французька мова": {
+    "10-11 класи (поглиблене вивчення)": { id: "french-10-11-advanced", classes: [10,11], description: "Спецшколи з поглибленим вивченням, 5 год/тиждень (рівень В2)", lessonsPerWeek: 5, hasVariant: false },
+    "10-11 класи (перша іноземна, рівень стандарту)": { id: "french-10-11-standard", classes: [10,11], description: "Рівень стандарту, 2 год/тиждень (рівень В1)", lessonsPerWeek: 2, hasVariant: false },
+    "10-11 класи (друга іноземна мова)": { id: "french-10-11-second", classes: [10,11], description: "Друга іноземна мова, 2 год/тиждень (рівень А2+)", lessonsPerWeek: 2, hasVariant: false },
+  },
+  "Іспанська мова": {
+    "10-11 класи (поглиблене вивчення)": { id: "spanish-10-11-advanced", classes: [10,11], description: "Спецшколи з поглибленим вивченням, 5 год/тиждень (рівень В2)", lessonsPerWeek: 5, hasVariant: false },
+    "10-11 класи (перша іноземна, рівень стандарту)": { id: "spanish-10-11-standard", classes: [10,11], description: "Рівень стандарту, 2 год/тиждень (рівень В1)", lessonsPerWeek: 2, hasVariant: false },
+    "10-11 класи (друга іноземна мова)": { id: "spanish-10-11-second", classes: [10,11], description: "Друга іноземна мова, 2 год/тиждень (рівень А2+)", lessonsPerWeek: 2, hasVariant: false },
+  },
   "Фізична культура": {
     "НУШ 5-9 класи": { id: "fizkultura-nush-5-9", classes: [5,6,7,8,9], description: "Базова програма НУШ", lessonsPerWeek: 3, hasVariant: false },
     "10-11 класи (рівень стандарту)": { id: "fizkultura-10-11-standart", classes: [10,11], description: "2 год/тиждень", lessonsPerWeek: 2, hasVariant: true, variantModules: [{ id:"basketball",name:"Баскетбол"},{ id:"volleyball",name:"Волейбол"},{ id:"football",name:"Футбол"},{ id:"athletics",name:"Легка атлетика"},{ id:"gymnastics",name:"Гімнастика"},{ id:"badminton",name:"Бадмінтон"}], variantRequired: 2 },
@@ -96,6 +111,9 @@ export const PROGRAMS: Programs = {
 // що бібліотека транслітерації колись інакше розбере апостроф чи "ї".
 export const SUBJECT_SLUGS: Record<string, string> = {
   "Англійська мова": "angliyska-mova",
+  "Німецька мова": "nimetska-mova",
+  "Французька мова": "frantsuzka-mova",
+  "Іспанська мова": "ispanska-mova",
   "Фізична культура": "fizkultura",
   "Українська мова": "ukrainska-mova",
   "Українська література": "ukrainska-literatura",

@@ -1,21 +1,14 @@
 /**
- * Дані для календарних планів з англійської мови, 10-11 класи.
+ * Дані для календарних планів з німецької мови, 10-11 класи.
  * Джерело: «Навчальні програми з іноземних мов для загальноосвітніх
  * навчальних закладів і спеціалізованих шкіл із поглибленим вивченням
  * іноземних мов. 10-11 класи» (МОН України, 19.09.2017).
- *
- * Програма рамкова — фіксованої розбивки тем по годинах в оригіналі
- * немає (це прямо сказано в самому документі), тому кількість годин на
- * тему розраховується генератором пропорційно від загальної кількості
- * уроків у семестрі. Тижневе навантаження (weeklyHours) — за чинним
- * Типовим навчальним планом: поглиблене вивчення (спецшколи) — 5 год/тиж,
- * перша іноземна рівня стандарту — 2 год/тиж, друга іноземна — 2 год/тиж.
+ * Теми ситуативного спілкування спільні для всіх чотирьох мов джерела —
+ * відрізняється лише граматичний матеріал.
  */
-
 import type { LangTrackData } from "./language-plan-engine";
 
-export const ENGLISH_ADVANCED: LangTrackData = {
-  // Спеціалізовані школи з поглибленим вивченням, рівень В2
+export const GERMAN_ADVANCED: LangTrackData = {
   weeklyHours: 5,
   grade10: {
     topics: [
@@ -31,12 +24,10 @@ export const ENGLISH_ADVANCED: LangTrackData = {
       { sphere: "Освітня", topic: "Робота і професії" },
     ],
     grammar: [
-      { category: "Clause", structure: "Past Perfect with adverbial clauses of time; first and second conditionals; so ... that; declarative + so/therefore + declarative" },
-      { category: "Modality", structure: "use(d) to / would + infinitive for past routines and habits" },
-      { category: "Phrasal Verb", structure: "phrasal and prepositional verbs: position of indirect object" },
-      { category: "Phrase", structure: "verbs taking gerund" },
-      { category: "Preposition", structure: "prepositions of reason and purpose (due to, owing to, so, because); prepositions in time phrases (before, for, since, till, until, by)" },
-      { category: "Verb", structure: "Past Perfect Continuous; Future Continuous; Future Perfect; going to / will for predictions; verb + '-ing' vs. + 'to' infinitive" },
+      { category: "Adjektiv", structure: "Adjektive auf -a, -er, -el" },
+      { category: "Pronomen", structure: "Demonstrativpronomen solcher, jener, derjenige" },
+      { category: "Satz", structure: "Bedingungssätze mit wenn; Satzreihe mit entweder ... oder, nicht ... sondern; Sätze mit haben/sein+zu+Infinitiv" },
+      { category: "Verb", structure: "Das Verb lassen; Partizip I; Plusquamperfekt (im Satzgefüge)" },
     ],
   },
   grade11: {
@@ -53,18 +44,13 @@ export const ENGLISH_ADVANCED: LangTrackData = {
       { sphere: "Освітня", topic: "Робота і професії" },
     ],
     grammar: [
-      { category: "Adjective", structure: "adjectives formed with suffixes/prefixes (overview); compound adjectives; present/past participles as adjectives" },
-      { category: "Adverb", structure: "common linking words for chronological sequence; advanced adverbials of time (beforehand, afterwards)" },
-      { category: "Clause", structure: "defining vs. non-defining relative clauses; overview of relative pronouns; first, second and third conditional; reported speech with changed tenses; reporting verbs + that + complement clause" },
-      { category: "Determiner", structure: "overview of all quantifiers with countable/uncountable nouns" },
-      { category: "Modality", structure: "modals + passive" },
-      { category: "Verb", structure: "question tags (positive/negative, all tenses); prepositional vs. phrasal verbs (separable/inseparable); overview of all tense forms (active/passive)" },
+      { category: "Satz", structure: "Kausalsätze mit ob; Konzessivsätze mit obwohl, deswegen, trotzdem; Temporalsätze mit seit" },
+      { category: "Verb", structure: "Modalverbe im Perfekt und Plusquamperfekt Aktiv; Indirekte Rede mit Modalverben; Infinitiv Passiv; Passiv mit Modalverben; Konjunktiv I (indirekte Rede); Konjunktiv II von haben, sein, können, mögen; Konditionalis I (würde+Infinitiv)" },
     ],
   },
 };
 
-export const ENGLISH_STANDARD: LangTrackData = {
-  // Загальноосвітні заклади, перша іноземна мова, рівень В1
+export const GERMAN_STANDARD: LangTrackData = {
   weeklyHours: 2,
   grade10: {
     topics: [
@@ -80,9 +66,10 @@ export const ENGLISH_STANDARD: LangTrackData = {
       { sphere: "Освітня", topic: "Робота і професії" },
     ],
     grammar: [
-      { category: "Clause", structure: "first conditional for future outcomes of a present action or situation; second conditional for hypothetical (counterfactual) current results" },
-      { category: "Modality", structure: "use(d) to / would + Infinitive for past routines and habits" },
-      { category: "Verb", structure: "comparison of common past forms; comparison of common future forms ('going to', 'will' + Infinitive); Present Perfect Continuous for ongoing states; Past Perfect Continuous in common situations" },
+      { category: "Adjektiv", structure: "Deklination der Adjektive auf -a, -e, -er, -el" },
+      { category: "Pronomen", structure: "Demonstrativpronomen – dieser, jener, solcher" },
+      { category: "Satz", structure: "Konditionalsätze; die Satzreihe" },
+      { category: "Verb", structure: "Das Verb lassen; Partizip I; Plusquamperfekt: Vorzeitigkeit" },
     ],
   },
   grade11: {
@@ -99,15 +86,13 @@ export const ENGLISH_STANDARD: LangTrackData = {
       { sphere: "Освітня", topic: "Робота і професії" },
     ],
     grammar: [
-      { category: "Adverb", structure: "until/when for linking events in the present, past and future" },
-      { category: "Clause", structure: "relative clauses and compound sentences; direct and reported speech; first, second and third conditional" },
-      { category: "Verb", structure: "sequence of tenses; infinitive; present/past participle" },
+      { category: "Satz", structure: "Temporalsätze; Konsekutivsätze; Konzessivsätze" },
+      { category: "Verb", structure: "Konjunktiv II von haben, sein, werden, können, mögen; irreale Bedingungssätze; Umschreibung des Konjunktivs II mit würde+Infinitiv (Höflichkeit, Wunsch, Vorschlag, Aufforderung)" },
     ],
   },
 };
 
-export const ENGLISH_SECOND: LangTrackData = {
-  // Іноземна мова як друга, рівень А2+
+export const GERMAN_SECOND: LangTrackData = {
   weeklyHours: 2,
   grade10: {
     topics: [
@@ -120,10 +105,12 @@ export const ENGLISH_SECOND: LangTrackData = {
       { sphere: "Освітня", topic: "Шкільне життя" },
     ],
     grammar: [
-      { category: "Clause", structure: "comparisons with 'as ... as'; either ... or, neither ... nor; make/help/let + NP + VPinf; reported speech with changed tenses; reported yes/no and wh-questions" },
-      { category: "Determiner", structure: "countable vs uncountable nouns" },
-      { category: "Phrase", structure: "'said to/asked/told' + person + to + VPinf; '(not) allowed/permitted to' + VPinf" },
-      { category: "Verb", structure: "'do/did' as a placeholder for verbs; Past Perfect Continuous; Passive Voice" },
+      { category: "Adjektiv", structure: "Substantivierte Adjektive" },
+      { category: "Adverb", structure: "Pronominaladverbien" },
+      { category: "Pronomen", structure: "Relativpronomen" },
+      { category: "Satz", structure: "Attributsätze; Finalsätze" },
+      { category: "Substantiv", structure: "Substantive der fremden Herkunft" },
+      { category: "Verb", structure: "Infinitivkonstruktion um ... zu + Infinitiv" },
     ],
   },
   grade11: {
@@ -138,11 +125,11 @@ export const ENGLISH_SECOND: LangTrackData = {
       { sphere: "Освітня", topic: "Робота і професії" },
     ],
     grammar: [
-      { category: "Clause", structure: "first conditional; reported speech with changed tenses" },
-      { category: "Modal Verbs", structure: "'may/might' for likelihood" },
-      { category: "Phrase", structure: "verbs taking 'to' + infinitive" },
-      { category: "Preposition", structure: "prepositions in time phrases: during, for, since, throughout, till, until, as soon as, if, when" },
-      { category: "Verb", structure: "Present/Past Perfect active/passive" },
+      { category: "Adjektiv", structure: "Steigerungsstufen der Adjektive (besondere Formen)" },
+      { category: "Adverb", structure: "Temporaladverbien" },
+      { category: "Satz", structure: "Lokalsätze" },
+      { category: "Verb", structure: "Konjunktiv II; Infinitivkonstruktion statt ... zu + Infinitiv, ohne ... zu + Infinitiv" },
+      { category: "Zahlwort", structure: "Systematisierung" },
     ],
   },
 };
