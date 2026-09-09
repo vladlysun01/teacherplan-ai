@@ -179,6 +179,12 @@ export async function POST(request: NextRequest) {
         lessons = result.lessons || [];
         planSettings = result;
 
+      } else if (formData.subject === "Зарубіжна література") {
+        const { generateZarLitCalendarPlan } = await import("@/lib/generation/zarubizhna-literatura-plan");
+        const result = generateZarLitCalendarPlan(formData);
+        lessons = result.lessons || [];
+        planSettings = result;
+
       } else if (formData.subject === "Фінансова грамотність") {
         const { generateFinancialLiteracyCalendarPlan } = await import("@/lib/generation/financial-literacy-plan");
         const result = generateFinancialLiteracyCalendarPlan(formData);
