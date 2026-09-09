@@ -34,6 +34,14 @@ export default function PlansHubPage() {
           <p className="text-xl text-slate-400 max-w-2xl mx-auto">
             Оберіть предмет — побачите, які класи й програми вже підтримуються, і зможете згенерувати свій план за 10 секунд.
           </p>
+          <p className="text-sm text-slate-500 max-w-xl mx-auto mt-4">
+            Перелік предметів і програм постійно оновлюється під чинну Типову освітню програму МОН.
+            Не знайшли свій предмет або клас?{" "}
+            <a href="mailto:teacher_plan_ai@proton.me" className="text-cyan-400 hover:text-cyan-300">
+              Напишіть у підтримку
+            </a>{" "}
+            — додамо.
+          </p>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">

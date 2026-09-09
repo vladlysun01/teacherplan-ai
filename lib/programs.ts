@@ -114,3 +114,17 @@ export function getAllClassesForSubject(subject: string): number[] {
   Object.values(programs).forEach((p) => p.classes.forEach((c) => classes.add(c)));
   return Array.from(classes).sort((a, b) => a - b);
 }
+
+// Журнал видалених/замінених програм — показується в адмінці (/admin), щоб
+// було видно, чому якась програма зникла зі списку, а не просто мовчки
+// пропала. Заповнюється вручну щоразу, коли прибираємо запис із PROGRAMS
+// через невідповідність чинній Типовій освітній програмі МОН.
+export type ProgramChangeEntry = {
+  date: string; // YYYY-MM-DD
+  subject: string;
+  program: string;
+  reason: string;
+  replacedBy?: string;
+};
+
+export const REMOVED_PROGRAMS: ProgramChangeEntry[] = [];

@@ -15,8 +15,9 @@ import {
   ArrowLeft,
   ShieldAlert,
   BookOpen,
+  AlertTriangle,
 } from "lucide-react";
-import { PROGRAMS } from "@/lib/programs";
+import { PROGRAMS, REMOVED_PROGRAMS } from "@/lib/programs";
 import {
   ResponsiveContainer,
   BarChart,
@@ -456,6 +457,41 @@ export default function AdminPage() {
                       </div>
                     ))}
                   </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Журнал видалених/замінених програм — щоб було видно, чому предмет
+            зник, а не просто мовчки пропав зі списку. */}
+        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl mb-6 p-5">
+          <div className="flex items-center gap-3 mb-3">
+            <AlertTriangle size={18} className="text-amber-400" />
+            <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wide">
+              Видалені/замінені програми
+            </h2>
+            <span className="text-xs text-slate-500">{REMOVED_PROGRAMS.length}</span>
+          </div>
+          {REMOVED_PROGRAMS.length === 0 ? (
+            <p className="text-slate-500 text-sm">
+              Ще нічого не видаляли. Сюди потрапляють програми, які прибрані як застарілі
+              (див. <code className="text-slate-400">REMOVED_PROGRAMS</code> у lib/programs.ts).
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {REMOVED_PROGRAMS.map((entry, i) => (
+                <div key={i} className="bg-slate-900/40 rounded-xl p-3 text-xs">
+                  <div className="flex items-center gap-2 text-slate-300 font-medium">
+                    <span>{entry.subject}</span>
+                    <span className="text-slate-600">·</span>
+                    <span>{entry.program}</span>
+                    <span className="ml-auto text-slate-500">{entry.date}</span>
+                  </div>
+                  <p className="text-slate-500 mt-1">{entry.reason}</p>
+                  {entry.replacedBy && (
+                    <p className="text-teal-400 mt-1">Замінено на: {entry.replacedBy}</p>
+                  )}
                 </div>
               ))}
             </div>
