@@ -197,6 +197,12 @@ export async function POST(request: NextRequest) {
         lessons = result.lessons || [];
         planSettings = result;
 
+      } else if (formData.subject === "Природничі науки") {
+        const { generatePryrodnychiNaukyCalendarPlan } = await import("@/lib/generation/pryrodnychi-nauky-plan");
+        const result = generatePryrodnychiNaukyCalendarPlan(formData);
+        lessons = result.lessons || [];
+        planSettings = result;
+
       } else if (formData.subject === "Фінансова грамотність") {
         const { generateFinancialLiteracyCalendarPlan } = await import("@/lib/generation/financial-literacy-plan");
         const result = generateFinancialLiteracyCalendarPlan(formData);
