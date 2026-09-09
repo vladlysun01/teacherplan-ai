@@ -122,6 +122,10 @@ export const PROGRAMS: Programs = {
   "Фінансова грамотність": {
     "10-11 класи (курс за вибором)": { id: "financial-literacy-10-11", classes: [10,11], description: "Курс за вибором, 3 год/тиждень, 105 год", lessonsPerWeek: 3, hasVariant: false, officialName: "Навчальна програма курсу за вибором «Фінансова грамотність» для учнів 10, 11 класів" },
   },
+  "Астрономія": {
+    "11 клас (рівень стандарту)": { id: "astronomy-11-standard", classes: [11], description: "Рівень стандарту (1 год/тиждень, 35 год)", lessonsPerWeek: 1, hasVariant: false, officialName: "Астрономія. Рівень стандарту. 11 клас", authors: "Яцків Я. С. (голова робочої групи), Івченко В. М., Казанцев А. М., Ващенко О. П., Крячко І. П.", approvedBy: "Робоча група сформована НАН України" },
+    "10-11 класи (профільний рівень)": { id: "astronomy-10-11-profile", classes: [10,11], description: "Профільний рівень (1 год/тиждень, 70 год на курс)", lessonsPerWeek: 1, hasVariant: false, officialName: "Астрономія. Профільний рівень. 10-11 класи", authors: "Яцків Я. С. (голова робочої групи), Івченко В. М., Казанцев А. М., Ващенко О. П., Крячко І. П.", approvedBy: "Робоча група сформована НАН України" },
+  },
 };
 
 // Явні слаги замість автотранслітерації — передбачувані URL, без ризику,
@@ -148,6 +152,7 @@ export const SUBJECT_SLUGS: Record<string, string> = {
   "Фізика": "fizyka",
   "Захист України": "zahyst-ukrayiny",
   "Фінансова грамотність": "finansova-hramotnist",
+  "Астрономія": "astronomiya",
 };
 
 export const SLUG_TO_SUBJECT: Record<string, string> = Object.fromEntries(
