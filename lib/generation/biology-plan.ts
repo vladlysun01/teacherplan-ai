@@ -6,6 +6,8 @@ import { allModules8 } from './biology-modules-8';
 import { allModules9 } from './biology-modules-9';
 import { allModules10 } from './biology-modules-10';
 import { allModules11 } from './biology-modules-11';
+import { allModules10Profil } from './biology-modules-10-profil';
+import { allModules11Profil } from './biology-modules-11-profil';
 
 export interface BiologyPlanSettings {
   class: string;
@@ -17,6 +19,7 @@ export interface BiologyPlanSettings {
   teacherName: string;
   teacherCategory: string;
   schoolName: string;
+  programId?: string;
 }
 
 function getWeekdayName(date: Date): string {
@@ -24,25 +27,29 @@ function getWeekdayName(date: Date): string {
   return days[date.getDay()];
 }
 
-function getModulesForClass(classNum: number): Module[] {
+function getModulesForClass(classNum: number, isProfile: boolean): Module[] {
   switch (classNum) {
     case 6:  return allModules6;
     case 7:  return allModules7;
     case 8:  return allModules8;
     case 9:  return allModules9;
-    case 10: return allModules10;
-    case 11: return allModules11;
+    case 10: return isProfile ? allModules10Profil : allModules10;
+    case 11: return isProfile ? allModules11Profil : allModules11;
     default: return [];
   }
 }
 
 // 6-9 кл: 2 год/тиж → 70 год/рік
 // 10-11 кл (стандарт): 1.5 год/тиж → 52 год/рік
-function getMaxLessons(classNum: number, semester: number): number {
+// 10-11 кл (профіль): 5 год/тиж → 175 год/рік
+function getMaxLessons(classNum: number, semester: number, isProfile: boolean): number {
   if ([6, 7, 8, 9].includes(classNum)) {
     return semester === 1 ? 32 : 38;
   }
   if ([10, 11].includes(classNum)) {
+    if (isProfile) {
+      return (semester === 1 ? 16 : 19) * 5;
+    }
     return semester === 1 ? 24 : 28;
   }
   return 35;
@@ -83,7 +90,8 @@ function generateLessonContent(topic: string, moduleName: string): string {
 
 export function generateBiologyCalendarPlan(settings: BiologyPlanSettings) {
   const classNum = parseInt(settings.class);
-  const modules = getModulesForClass(classNum);
+  const isProfile = settings.programId?.includes("profile") ?? false;
+  const modules = getModulesForClass(classNum, isProfile);
 
   if (modules.length === 0) {
     throw new Error(`Немає модулів для ${classNum} класу`);
@@ -92,7 +100,7 @@ export function generateBiologyCalendarPlan(settings: BiologyPlanSettings) {
   const weekdays = convertWeekdays(settings.weekdays);
   const startDate = convertStartDate(settings.startDate);
   const semester = convertSemester(settings.semester);
-  const maxLessons = getMaxLessons(classNum, semester);
+  const maxLessons = getMaxLessons(classNum, semester, isProfile);
 
   const lessons: any[] = [];
   let lessonNumber = 1;

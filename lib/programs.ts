@@ -109,6 +109,8 @@ export const PROGRAMS: Programs = {
     "9 клас": { id: "biology-9", classes: [9], description: "Молекулярна біологія, генетика, еволюція (2 год/тиждень, 70 год)", lessonsPerWeek: 2, hasVariant: false },
     "10 клас (рівень стандарту)": { id: "biology-10-standard", classes: [10], description: "Біологія і екологія (1.5 год/тиждень, 52 год)", lessonsPerWeek: [1,2], hasVariant: false },
     "11 клас (рівень стандарту)": { id: "biology-11-standard", classes: [11], description: "Біологія і екологія (1.5 год/тиждень, 52 год)", lessonsPerWeek: [1,2], hasVariant: false },
+    "10 клас (профільний рівень)": { id: "biology-10-profile", classes: [10], description: "Біологія і екологія, профіль (5 год/тиждень, 175 год)", lessonsPerWeek: 5, hasVariant: false, officialName: "Біологія і екологія. 10-11 класи. Профільний рівень" },
+    "11 клас (профільний рівень)": { id: "biology-11-profile", classes: [11], description: "Біологія і екологія, профіль (5 год/тиждень, 175 год)", lessonsPerWeek: 5, hasVariant: false, officialName: "Біологія і екологія. 10-11 класи. Профільний рівень" },
   },
   "Фізика": {
     "10 клас (рівень стандарту)": { id: "physics-10-standard", classes: [10], description: "Механіка, МКТ, електростатика (3 год/тиждень, 105 год)", lessonsPerWeek: 3, hasVariant: false },
