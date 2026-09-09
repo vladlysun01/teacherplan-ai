@@ -87,11 +87,17 @@ export async function GET(request: NextRequest) {
 
     const buffer = await fileBlob.arrayBuffer();
 
+    // Content-Length НЕ виставляємо вручну: якщо Vercel/CDN поверх стискає
+    // тіло відповіді (gzip), заявлений вручну розмір перестає збігатись із
+    // фактично переданими байтами — і Safari бачить розбіжність та зупиняє
+    // завантаження ("0 КБ з N КБ — остановлена"), хоча заголовок
+    // Content-Disposition: attachment уже спрацював і індикатор встиг
+    // з'явитись. Без явного Content-Length платформа порахує його сама
+    // (або віддасть chunked) узгоджено з фактичним тілом.
     return new NextResponse(buffer, {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         "Content-Disposition": `attachment; filename="document.docx"; filename*=UTF-8''${encodeURIComponent(downloadName)}`,
-        "Content-Length": String(buffer.byteLength),
         "Cache-Control": "private, no-store",
       },
     });
