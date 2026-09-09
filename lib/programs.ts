@@ -40,6 +40,7 @@ export const PROGRAMS: Programs = {
   },
   "Зарубіжна література": {
     "10-11 класи (рівень стандарту)": { id: "zarubizhna-literatura-10-11-standard", classes: [10,11], description: "1 год/тиждень, 34-35 год/рік", lessonsPerWeek: 1, hasVariant: false },
+    "10-11 класи (профільний рівень)": { id: "zarubizhna-literatura-10-11-profile", classes: [10,11], description: "3 год/тиждень, 102-105 год/рік", lessonsPerWeek: 3, hasVariant: false },
   },
   "Фізична культура": {
     "НУШ 5-9 класи": { id: "fizkultura-nush-5-9", classes: [5,6,7,8,9], description: "Базова програма НУШ", lessonsPerWeek: 3, hasVariant: false },

@@ -3,6 +3,8 @@
 import { convertWeekdays, convertSemester, convertStartDate } from "./utils";
 import { allModulesLit10 } from "./zarubizhna-literatura-modules-10";
 import { allModulesLit11 } from "./zarubizhna-literatura-modules-11";
+import { allModulesLit10P } from "./zarubizhna-literatura-modules-10-profil";
+import { allModulesLit11P } from "./zarubizhna-literatura-modules-11-profil";
 
 export interface ZarLitPlanSettings {
   class: string;
@@ -14,6 +16,7 @@ export interface ZarLitPlanSettings {
   teacherName: string;
   teacherCategory: string;
   schoolName: string;
+  programId?: string;
 }
 
 function generateLessonContent(topic: string, moduleName: string): string {
@@ -52,13 +55,18 @@ function formatDate(date: Date): string {
 
 export function generateZarLitCalendarPlan(settings: ZarLitPlanSettings) {
   const classNum = parseInt(settings.class);
-  const modules = classNum === 11 ? allModulesLit11 : allModulesLit10;
+  const isProfile = settings.programId?.includes("profile") ?? false;
+  const modules = isProfile
+    ? (classNum === 11 ? allModulesLit11P : allModulesLit10P)
+    : (classNum === 11 ? allModulesLit11 : allModulesLit10);
 
   const weekdays = convertWeekdays(settings.weekdays);
   const startDate = convertStartDate(settings.startDate);
   const semester = convertSemester(settings.semester);
 
-  const maxLessons = semester === 1 ? 16 : 19;
+  // Стандарт: 1 год/тиждень (34-35 год/рік); профіль: 3 год/тиждень (102-105 год/рік).
+  const weeklyHours = isProfile ? 3 : 1;
+  const maxLessons = (semester === 1 ? 16 : 19) * weeklyHours;
 
   const lessons: any[] = [];
   let lessonNumber = 1;
