@@ -221,9 +221,10 @@ function buildTitlePage(data: PlanData, className: string): Paragraph[] {
   teacherLines.forEach((line) => {
     paras.push(
       new Paragraph({
-        // По центру, а не по правому краю — явний запит користувача
-        // (обведено на скріні панелі форматування).
-        alignment: AlignmentType.CENTER,
+        // По правому краю, як в оригінальному зразку. Був короткий
+        // період "по центру" за одним із запитів користувача, потім
+        // повернули назад до правого краю — це фінальне рішення.
+        alignment: AlignmentType.RIGHT,
         children: [new TextRun({ text: line, size: 12 * HP, color: BLACK, bold: false })],
       })
     );
