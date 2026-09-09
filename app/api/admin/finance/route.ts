@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { isAdminEmail, isTestEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/admin";
+// Свідомо БЕЗ isTestEmail тут: на відміну від /api/admin/stats (де
+// тестові акаунти псують кількість користувачів і популярність
+// предметів), фінансовий журнал має відображати ВСІ реальні гроші, що
+// пройшли через рахунок — включно з тестовими платежами власника й
+// друга з їхніх власних карток. Для звітності це реальний рух коштів,
+// приховувати його звідси було б неправильно.
 
 // TeacherPlan — той самий проєкт, що й решта адмінки.
 const tpUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -57,7 +63,6 @@ export async function GET(request: NextRequest) {
     const tpEmailById = new Map((tpProfilesRes.data || []).map((p) => [p.id, p.email] as const));
     for (const p of tpPaymentsRes.data || []) {
       const email = tpEmailById.get(p.user_id) || null;
-      if (isTestEmail(email)) continue; // ті самі тестові акаунти, що й в /api/admin/stats
       payments.push({
         project: "teacherplan",
         id: p.id,
@@ -82,7 +87,6 @@ export async function GET(request: NextRequest) {
         const tiEmailById = new Map((tiUsersRes.data?.users || []).map((u) => [u.id, u.email ?? null] as const));
         for (const e of tiEventsRes.data || []) {
           const email = tiEmailById.get(e.user_id) || null;
-          if (isTestEmail(email)) continue;
           payments.push({
             project: "tenderintel",
             id: e.id,

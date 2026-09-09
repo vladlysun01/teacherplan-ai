@@ -123,7 +123,14 @@ export async function POST(req: Request) {
       clientFirstName: name,
       clientLastName: '',
       language: 'UA',
-      returnUrl: 'https://www.teacher-plan-ai.site/payment/success',
+      // Не напряму на /payment/success: WayForPay повертає браузер сюди
+      // POST-ом (форма з даними транзакції), а Next.js трактує POST на
+      // сторінку без свого route.ts як виклик Server Action — звідси
+      // "Server action not found." замість сторінки успіху (зловлено на
+      // реальному платежі). /api/payment-return приймає цей POST і
+      // редиректить (303 — гарантовано змінює метод на GET) на
+      // /payment/success.
+      returnUrl: 'https://www.teacher-plan-ai.site/api/payment-return',
       serviceUrl: 'https://www.teacher-plan-ai.site/api/payments/callback',
       merchantSignature: signature,
     };

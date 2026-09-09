@@ -35,11 +35,27 @@ const CREDIT_PACKAGES = [
   },
 ];
 
+type PaymentRecord = {
+  id: string;
+  order_id: string;
+  amount: number;
+  credits: number;
+  status: string;
+  created_at: string;
+};
+
+const STATUS_LABELS: Record<string, { label: string; className: string }> = {
+  completed: { label: "Успішно", className: "bg-green-500/15 text-green-400" },
+  pending: { label: "Обробляється", className: "bg-amber-500/15 text-amber-400" },
+  failed: { label: "Не вдалося", className: "bg-red-500/15 text-red-400" },
+};
+
 export default function BillingPage() {
   const [loading, setLoading] = useState(true);
   const [credits, setCredits] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [purchasing, setPurchasing] = useState<string | null>(null);
+  const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -66,6 +82,19 @@ export default function BillingPage() {
         .single();
 
       setCredits(profile?.credits || 0);
+
+      // Історія платежів — RLS сама обмежує вибірку лише власними
+      // записами користувача ("Users can view own payments" policy).
+      const { data: paymentsData, error: paymentsError } = await supabase
+        .from('payments')
+        .select('id, order_id, amount, credits, status, created_at')
+        .order('created_at', { ascending: false });
+      if (paymentsError) {
+        console.error('Не вдалось завантажити історію платежів:', paymentsError);
+      } else {
+        setPayments(paymentsData || []);
+      }
+
       setLoading(false);
     } catch (error) {
       console.error('Error loading billing data:', error);
@@ -214,6 +243,44 @@ export default function BillingPage() {
           })}
         </div>
       </div>
+
+      {/* Payment History */}
+      {payments.length > 0 && (
+        <div className="mb-6 sm:mb-10">
+          <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center gap-2">
+            <History size={20} className="text-cyan-400" /> Історія платежів
+          </h2>
+          <div className="space-y-2">
+            {payments.map((p) => {
+              const statusInfo = STATUS_LABELS[p.status] || { label: p.status, className: "bg-white/10 text-gray-300" };
+              return (
+                <div
+                  key={p.id}
+                  className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-lg px-3 sm:px-4 py-3 text-sm"
+                >
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${statusInfo.className}`}>
+                    {statusInfo.label}
+                  </span>
+                  <span className="text-gray-300 flex-1 truncate">
+                    {p.credits} {pluralUk(p.credits, 'кредит', 'кредити', 'кредитів')}
+                  </span>
+                  <span className="text-white font-semibold shrink-0">{p.amount} ₴</span>
+                  <span className="text-gray-500 text-xs shrink-0 hidden sm:block">
+                    {new Date(p.created_at).toLocaleString('uk-UA', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-xs text-gray-500 mt-3">
+            Потрібен фіскальний чек про оплату? Напиши нам на{' '}
+            <a href="mailto:teacher_plan_ai@proton.me" className="text-cyan-400 hover:underline">
+              teacher_plan_ai@proton.me
+            </a>{' '}
+            з номером замовлення — уточнимо в WayForPay.
+          </p>
+        </div>
+      )}
 
       {/* Info Section */}
       <div className="mt-6 sm:mt-8 bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 sm:p-4">

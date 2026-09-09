@@ -128,15 +128,18 @@ function CheckoutContent() {
       {/* Header */}
       <header className="relative border-b border-slate-800/50 bg-slate-900/50 backdrop-blur-xl">
         <div className="max-w-4xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+          >
             <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-teal-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/50">
               <Sparkles className="text-white" size={20} />
             </div>
-            <div>
+            <div className="text-left">
               <h1 className="text-xl font-bold text-white">TeacherPlan</h1>
               <p className="text-xs text-slate-400">Безпечна оплата</p>
             </div>
-          </div>
+          </button>
         </div>
       </header>
 
