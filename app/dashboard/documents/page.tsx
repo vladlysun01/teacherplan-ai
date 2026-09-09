@@ -68,7 +68,11 @@ export default function DocumentsPage() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      URL.revokeObjectURL(blobUrl);
+      // Safari забирає вміст blob: посилання асинхронно, вже ПІСЛЯ click().
+      // Миттєвий revokeObjectURL() встигає відкликати його раніше, ніж Safari
+      // дочитає дані — саме тому завантаження показувало "0 КБ з 12 КБ —
+      // остановлена". Даємо Safari час дійсно забрати вміст перед відкликанням.
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
     } catch (error) {
       console.error('Error downloading document:', error);
       alert('Не вдалось завантажити документ. Спробуйте ще раз.');
