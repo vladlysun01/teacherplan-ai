@@ -135,8 +135,15 @@ function centerParagraph(text: string, opts: { size?: number; bold?: boolean } =
 // Приймає КІЛЬКІСТЬ рядків напряму (не pt) — щоб позиція завжди
 // рахувалась від конкретної цілі (buildTitlePage нижче), а не від
 // зашитого наперед числа.
-function blankLines(count: number): Paragraph[] {
-  return Array.from({ length: Math.max(0, count) }, () => new Paragraph({ children: [new TextRun({ text: " " })] }));
+function blankLines(count: number, alignment: (typeof AlignmentType)[keyof typeof AlignmentType] = AlignmentType.CENTER): Paragraph[] {
+  // alignment на порожньому рядку нічого візуально не змінює (там лише
+  // пробіл), АЛЕ: реальний скрін показав усю титульну сторінку
+  // притиснутою ліворуч, хоча XML має правильні jc=center/right —
+  // підозра, що Pages плутає вирівнювання НАСТУПНИХ абзаців, коли між
+  // ними стоїть абзац зовсім БЕЗ w:jc (default None). Явно виставляємо
+  // його тут теж, щоб у всьому документі не лишалось жодного абзацу
+  // без прямо заданого вирівнювання.
+  return Array.from({ length: Math.max(0, count) }, () => new Paragraph({ alignment, children: [new TextRun({ text: " " })] }));
 }
 
 // Параметри сторінки й калібрування — з реального зразка користувача
@@ -208,7 +215,7 @@ function buildTitlePage(data: PlanData, className: string): Paragraph[] {
   pos += titleLines.length * LINE_HEIGHT_PT;
 
   const n2 = clampToBudget(pos, gapLinesTo(pos, TEACHER_TARGET_PT));
-  paras.push(...blankLines(n2));
+  paras.push(...blankLines(n2, AlignmentType.RIGHT)); // далі йде блок вчителя, по правому краю
   pos += n2 * LINE_HEIGHT_PT;
 
   const teacherLines = [
