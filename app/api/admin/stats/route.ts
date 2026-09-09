@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Доступ заборонено" }, { status: 403 });
     }
 
-    const [profilesRes, documentsRes, purchasesRes] = await Promise.all([
+    const [profilesRes, documentsRes, purchasesRes, paymentsRes] = await Promise.all([
       supabaseAdmin
         .from("profiles")
         .select("id, email, full_name, school_name, created_at, credits, total_generations")
@@ -49,11 +49,16 @@ export async function GET(request: NextRequest) {
         .from("credit_transactions")
         .select("user_id, price, created_at")
         .eq("type", "purchase"),
+      supabaseAdmin
+        .from("payments")
+        .select("id, user_id, order_id, amount, credits, status, created_at")
+        .order("created_at", { ascending: false }),
     ]);
 
     if (profilesRes.error) throw profilesRes.error;
     if (documentsRes.error) throw documentsRes.error;
     if (purchasesRes.error) throw purchasesRes.error;
+    if (paymentsRes.error) throw paymentsRes.error;
 
     // Власні тестові акаунти (власник + друг, що тестує "Фізичну
     // культуру") прибираємо звідусіль — інакше вони спотворюють і
@@ -155,6 +160,47 @@ export async function GET(request: NextRequest) {
     const totalPaidUsers = users.filter((u) => u.paid).length;
     const totalRevenueUAH = purchases.reduce((sum, p) => sum + (p.price || 0), 0);
 
+    // Фінанси — реальний журнал оплат (таблиця payments, а не
+    // credit_transactions) для звітності: скільки й коли реально
+    // надійшло. status='completed' — це підтверджений вебхуком платіж,
+    // тільки такі йдуть у підсумки по місяцях/кварталах.
+    const emailById = new Map((profilesRes.data || []).map((p) => [p.id, p.email] as const));
+    const payments = (paymentsRes.data || [])
+      .filter((p) => !testIds.has(p.user_id))
+      .map((p) => ({
+        id: p.id,
+        createdAt: p.created_at,
+        userEmail: emailById.get(p.user_id) || null,
+        orderId: p.order_id,
+        amountUAH: p.amount,
+        credits: p.credits,
+        status: p.status as string,
+      }));
+
+    const completedPayments = payments.filter((p) => p.status === "completed");
+
+    function periodKey(dateStr: string, kind: "month" | "quarter"): string {
+      const d = new Date(dateStr);
+      const y = d.getUTCFullYear();
+      if (kind === "month") return `${y}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+      const q = Math.floor(d.getUTCMonth() / 3) + 1;
+      return `${y}-Q${q}`;
+    }
+
+    function aggregateByPeriod(kind: "month" | "quarter") {
+      const map = new Map<string, { totalUAH: number; count: number }>();
+      for (const p of completedPayments) {
+        const key = periodKey(p.createdAt, kind);
+        const entry = map.get(key) || { totalUAH: 0, count: 0 };
+        entry.totalUAH += p.amountUAH || 0;
+        entry.count += 1;
+        map.set(key, entry);
+      }
+      return Array.from(map.entries())
+        .sort((a, b) => (a[0] < b[0] ? -1 : 1))
+        .map(([period, v]) => ({ period, ...v }));
+    }
+
     return NextResponse.json({
       summary: {
         totalUsers: profiles.length,
@@ -167,6 +213,12 @@ export async function GET(request: NextRequest) {
         signupsByDay,
       },
       users,
+      finance: {
+        payments,
+        totalCompletedUAH: completedPayments.reduce((sum, p) => sum + (p.amountUAH || 0), 0),
+        byMonth: aggregateByPeriod("month"),
+        byQuarter: aggregateByPeriod("quarter"),
+      },
     });
   } catch (error: any) {
     console.error("❌ /api/admin/stats:", error);

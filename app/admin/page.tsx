@@ -332,6 +332,12 @@ export default function AdminPage() {
               Адмін-панель
             </h1>
           </div>
+          <button
+            onClick={() => router.push("/admin/finance")}
+            className="flex items-center gap-2 px-4 py-2.5 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 text-green-400 rounded-xl text-sm transition-colors"
+          >
+            <Wallet size={16} /> Фінанси (обидва проєкти)
+          </button>
         </div>
 
         {/* Stat cards */}
