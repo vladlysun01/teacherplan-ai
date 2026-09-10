@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifySignature, TRANSACTION_STATUS } from '@/lib/wayforpay';
+import { maybeRewardReferral } from '@/lib/referrals';
 
 // Server-side Supabase client with SERVICE_ROLE_KEY for admin operations
 const supabase = createClient(
@@ -199,6 +200,16 @@ export async function POST(request: Request) {
 
       console.log(`✅ Added ${payment.credits} credits to user ${payment.user_id}`);
       console.log(`💳 New balance: ${newCredits} credits`);
+
+      // Реферальний бонус: якщо це перша успішна оплата цього користувача
+      // і його привів реферер, нагороджуємо обох. Не блокує основну
+      // відповідь вебхука WayForPay — помилка тут не повинна ламати
+      // підтвердження вже проведеного платежу.
+      try {
+        await maybeRewardReferral(supabase, payment.user_id);
+      } catch (referralError) {
+        console.error('❌ Referral reward error (payment itself succeeded):', referralError);
+      }
     } else {
       console.log(`❌ Payment declined: ${reason} (${reasonCode})`);
     }

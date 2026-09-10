@@ -49,6 +49,26 @@ export default function RegisterPage() {
 
       if (error) throw error;
 
+      // Реферальна атрибуція: якщо людина прийшла за посиланням із
+      // ?ref=<code>, middleware.ts уже поклав код у cookie tp_ref.
+      // Фіксуємо "хто кого запросив" рівно один раз, одразу після
+      // успішної реєстрації. Не блокуємо редірект, якщо це не вдалося —
+      // відсутність бонусу не повинна заважати людині потрапити в кабінет.
+      if (data.user) {
+        const refCode = document.cookie
+          .split('; ')
+          .find((row) => row.startsWith('tp_ref='))
+          ?.split('=')[1];
+
+        if (refCode) {
+          fetch('/api/referrals/attribute', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: data.user.id, refCode }),
+          }).catch((err) => console.error('Referral attribution failed:', err));
+        }
+      }
+
       setSuccess(true);
       setTimeout(() => {
         router.push('/dashboard');

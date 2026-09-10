@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { isMaintenanceModeOn, canBypassMaintenance } from "@/lib/admin";
+import { getOrCreateReferralCode, referralLinkFor } from "@/lib/referrals";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('credits, email')
+      .select('credits, email, referral_code')
       .eq('id', userId)
       .single();
 
@@ -279,10 +280,25 @@ export async function POST(request: NextRequest) {
     // Фікс: спершу formData (усе, що ввів користувач), зверху — те, що
     // явно повернув генератор (там, де він щось уточнює/дораховує).
     // Жодне поле з форми більше не може мовчки зникнути.
+    // Реферальний підпис знизу документа — флагманський канал поширення
+    // з роадмапу: учителі й так пересилають готові плани одне одному,
+    // кожен обмін файлом стає точкою поширення без додаткової дії
+    // користувача. Код генерується тут же лінькво, якщо в користувача
+    // його ще немає (щоб перший-ліпший документ уже ніс робоче посилання,
+    // а не чекав окремого візиту в "Мій профіль").
+    let referralLink: string | undefined;
+    try {
+      const code = profile.referral_code || (await getOrCreateReferralCode(supabase, userId));
+      referralLink = referralLinkFor(code);
+    } catch (referralErr) {
+      console.error("⚠️ Не вдалося отримати реферальний код (документ згенерується без підпису):", referralErr);
+    }
+
     const finalData = {
       ...formData,
       ...planSettings,
-      lessons: lessons
+      lessons: lessons,
+      referralLink,
     };
 
     console.log("📄 Генерую .docx локально (без Google Apps Script)...");

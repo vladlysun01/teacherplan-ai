@@ -64,6 +64,10 @@ export type PlanData = {
   teacherName?: string;
   teacherCategory?: string;
   lessons: Lesson[];
+  // Реферальна програма: тонкий підпис знизу документа. Учителі й так
+  // обмінюються готовими планами між собою — кожен такий обмін файлом
+  // стає точкою поширення без жодної додаткової дії користувача.
+  referralLink?: string;
 };
 
 // "Іванов Іван Іванович" → "Іванов І.І." Якщо вже скорочено чи 1-2 слова —
@@ -409,6 +413,22 @@ export async function buildCalendarPlanDocx(data: PlanData): Promise<Buffer> {
         ],
       })
     );
+
+    if (data.referralLink) {
+      children.push(
+        new Paragraph({
+          spacing: { before: 30 * PT },
+          children: [
+            new TextRun({
+              text: `Створено на TeacherPlan AI · ${data.referralLink}`,
+              color: "999999",
+              size: 8 * HP,
+              italics: true,
+            }),
+          ],
+        })
+      );
+    }
   }
 
   const doc = new Document({
