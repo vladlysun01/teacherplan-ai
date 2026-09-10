@@ -6,15 +6,28 @@ import { PROGRAMS, SUBJECT_SLUGS, getAllClassesForSubject } from "@/lib/programs
 export const metadata: Metadata = {
   title: "Календарно-тематичні плани за предметами",
   description:
-    "Календарно-тематичне планування для 14 предметів шкільної програми МОН України — українська мова, математика, хімія, біологія, фізика, історія та інші. Оберіть предмет.",
+    `Календарно-тематичне планування для ${Object.keys(PROGRAMS).length}+ предметів шкільної програми МОН України — українська мова, математика, хімія, біологія, фізика, історія та інші. Оберіть предмет.`,
   alternates: { canonical: "/plans" },
 };
 
 export default function PlansHubPage() {
   const subjects = Object.keys(PROGRAMS);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Календарно-тематичні плани за предметами",
+    itemListElement: subjects.map((subject, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: subject,
+      url: `https://www.teacher-plan-ai.site/plans/${SUBJECT_SLUGS[subject]}`,
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-slate-950">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <header className="border-b border-slate-800/50 bg-slate-900/50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <Link href="/" className="flex items-center gap-3">
