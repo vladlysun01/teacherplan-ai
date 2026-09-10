@@ -102,11 +102,19 @@ export async function POST(request: NextRequest) {
         planSettings = result.settings || formData;
 
       } else if (formData.subject === "Українська література") {
-        const { generateUkrainianLiteratureCalendarPlan } = await import("@/lib/generation/ukrainian-literature-plan");
-        const result = await generateUkrainianLiteratureCalendarPlan(formData);
-        if (!result.success) throw new Error(result.error || "Помилка генерації плану");
-        lessons = result.lessons || [];
-        planSettings = (result as any).settings || formData;
+        const classNum = parseInt(formData.class);
+        if (classNum === 10 || classNum === 11) {
+          const { generateUkrLitCalendarPlan } = await import("@/lib/generation/ukrainska-literatura-10-11-plan");
+          const result = generateUkrLitCalendarPlan(formData);
+          lessons = result.lessons || [];
+          planSettings = result;
+        } else {
+          const { generateUkrainianLiteratureCalendarPlan } = await import("@/lib/generation/ukrainian-literature-plan");
+          const result = await generateUkrainianLiteratureCalendarPlan(formData);
+          if (!result.success) throw new Error(result.error || "Помилка генерації плану");
+          lessons = result.lessons || [];
+          planSettings = (result as any).settings || formData;
+        }
 
       } else if (formData.subject === "Математика") {
         const { generateMathematicsCalendarPlan } = await import("@/lib/generation/mathematics-plan");

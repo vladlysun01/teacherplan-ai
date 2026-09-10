@@ -60,37 +60,38 @@ export const PROGRAMS: Programs = {
   },
   "Українська мова": {
     "НУШ 5-9 класи": { id: "ukrainian-nush-5-9", classes: [5,6,7,8,9], description: "Базова програма НУШ", lessonsPerWeek: [2,4], hasVariant: false },
-    "10-11 класи (рівень стандарту)": { id: "ukrainian-10-11-standard", classes: [10,11], description: "2-3 год/тиждень", lessonsPerWeek: [2,3], hasVariant: false },
-    "10-11 класи (профільний рівень)": { id: "ukrainian-10-11-profile", classes: [10,11], description: "4-5 год/тиждень", lessonsPerWeek: [4,5], hasVariant: false },
+    "10-11 класи (рівень стандарту)": { id: "ukrainian-10-11-standard", classes: [10,11], description: "2-3 год/тиждень", lessonsPerWeek: [2,3], hasVariant: false, officialName: "Українська мова. 10-11 класи. Рівень стандарту", authors: "Голуб Н.Б., Котусенко О.Ю., Горошкіна О.М., Новосьолова В.І., Романенко Ю.О., Кондесюк Т.В., Король О.М., Тарасенко О.О., Сергєєва Н.В.", approvedBy: "Наказ МОН України №1407 від 23.10.2017" },
+    "10-11 класи (профільний рівень)": { id: "ukrainian-10-11-profile", classes: [10,11], description: "4-5 год/тиждень", lessonsPerWeek: [4,5], hasVariant: false, officialName: "Українська мова. 10-11 класи. Профільний рівень", approvedBy: "Наказ МОН України №1407 від 23.10.2017" },
   },
   "Українська література": {
     "НУШ 5-9 класи": { id: "ukrainian-literature-nush-5-9", classes: [5,6,7,8,9], description: "Базова програма НУШ", lessonsPerWeek: 2, hasVariant: false },
+    "10-11 класи (рівень стандарту)": { id: "ukrainian-literature-10-11-standard", classes: [10,11], description: "2 год/тиждень, 70 год/рік", lessonsPerWeek: 2, hasVariant: false, officialName: "Українська література. 10-11 класи. Рівень стандарту", authors: "Мовчан Р.В. (голова робочої групи), Молочко С.Р., Дроздовський Д.І., Коваленко Л.Т., Фасоля А.М., Цимбалюк В.І.", approvedBy: "Наказ МОН України №1407 від 23.10.2017" },
   },
   "Математика": {
-    "10-11 класи (рівень стандарту)": { id: "mathematics-10-11-standard", classes: [10,11], description: "3 год/тиждень", lessonsPerWeek: 3, hasVariant: false },
-    "10-11 класи (поглиблений рівень)": { id: "mathematics-10-11-advanced", classes: [10,11], description: "4 год/тиждень", lessonsPerWeek: 4, hasVariant: false },
-    "10-11 класи (профільний рівень)": { id: "mathematics-10-11-profile", classes: [10,11], description: "5-6 год/тиждень", lessonsPerWeek: [5,6], hasVariant: false },
+    "10-11 класи (рівень стандарту)": { id: "mathematics-10-11-standard", classes: [10,11], description: "3 год/тиждень", lessonsPerWeek: 3, hasVariant: false, approvedBy: "Наказ МОН України №1407 від 23.10.2017" },
+    "10-11 класи (поглиблений рівень)": { id: "mathematics-10-11-advanced", classes: [10,11], description: "4 год/тиждень", lessonsPerWeek: 4, hasVariant: false, approvedBy: "Наказ МОН України №1407 від 23.10.2017" },
+    "10-11 класи (профільний рівень)": { id: "mathematics-10-11-profile", classes: [10,11], description: "5-6 год/тиждень", lessonsPerWeek: [5,6], hasVariant: false, approvedBy: "Наказ МОН України №1407 від 23.10.2017" },
   },
   "Інформатика": {
-    "10-11 класи (рівень стандарту)": { id: "informatics-10-11-standard", classes: [10,11], description: "1-2 год/тиждень", lessonsPerWeek: [1,2], hasVariant: false },
+    "10-11 класи (рівень стандарту)": { id: "informatics-10-11-standard", classes: [10,11], description: "1-2 год/тиждень", lessonsPerWeek: [1,2], hasVariant: false, approvedBy: "Наказ МОН України №1407 від 23.10.2017" },
   },
   "Історія України": {
-    "10-11 класи": { id: "history-ukraine-10-11", classes: [10,11], description: "Інтегрований курс", lessonsPerWeek: 2, hasVariant: false },
+    "10-11 класи": { id: "history-ukraine-10-11", classes: [10,11], description: "Інтегрований курс", lessonsPerWeek: 2, hasVariant: false, officialName: "Історія України. 10-11 класи", approvedBy: "Наказ МОН України №1407 від 23.10.2017" },
   },
   "Всесвітня історія": {
     "НУШ 6-9 класи": { id: "world-history-nush-6-9", classes: [6,7,8,9], description: "Базова програма НУШ", lessonsPerWeek: 1, hasVariant: false },
-    "10-11 класи": { id: "world-history-10-11", classes: [10,11], description: "Старша школа", lessonsPerWeek: 1, hasVariant: false },
+    "10-11 класи": { id: "world-history-10-11", classes: [10,11], description: "Старша школа", lessonsPerWeek: 1, hasVariant: false, officialName: "Всесвітня історія. 10-11 класи", approvedBy: "Наказ МОН України №1407 від 23.10.2017" },
   },
   "Мистецтво": {
-    "10-11 класи (профільний рівень)": { id: "art-10-11-profile", classes: [10,11], description: "Поглиблене вивчення мистецтва", lessonsPerWeek: 2, hasVariant: false },
+    "10-11 класи (профільний рівень)": { id: "art-10-11-profile", classes: [10,11], description: "Поглиблене вивчення мистецтва", lessonsPerWeek: 2, hasVariant: false, officialName: "Мистецтво. 10-11 класи. Профільний рівень", authors: "Абрамян Т.О., Арістова Л.С., Гайдамака О.В., Гараздовська М.Т., Гречана О.І., Гурик О.М., Новикова Н.В., Пірог А.Г., Просіна О.В.", approvedBy: "Наказ МОН України №1407 від 23.10.2017" },
   },
   "Географія": {
     "6 клас": { id: "geography-6", classes: [6], description: "Загальна географія (2 год/тиждень, 70 год)", lessonsPerWeek: 2, hasVariant: false },
     "7 клас": { id: "geography-7", classes: [7], description: "Материки та океани (2 год/тиждень, 70 год)", lessonsPerWeek: 2, hasVariant: false },
     "8 клас": { id: "geography-8", classes: [8], description: "Україна у світі: природа, населення (2 год/тиждень, 70 год)", lessonsPerWeek: 2, hasVariant: false },
     "9 клас": { id: "geography-9", classes: [9], description: "Україна і світове господарство (1.5 год/тиждень, 52 год)", lessonsPerWeek: [1,2], hasVariant: false },
-    "10 клас": { id: "geography-10", classes: [10], description: "Регіони та країни (1.5 год/тиждень, 52 год)", lessonsPerWeek: [1,2], hasVariant: false },
-    "11 клас": { id: "geography-11", classes: [11], description: "Географічний простір Землі (1 год/тиждень, 35 год)", lessonsPerWeek: 1, hasVariant: false },
+    "10 клас": { id: "geography-10", classes: [10], description: "Регіони та країни (1.5 год/тиждень, 52 год)", lessonsPerWeek: [1,2], hasVariant: false, approvedBy: "Наказ МОН України №1407 від 23.10.2017" },
+    "11 клас": { id: "geography-11", classes: [11], description: "Географічний простір Землі (1 год/тиждень, 35 год)", lessonsPerWeek: 1, hasVariant: false, approvedBy: "Наказ МОН України №1407 від 23.10.2017" },
   },
   "Основи правознавства": {
     "9 клас": { id: "law-9", classes: [9], description: "Основи правознавства (1 год/тиждень, 35 год)", lessonsPerWeek: 1, hasVariant: false },
@@ -99,8 +100,8 @@ export const PROGRAMS: Programs = {
     "7 клас": { id: "chemistry-7", classes: [7], description: "Початкові хімічні поняття (1.5 год/тиждень, 51 год)", lessonsPerWeek: [1,2], hasVariant: false },
     "8 клас": { id: "chemistry-8", classes: [8], description: "Будова атома, хімічний зв'язок, класи сполук (2 год/тиждень, 68 год)", lessonsPerWeek: 2, hasVariant: false },
     "9 клас": { id: "chemistry-9", classes: [9], description: "Розчини, хімічні реакції, органічні сполуки (2 год/тиждень, 68 год)", lessonsPerWeek: 2, hasVariant: false },
-    "10 клас (рівень стандарту)": { id: "chemistry-10-standard", classes: [10], description: "Органічна хімія (1.5 год/тиждень, 52 год)", lessonsPerWeek: [1,2], hasVariant: false },
-    "11 клас (рівень стандарту)": { id: "chemistry-11-standard", classes: [11], description: "Загальна та неорганічна хімія (2 год/тиждень, 70 год)", lessonsPerWeek: 2, hasVariant: false },
+    "10 клас (рівень стандарту)": { id: "chemistry-10-standard", classes: [10], description: "Органічна хімія (1.5 год/тиждень, 52 год)", lessonsPerWeek: [1,2], hasVariant: false, approvedBy: "Наказ МОН України №1407 від 23.10.2017" },
+    "11 клас (рівень стандарту)": { id: "chemistry-11-standard", classes: [11], description: "Загальна та неорганічна хімія (2 год/тиждень, 70 год)", lessonsPerWeek: 2, hasVariant: false, approvedBy: "Наказ МОН України №1407 від 23.10.2017" },
   },
   "Біологія": {
     "6 клас": { id: "biology-6", classes: [6], description: "Різноманітність живої природи (2 год/тиждень, 70 год)", lessonsPerWeek: 2, hasVariant: false },
@@ -113,8 +114,8 @@ export const PROGRAMS: Programs = {
     "11 клас (профільний рівень)": { id: "biology-11-profile", classes: [11], description: "Біологія і екологія, профіль (5 год/тиждень, 175 год)", lessonsPerWeek: 5, hasVariant: false, officialName: "Біологія і екологія. 10-11 класи. Профільний рівень" },
   },
   "Фізика": {
-    "10 клас (рівень стандарту)": { id: "physics-10-standard", classes: [10], description: "Механіка, МКТ, електростатика (3 год/тиждень, 105 год)", lessonsPerWeek: 3, hasVariant: false },
-    "11 клас (рівень стандарту)": { id: "physics-11-standard", classes: [11], description: "Електродинаміка, оптика, ядерна фізика (3 год/тиждень, 105 год)", lessonsPerWeek: 3, hasVariant: false },
+    "10 клас (рівень стандарту)": { id: "physics-10-standard", classes: [10], description: "Механіка, МКТ, електростатика (3 год/тиждень, 105 год)", lessonsPerWeek: 3, hasVariant: false, officialName: "Фізика. 10-11 класи. Рівень стандарту", authors: "Авторський колектив під керівництвом Локтєва В.М.", approvedBy: "Наказ МОН України №1407 від 23.10.2017" },
+    "11 клас (рівень стандарту)": { id: "physics-11-standard", classes: [11], description: "Електродинаміка, оптика, ядерна фізика (3 год/тиждень, 105 год)", lessonsPerWeek: 3, hasVariant: false, officialName: "Фізика. 10-11 класи. Рівень стандарту", authors: "Авторський колектив під керівництвом Локтєва В.М.", approvedBy: "Наказ МОН України №1407 від 23.10.2017" },
   },
   "Захист України": {
     "10-11 класи (профільний рівень)": { id: "defense-ukraine-10-11-profile", classes: [10,11], description: "6 год/тиждень, 210 год на рік", lessonsPerWeek: 6, hasVariant: false },
