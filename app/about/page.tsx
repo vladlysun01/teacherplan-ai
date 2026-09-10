@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import SiteFooter from "@/components/landing/SiteFooter";
 
 export const metadata: Metadata = {
   title: "Про нас",
@@ -152,13 +153,8 @@ export default function AboutPage() {
           </section>
         </div>
 
-        {/* Footer Links */}
-        <div className="mt-12 text-center space-x-6">
-          <a href="/terms" className="text-slate-400 hover:text-cyan-400">Умови використання</a>
-          <a href="/privacy" className="text-slate-400 hover:text-cyan-400">Конфіденційність</a>
-          <a href="/refund" className="text-slate-400 hover:text-cyan-400">Повернення коштів</a>
-        </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }

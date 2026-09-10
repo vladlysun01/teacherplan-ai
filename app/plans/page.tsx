@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
 import { PROGRAMS, SUBJECT_SLUGS, getAllClassesForSubject } from "@/lib/programs";
+import SiteFooter from "@/components/landing/SiteFooter";
 
 export const metadata: Metadata = {
   title: "Календарно-тематичні плани за предметами",
@@ -80,6 +81,7 @@ export default function PlansHubPage() {
           })}
         </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }

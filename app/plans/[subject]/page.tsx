@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CheckCircle, ArrowRight } from "lucide-react";
 import { PROGRAMS, SUBJECT_SLUGS, SLUG_TO_SUBJECT, getAllClassesForSubject } from "@/lib/programs";
+import SiteFooter from "@/components/landing/SiteFooter";
 
 export function generateStaticParams() {
   return Object.values(SUBJECT_SLUGS).map((subject) => ({ subject }));
@@ -147,6 +148,7 @@ export default async function SubjectPlanPage({
           </Link>
         </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }

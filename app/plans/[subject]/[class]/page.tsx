@@ -7,6 +7,7 @@ import {
   getAllSubjectClassPairs,
   getProgramsForSubjectAndClass,
 } from "@/lib/programs";
+import SiteFooter from "@/components/landing/SiteFooter";
 
 // Окрема сторінка на кожну пару "предмет × клас" — довгі пошукові запити
 // штибу "календарний план хімія 8 клас 2026-2027" реально шукають
@@ -168,6 +169,7 @@ export default async function SubjectClassPlanPage({
           </Link>
         </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }

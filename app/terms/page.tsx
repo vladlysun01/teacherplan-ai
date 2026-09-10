@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import SiteFooter from "@/components/landing/SiteFooter";
 
 export const metadata: Metadata = {
   title: "Умови використання",
@@ -224,13 +225,8 @@ export default function TermsPage() {
           </div>
         </div>
 
-        {/* Footer Links */}
-        <div className="mt-12 text-center space-x-6">
-          <a href="/about" className="text-slate-400 hover:text-cyan-400">Про нас</a>
-          <a href="/privacy" className="text-slate-400 hover:text-cyan-400">Конфіденційність</a>
-          <a href="/refund" className="text-slate-400 hover:text-cyan-400">Повернення коштів</a>
-        </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }

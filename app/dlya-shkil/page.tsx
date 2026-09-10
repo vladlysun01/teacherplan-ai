@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle, Users, FileText, Receipt, Phone } from "lucide-react";
 import LeadForm from "./LeadForm";
+import SiteFooter from "@/components/landing/SiteFooter";
 
 export const metadata: Metadata = {
   title: "TeacherPlan AI для шкіл і методоб'єднань",
@@ -143,6 +144,7 @@ export default function SchoolsPage() {
           </div>
         </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }
