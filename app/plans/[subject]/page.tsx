@@ -107,13 +107,17 @@ export default async function SubjectPlanPage({
             >
               <h3 className="text-white font-semibold mb-2">{programName}</h3>
               <p className="text-slate-400 text-sm mb-3">{program.description}</p>
-              <div className="flex items-center gap-2 text-cyan-400 text-sm">
-                <CheckCircle size={16} />
-                <span>
-                  {program.classes.length === 1
-                    ? `${program.classes[0]} клас`
-                    : `Класи: ${program.classes.join(", ")}`}
-                </span>
+              <div className="flex flex-wrap items-center gap-2">
+                {program.classes.map((c) => (
+                  <Link
+                    key={c}
+                    href={`/plans/${slug}/${c}`}
+                    className="flex items-center gap-1.5 px-3 py-1 bg-slate-800 hover:bg-cyan-500/20 border border-slate-700 hover:border-cyan-500/50 rounded-lg text-cyan-400 text-sm transition-colors"
+                  >
+                    <CheckCircle size={14} />
+                    {c} клас
+                  </Link>
+                ))}
               </div>
             </div>
           ))}

@@ -185,6 +185,32 @@ export function getAllClassesForSubject(subject: string): number[] {
   return Array.from(classes).sort((a, b) => a - b);
 }
 
+// Для /plans/[subject]/[class]: усі програми, дозволені для конкретного
+// класу конкретного предмету (той самий предмет часто має кілька рівнів —
+// наприклад, "10 клас (профільний рівень)" і "10 клас (рівень стандарту)"
+// одночасно підпадають під клас 10).
+export function getProgramsForSubjectAndClass(
+  subject: string,
+  classNum: number
+): [string, Program][] {
+  const programs = PROGRAMS[subject];
+  if (!programs) return [];
+  return Object.entries(programs).filter(([, p]) => p.classes.includes(classNum));
+}
+
+// Для sitemap.ts і generateStaticParams сторінки /plans/[subject]/[class]:
+// кожна пара "предмет × клас" — окремий URL під довгі пошукові запити
+// штибу "календарний план хімія 8 клас" (не просто "хімія").
+export function getAllSubjectClassPairs(): { slug: string; subject: string; classNum: number }[] {
+  const pairs: { slug: string; subject: string; classNum: number }[] = [];
+  Object.entries(SUBJECT_SLUGS).forEach(([subject, slug]) => {
+    getAllClassesForSubject(subject).forEach((classNum) => {
+      pairs.push({ slug, subject, classNum });
+    });
+  });
+  return pairs;
+}
+
 // Журнал видалених/замінених програм — показується в адмінці (/admin), щоб
 // було видно, чому якась програма зникла зі списку, а не просто мовчки
 // пропала. Заповнюється вручну щоразу, коли прибираємо запис із PROGRAMS

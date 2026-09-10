@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { SUBJECT_SLUGS } from "@/lib/programs";
+import { SUBJECT_SLUGS, getAllSubjectClassPairs } from "@/lib/programs";
 
 const siteUrl = "https://www.teacher-plan-ai.site";
 
@@ -13,8 +13,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: path === "" ? 1 : path === "/plans" ? 0.8 : 0.6,
   }));
 
-  // По одній індексованій сторінці на кожен із 14 предметів — саме те, за
-  // чим реально шукають у вересні/січні ("календарний план хімія 8 клас").
+  // По одній індексованій сторінці на кожен предмет — ширший запит
+  // штибу "календарний план хімія".
   const subjectEntries: MetadataRoute.Sitemap = Object.values(SUBJECT_SLUGS).map((slug) => ({
     url: `${siteUrl}/plans/${slug}`,
     lastModified: new Date(),
@@ -22,5 +22,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticEntries, ...subjectEntries];
+  // І окремо — по сторінці на кожну пару предмет×клас, під довгі запити
+  // штибу "календарний план хімія 8 клас 2026-2027", за якими реально
+  // ранжуються конкуренти (vseosvita.ua, naurok.com.ua, osvita.ua).
+  const subjectClassEntries: MetadataRoute.Sitemap = getAllSubjectClassPairs().map(({ slug, classNum }) => ({
+    url: `${siteUrl}/plans/${slug}/${classNum}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly",
+    priority: 0.65,
+  }));
+
+  return [...staticEntries, ...subjectEntries, ...subjectClassEntries];
 }
