@@ -16,6 +16,7 @@ import {
   ShieldAlert,
   BookOpen,
   AlertTriangle,
+  School,
 } from "lucide-react";
 import { PROGRAMS, REMOVED_PROGRAMS } from "@/lib/programs";
 import {
@@ -333,12 +334,20 @@ export default function AdminPage() {
               Адмін-панель
             </h1>
           </div>
-          <button
-            onClick={() => router.push("/admin/finance")}
-            className="flex items-center gap-2 px-4 py-2.5 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 text-green-400 rounded-xl text-sm transition-colors"
-          >
-            <Wallet size={16} /> Фінанси (обидва проєкти)
-          </button>
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={() => router.push("/admin/schools")}
+              className="flex items-center gap-2 px-4 py-2.5 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-400 rounded-xl text-sm transition-colors"
+            >
+              <School size={16} /> Заявки шкіл
+            </button>
+            <button
+              onClick={() => router.push("/admin/finance")}
+              className="flex items-center gap-2 px-4 py-2.5 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 text-green-400 rounded-xl text-sm transition-colors"
+            >
+              <Wallet size={16} /> Фінанси (обидва проєкти)
+            </button>
+          </div>
         </div>
 
         {/* Stat cards */}
