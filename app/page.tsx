@@ -79,7 +79,10 @@ export default function LandingPage() {
             </div>
 
             {/* Auth Buttons */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
+              <Link href="/dlya-shkil" className="hidden sm:block text-slate-300 hover:text-cyan-400 transition-colors text-sm font-medium">
+                Для шкіл
+              </Link>
               <AuthHeaderButtons />
             </div>
           </div>
@@ -751,6 +754,9 @@ export default function LandingPage() {
                 <div className="space-y-2">
                   <Link href="/plans" className="block text-slate-400 hover:text-cyan-400 transition-colors text-sm">
                     Плани за предметами
+                  </Link>
+                  <Link href="/dlya-shkil" className="block text-slate-400 hover:text-cyan-400 transition-colors text-sm">
+                    Для шкіл
                   </Link>
                   <Link href="/about" className="block text-slate-400 hover:text-cyan-400 transition-colors text-sm">
                     Про нас
