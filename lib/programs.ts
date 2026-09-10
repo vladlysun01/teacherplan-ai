@@ -129,6 +129,9 @@ export const PROGRAMS: Programs = {
   "Природничі науки": {
     "10-11 класи (інтегрований курс)": { id: "pryrodnychi-nauky-10-11", classes: [10,11], description: "Інтегрований курс для нефізичного профілю, 4 год/тиждень, 280 год на курс", lessonsPerWeek: 4, hasVariant: false, officialName: "Природничі науки. Інтегрований курс. 10-11 класи", authors: "Дьоміна І., Задоянний В., Костик С.", approvedBy: "Наказ МОН України №1407 від 23.10.2017" },
   },
+  "Історія: Україна і світ": {
+    "10-11 класи (інтегрований курс)": { id: "history-ua-world-10-11", classes: [10,11], description: "Інтегрований курс історії України та всесвітньої історії, 2 год/тиждень, 70 год/рік у кожному класі", lessonsPerWeek: 2, hasVariant: false, officialName: "Історія: Україна і світ. 10-11 класи", authors: "Патриляк І. (голова робочої групи), Мудрий М., Байкеніч Г., Гриневич Л. та ін.", approvedBy: "Наказ МОН України №698 від 03.08.2022" },
+  },
 };
 
 // Явні слаги замість автотранслітерації — передбачувані URL, без ризику,
@@ -157,6 +160,7 @@ export const SUBJECT_SLUGS: Record<string, string> = {
   "Фінансова грамотність": "finansova-hramotnist",
   "Астрономія": "astronomiya",
   "Природничі науки": "pryrodnychi-nauky",
+  "Історія: Україна і світ": "istoriya-ukrayina-i-svit",
 };
 
 export const SLUG_TO_SUBJECT: Record<string, string> = Object.fromEntries(

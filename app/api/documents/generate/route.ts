@@ -197,6 +197,12 @@ export async function POST(request: NextRequest) {
         lessons = result.lessons || [];
         planSettings = result;
 
+      } else if (formData.subject === "Історія: Україна і світ") {
+        const { generateHistoryUaWorldCalendarPlan } = await import("@/lib/generation/history-ua-world-plan");
+        const result = generateHistoryUaWorldCalendarPlan(formData);
+        lessons = result.lessons || [];
+        planSettings = result;
+
       } else if (formData.subject === "Природничі науки") {
         const { generatePryrodnychiNaukyCalendarPlan } = await import("@/lib/generation/pryrodnychi-nauky-plan");
         const result = generatePryrodnychiNaukyCalendarPlan(formData);
