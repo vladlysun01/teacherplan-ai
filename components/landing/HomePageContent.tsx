@@ -253,6 +253,34 @@ export default function HomePageContent() {
         html[data-tp-theme="light"] .tp-home .price-card.popular::before{ background:conic-gradient(from var(--ang,0deg), #0B0D10, var(--cyan), #0B0D10); }
         html[data-tp-theme="light"] .tp-home .popular-tag{ background:#0B0D10; color:#fff; }
 
+        /* Тіні від карток у білій темі — без них картки зливаються з білим
+           фоном (лише тонка рамка), сайт виглядає пласким. У темній темі
+           не чіпаємо — там інша, вже об'ємна композиція (funnel/cal-card
+           тощо мають власні тіні незалежно від теми). */
+        html[data-tp-theme="light"] .tp-home .compare-card,
+        html[data-tp-theme="light"] .tp-home .subject-card,
+        html[data-tp-theme="light"] .tp-home .price-card,
+        html[data-tp-theme="light"] .tp-home .request-card,
+        html[data-tp-theme="light"] .tp-home .schools-card{
+          box-shadow:0 1px 2px rgba(16,24,32,.04), 0 14px 32px -16px rgba(16,24,32,.16);
+        }
+        html[data-tp-theme="light"] .tp-home .compare-card:hover,
+        html[data-tp-theme="light"] .tp-home .subject-card:hover,
+        html[data-tp-theme="light"] .tp-home .price-card:hover{
+          box-shadow:0 4px 10px rgba(16,24,32,.06), 0 26px 48px -16px rgba(16,24,32,.22);
+        }
+        html[data-tp-theme="light"] .tp-home .schools-card:hover{
+          box-shadow:0 4px 10px rgba(16,24,32,.06), 0 20px 40px -16px rgba(16,24,32,.18);
+        }
+        /* compare-card.win і price-card.popular темні навіть у білій темі —
+           їм пасує глибша, помітніша тінь, ніж світлим картками поряд. */
+        html[data-tp-theme="light"] .tp-home .compare-card.win{
+          box-shadow:0 1px 2px rgba(0,0,0,.2), 0 20px 40px -14px rgba(0,0,0,.4);
+        }
+        html[data-tp-theme="light"] .tp-home .compare-card.win:hover{
+          box-shadow:0 4px 10px rgba(0,0,0,.24), 0 30px 56px -14px rgba(0,0,0,.48);
+        }
+
         .tp-home a{ color:inherit; text-decoration:none; }
         .tp-home .wrap{ max-width:1180px; margin:0 auto; padding:0 1.75rem; position:relative; z-index:2; }
         .tp-home h1,.tp-home h2,.tp-home h3,.tp-home h4{ font-weight:700; text-wrap:balance; letter-spacing:-.02em; }
@@ -321,7 +349,7 @@ export default function HomePageContent() {
 
         .tp-home section.compare{ padding:2rem 0 2rem; position:relative; z-index:2; }
         .tp-home .compare-grid{ display:grid; grid-template-columns:1fr 1fr; gap:1.4rem; max-width:920px; margin:0 auto; }
-        .tp-home .compare-card{ background:var(--card-dark); border:1px solid var(--rule); border-radius:1.1rem; padding:1.9rem; text-align:center; transition:transform .25s; }
+        .tp-home .compare-card{ background:var(--card-dark); border:1px solid var(--rule); border-radius:1.1rem; padding:1.9rem; text-align:center; transition:transform .25s, box-shadow .25s; }
         .tp-home .compare-card:hover{ transform:translateY(-4px); }
         .tp-home .compare-card.win{ border-color:color-mix(in srgb, var(--cyan) 40%, transparent); background:linear-gradient(160deg, color-mix(in srgb, var(--cyan) 9%, transparent), var(--card-dark)); }
         .tp-home .compare-num{ font-size:2.7rem; font-weight:800; }
@@ -385,7 +413,7 @@ export default function HomePageContent() {
         .tp-home .funnel-card:nth-child(3) .bars div:nth-child(2){ width:65%; }
 
         .tp-home section.schools{ padding:4.5rem 0; position:relative; z-index:2; }
-        .tp-home .schools-card{ max-width:1040px; margin:0 auto; border-radius:1.6rem; padding:2.7rem 2.9rem; display:grid; grid-template-columns:1.3fr .7fr; gap:2rem; align-items:center; border:1px solid color-mix(in srgb, var(--sand) 35%, transparent); background:linear-gradient(135deg, color-mix(in srgb, var(--sand) 10%, transparent), var(--paper) 60%); transition:border-color .3s; }
+        .tp-home .schools-card{ max-width:1040px; margin:0 auto; border-radius:1.6rem; padding:2.7rem 2.9rem; display:grid; grid-template-columns:1.3fr .7fr; gap:2rem; align-items:center; border:1px solid color-mix(in srgb, var(--sand) 35%, transparent); background:linear-gradient(135deg, color-mix(in srgb, var(--sand) 10%, transparent), var(--paper) 60%); transition:border-color .3s, box-shadow .3s; }
         .tp-home .schools-card:hover{ border-color:color-mix(in srgb, var(--sand) 60%, transparent); }
         .tp-home .schools-card h2{ font-size:1.9rem; margin:0 0 .7rem; }
         .tp-home .schools-card p{ color:var(--ink-dim); margin:0 0 1.3rem; max-width:46ch; }
@@ -412,7 +440,7 @@ export default function HomePageContent() {
 
         .tp-home section.pricing{ padding:1rem 0 4.5rem; position:relative; z-index:2; }
         .tp-home .pricing-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1.3rem; max-width:1000px; margin:0 auto; }
-        .tp-home .price-card{ background:var(--card-dark); border:1px solid var(--rule); border-radius:1.3rem; padding:1.9rem; transition:transform .25s, border-color .25s; position:relative; }
+        .tp-home .price-card{ background:var(--card-dark); border:1px solid var(--rule); border-radius:1.3rem; padding:1.9rem; transition:transform .25s, border-color .25s, box-shadow .25s; position:relative; }
         .tp-home .price-card:hover{ transform:translateY(-5px); }
         .tp-home .price-card.popular{ position:relative; z-index:0; border-color:var(--cyan); background:linear-gradient(160deg, color-mix(in srgb, var(--cyan) 10%, transparent), var(--card-dark)); }
         .tp-home .price-card.popular::before{ content:""; position:absolute; inset:-1.5px; z-index:-1; border-radius:inherit; background:conic-gradient(from var(--ang,0deg), var(--cyan), var(--sand), var(--cyan)); animation:tp-spin-border 4s linear infinite; }
