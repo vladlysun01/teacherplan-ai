@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
-import { ArrowLeft, ShieldAlert, School, FileDown, Loader } from "lucide-react";
+import { ArrowLeft, ShieldAlert, School, FileDown, Loader, Send } from "lucide-react";
 
 type Lead = {
   id: string;
@@ -182,6 +182,12 @@ export default function AdminSchoolsPage() {
               <School size={28} className="text-cyan-400" /> Заявки шкіл
             </h1>
           </div>
+          <a
+            href="/admin/schools/outreach"
+            className="flex items-center gap-2 px-4 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 rounded-xl text-sm transition-colors"
+          >
+            <Send size={15} /> Холодний аутріч (Prozorro-школи)
+          </a>
         </div>
 
         {leads.length === 0 ? (
