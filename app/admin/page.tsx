@@ -17,6 +17,7 @@ import {
   BookOpen,
   AlertTriangle,
   School,
+  Bell,
 } from "lucide-react";
 import { PROGRAMS, REMOVED_PROGRAMS } from "@/lib/programs";
 import {
@@ -346,6 +347,12 @@ export default function AdminPage() {
               className="flex items-center gap-2 px-4 py-2.5 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 text-green-400 rounded-xl text-sm transition-colors"
             >
               <Wallet size={16} /> Фінанси (обидва проєкти)
+            </button>
+            <button
+              onClick={() => router.push("/admin/activation")}
+              className="flex items-center gap-2 px-4 py-2.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 rounded-xl text-sm transition-colors"
+            >
+              <Bell size={16} /> Нагадування про активацію
             </button>
           </div>
         </div>
