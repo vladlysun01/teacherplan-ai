@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase-browser";
 import { CheckCircle, FileText, ArrowRight, X } from 'lucide-react';
 import { PROGRAMS, type VariantModule } from "@/lib/programs";
 import { isMaintenanceModeOn, canBypassMaintenance } from "@/lib/admin";
+import { track } from "@/lib/track";
 
 // Якщо дата випадає на сб/нд — переносимо на найближчий будній день
 // (понеділок), а не лишаємо як є: перший урок семестру не може бути
@@ -60,7 +61,10 @@ export default function Dashboard() {
   // кнопку, щоб людина не тицяла в неї даремно.
   const maintenanceBlocked = isMaintenanceModeOn() && !canBypassMaintenance(userEmail);
 
-  useEffect(() => { loadUserProfile(); }, []);
+  useEffect(() => {
+    loadUserProfile();
+    track("dashboard_view");
+  }, []);
 
   const loadUserProfile = async () => {
     try {
@@ -97,6 +101,7 @@ export default function Dashboard() {
   };
 
   const handleGenerate = async () => {
+    track("generate_click", { subject: formData.subject, hasWeekdays: !!formData.weekdays });
     if (maintenanceBlocked) {
       alert("Ми зараз тестуємо та покращуємо генерацію документів. Спробуйте, будь ласка, трохи пізніше — це ненадовго!");
       return;
@@ -131,9 +136,10 @@ export default function Dashboard() {
       const response = await fetch("/api/documents/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...formData, userId: user.id }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Помилка генерації");
+      track("generate_success", { subject: formData.subject });
       setShowSuccessModal(true);
       setFormData({ ...formData, variantModules: [] });
-    } catch (error: any) { alert("❌ Помилка: " + error.message); } finally { setLoading(false); }
+    } catch (error: any) { track("generate_error", { message: error.message }); alert("❌ Помилка: " + error.message); } finally { setLoading(false); }
   };
 
   return (
