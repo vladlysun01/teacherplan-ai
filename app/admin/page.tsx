@@ -354,6 +354,12 @@ export default function AdminPage() {
             >
               <Bell size={16} /> Нагадування про активацію
             </button>
+            <button
+              onClick={() => router.push("/admin/funnel")}
+              className="flex items-center gap-2 px-4 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 rounded-xl text-sm transition-colors"
+            >
+              <FileText size={16} /> Лійка активації
+            </button>
           </div>
         </div>
 
