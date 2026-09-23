@@ -66,7 +66,8 @@ export async function GET(request: Request) {
       }
 
       // Redirect to dashboard with success
-      return NextResponse.redirect(new URL(next, request.url));
+      const origin = requestUrl.origin;
+return NextResponse.redirect(`${origin}${next}`);
     }
   }
 

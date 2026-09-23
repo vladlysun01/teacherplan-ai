@@ -11,6 +11,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [needsEmailConfirm, setNeedsEmailConfirm] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -70,10 +71,24 @@ export default function RegisterPage() {
       }
 
       setSuccess(true);
-      setTimeout(() => {
-        router.push('/dashboard');
-        router.refresh();
-      }, 2000);
+
+      // Реальний баг (знайдено 2026-09-24 по реальному користувачу в базі,
+      // застряг саме тут): якщо в проєкті Supabase увімкнене підтвердження
+      // email, signUp() НЕ створює активну сесію (data.session === null),
+      // доки людина не перейде за посиланням з листа. Код і так тягнув
+      // на /dashboard за таймером — а там немає сесії, і checkUser()
+      // одразу відкидає назад на /login. Тепер редіректимо на дашборд
+      // ЛИШЕ якщо сесія реально є (Supabase вимкнене підтвердження email
+      // або миттєве auto-confirm); інакше лишаємо повідомлення "перевірте
+      // пошту" на екрані — не женемо людину туди, куди їй ще зарано.
+      if (data.session) {
+        setTimeout(() => {
+          router.push('/dashboard');
+          router.refresh();
+        }, 2000);
+      } else {
+        setNeedsEmailConfirm(true);
+      }
     } catch (err: any) {
       setError(err.message || 'Помилка реєстрації');
     } finally {
@@ -112,7 +127,22 @@ export default function RegisterPage() {
             <ArrowRight className="text-white" size={40} />
           </div>
           <h2 className="text-3xl font-bold mb-4">Вітаємо!</h2>
-          <p className="text-gray-400">Реєстрація успішна. Перенаправляємо...</p>
+          {needsEmailConfirm ? (
+            <>
+              <p className="text-gray-400 mb-2">
+                Реєстрація майже готова — перевірте пошту <b className="text-white">{formData.email}</b> і перейдіть
+                за посиланням у листі, щоб підтвердити акаунт.
+              </p>
+              <p className="text-gray-500 text-sm">
+                Після підтвердження ви одразу потрапите в кабінет.{' '}
+                <a href="/login" className="text-amber-400 hover:text-amber-300 transition">
+                  Вже підтвердили? Увійти
+                </a>
+              </p>
+            </>
+          ) : (
+            <p className="text-gray-400">Реєстрація успішна. Перенаправляємо...</p>
+          )}
         </div>
       </div>
     );

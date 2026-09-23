@@ -26,9 +26,9 @@ export default function AuthHeaderButtons() {
     return (
       <button
         onClick={() => router.push("/dashboard")}
-        className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 hover:scale-105 transition-all duration-300 font-medium"
+        className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-lg hover:shadow-lg hover:shadow-cyan-500/50 hover:scale-105 transition-all duration-300 font-medium whitespace-nowrap"
       >
-        Перейти до Dashboard
+        <span className="hidden sm:inline">Перейти до </span>Dashboard
       </button>
     );
   }

@@ -480,6 +480,22 @@ export default function HomePageContent() {
           .tp-home .cal-card, .tp-home .cal-lesson{ position:static; width:100%; margin-bottom:1rem; }
           .tp-home .funnel-card{ position:static; margin-bottom:1rem; transform:none !important; opacity:1 !important; }
         }
+
+        /* Мобільний навбар (запит користувача 2026-09-24): якірні
+           посилання (#features/#examples/#pricing/#schools) + перемикач
+           теми + кнопки входу тіснились в один рядок без жодного
+           респонсиву — на вузьких екранах кнопка "Dashboard"/"Увійти"
+           або зникала за межами екрана, або губилась у тисняві. Ховаємо
+           якірні посилання й перемикач теми на малих екранах, лишаємо
+           лише лого + кнопку входу/дашборду — завжди на видноті. */
+        @media (max-width:720px){
+          .tp-home nav.top .links{ display:none; }
+          .tp-home .theme-toggle{ display:none; }
+          .tp-home nav.top{ gap:.6rem; }
+          .tp-home header .row{ flex-wrap:nowrap; }
+          .tp-home .brand{ font-size:.95rem; }
+          .tp-home .btn, .tp-home nav.top button{ padding:.6rem .9rem; font-size:.8rem; white-space:nowrap; }
+        }
       `}</style>
 
       <header>

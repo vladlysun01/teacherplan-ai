@@ -40,13 +40,26 @@ export default function DashboardLayout({
       const supabase = createClient();
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const accessToken = hashParams.get('access_token');
-      
+
       if (accessToken) {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      let { data: { session } } = await supabase.auth.getSession();
+
+      // Захист від гонки одразу після /callback (запит користувача
+      // 2026-09-24 — "вхід через Google перекидає на лендінг"): куки, які
+      // сервер щойно виставив у callback/route.ts, теоретично можуть ще
+      // не встигнути стати видимими цьому ж запиту getSession() —
+      // особливо на мобільних браузерах з суворішими правилами кукі.
+      // Одна невдала перевірка одразу відкидала на /login без жодної
+      // повторної спроби. Тепер — одна коротка повторна спроба перед тим,
+      // як реально визнати, що сесії нема.
+      if (!session) {
+        await new Promise((resolve) => setTimeout(resolve, 600));
+        ({ data: { session } } = await supabase.auth.getSession());
+      }
+
       if (!session) {
         router.push('/login');
       } else {

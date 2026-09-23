@@ -50,7 +50,7 @@ export default function LoginPage() {
       // register/page.tsx завжди мав правильний шлях, тому реєстрація
       // через Google працювала, а повторний вхід — ні.
       const origin = window.location.origin;
-      const redirectUrl = `${origin}/callback`;
+      const redirectUrl = `${origin}/callback?next=/dashboard`;
       console.log('🔐 Redirect URL:', redirectUrl);
       
       const { error } = await supabase.auth.signInWithOAuth({
