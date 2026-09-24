@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Sparkles, Mail, Lock, Eye, EyeOff, ArrowRight, Chrome } from 'lucide-react';
 import { createClient } from '@/lib/supabase-browser';
+import { track } from '@/lib/track';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -28,6 +29,7 @@ export default function LoginPage() {
 
       if (error) throw error;
 
+      track('login_success', { method: 'password' });
       router.push('/dashboard');
       router.refresh();
     } catch (err: any) {
