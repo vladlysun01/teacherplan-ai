@@ -31,6 +31,10 @@ export default function SiteFooter() {
   return (
     <footer className="site-footer border-t border-slate-800/50 bg-slate-900/50 backdrop-blur-xl mt-20">
       <style>{`
+        /* Запит користувача 2026-09-27: на світлій темі лендінгу фон
+           футера (bg-slate-900/50, напівпрозорий) хай буде суцільним
+           чорним, а не просвічувати білою сторінкою під ним. */
+        html[data-tp-theme="light"] .site-footer{ background-color:#000000; }
         .site-footer a{ color:#94A3B8; }
         .site-footer a:hover{ color:#22D3EE; }
         /* Розкритий номер телефону навмисно вже яскраво-циановий

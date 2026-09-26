@@ -345,6 +345,11 @@ export default function HomePageContent() {
         .tp-home .spotlight{ position:relative; overflow:hidden; }
         .tp-home .spotlight::before{ content:""; position:absolute; inset:0; z-index:0; opacity:0; pointer-events:none; background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%), color-mix(in srgb, var(--cyan) 14%, transparent), transparent 65%); transition:opacity .3s; }
         .tp-home .spotlight:hover::before{ opacity:1; }
+        /* Запит користувача 2026-09-27: на білій темі при наведенні на
+           картку "Популярний" колір картки змінювався (spotlight-підсвітка
+           поверх і так наближеного до темного градієнта фону робила її
+           нечитабельною) — на цій одній картці ефект просто вимикаємо. */
+        html[data-tp-theme="light"] .tp-home .price-card.popular.spotlight:hover::before{ opacity:0; }
         .tp-home .spotlight > *{ position:relative; z-index:1; }
 
         .tp-home section.compare{ padding:2rem 0 2rem; position:relative; z-index:2; }
