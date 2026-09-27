@@ -198,6 +198,34 @@ export function getProgramsForSubjectAndClass(
   return Object.entries(programs).filter(([, p]) => p.classes.includes(classNum));
 }
 
+// SEO 2026-09-27: /plans/[subject]/[class] раніше показувала лише
+// description/officialName/authors — сам lessonsPerWeek (є у ВСІХ 59
+// програм) і approvedBy (є у 34 з 59) взагалі не рендерились, хоча дані
+// вже в базі. 85 з цих сторінок Google позначив "Discovered — currently
+// not indexed" (Search Console, 2026-09-27) — надто однотипний контент.
+// Ці дві функції дають реальний, унікальний за кожною сторінкою факт
+// (не переставлений шаблон) без вигаданого тексту.
+export function formatLessonsPerWeek(p: Program): string {
+  if (Array.isArray(p.lessonsPerWeek)) {
+    const [a, b] = p.lessonsPerWeek;
+    return a === b ? `${a}` : `${a}–${b}`;
+  }
+  return p.lessonsPerWeek != null ? `${p.lessonsPerWeek}` : "—";
+}
+
+// ~35 навчальних тижнів — стандартна оцінка тривалості навчального року
+// в українських школах за вирахуванням канікул; та сама база, якою
+// послуговуються самі програми МОН, вказуючи річну к-сть годин (напр.
+// "1.5 год/тиждень, 52 год" — 52/1.5≈35 тижнів). Тому позначаємо
+// "орієнтовно", а не як точний факт.
+const SCHOOL_WEEKS = 35;
+export function estimateYearlyLessons(p: Program): number {
+  const perWeek = Array.isArray(p.lessonsPerWeek)
+    ? (p.lessonsPerWeek[0] + p.lessonsPerWeek[1]) / 2
+    : p.lessonsPerWeek ?? 0;
+  return Math.round(perWeek * SCHOOL_WEEKS);
+}
+
 // Для sitemap.ts і generateStaticParams сторінки /plans/[subject]/[class]:
 // кожна пара "предмет × клас" — окремий URL під довгі пошукові запити
 // штибу "календарний план хімія 8 клас" (не просто "хімія").

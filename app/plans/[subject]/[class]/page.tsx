@@ -6,6 +6,8 @@ import {
   SLUG_TO_SUBJECT,
   getAllSubjectClassPairs,
   getProgramsForSubjectAndClass,
+  formatLessonsPerWeek,
+  estimateYearlyLessons,
 } from "@/lib/programs";
 import SiteFooter from "@/components/landing/SiteFooter";
 
@@ -83,10 +85,46 @@ export default async function SubjectClassPlanPage({
     ],
   };
 
+  // SEO 2026-09-27: реальні, порахoвані з даних факти (не переставлений
+  // шаблон) — скільки уроків/рік і за якою офіційною програмою, окремо
+  // для кожної пари предмет×клас. Разом з FAQPage-розміткою — і як
+  // унікальний текст на сторінці, і як потенційний rich snippet у видачі.
+  const hoursAnswer =
+    programs.length === 1
+      ? `За програмою «${programs[0][0]}» (${formatLessonsPerWeek(programs[0][1])} год/тиждень) — орієнтовно ${estimateYearlyLessons(programs[0][1])} уроків за навчальний рік (з розрахунку ~35 навчальних тижнів).`
+      : `Залежно від обраної програми: ${programs
+          .map(([name, p]) => `«${name}» — ${formatLessonsPerWeek(p)} год/тиждень (орієнтовно ${estimateYearlyLessons(p)} уроків/рік)`)
+          .join("; ")}.`;
+  const programsWithOfficial = programs.filter(([, p]) => p.officialName);
+  const officialAnswer =
+    programsWithOfficial.length > 0
+      ? programsWithOfficial
+          .map(([, p]) => `«${p.officialName}»${p.approvedBy ? ` (${p.approvedBy})` : ""}`)
+          .join("; ")
+      : `Чинна Типова освітня програма МОН України з предмету «${subject}» для ${classNum} класу.`;
+
+  const faqLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: `Скільки уроків з предмету «${subject}» у ${classNum} класі за навчальний рік?`,
+        acceptedAnswer: { "@type": "Answer", text: hoursAnswer },
+      },
+      {
+        "@type": "Question",
+        name: `За якою програмою МОН генерується план для ${classNum} класу?`,
+        acceptedAnswer: { "@type": "Answer", text: officialAnswer },
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-slate-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
 
       <header className="border-b border-slate-800/50 bg-slate-900/50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 py-4">
@@ -135,10 +173,14 @@ export default async function SubjectClassPlanPage({
             >
               <h3 className="text-white font-semibold mb-2">{programName}</h3>
               <p className="text-slate-400 text-sm">{program.description}</p>
-              {(program.officialName || program.authors) && (
+              <p className="text-cyan-400 text-sm mt-2">
+                {formatLessonsPerWeek(program)} год/тиждень · орієнтовно {estimateYearlyLessons(program)} уроків/рік
+              </p>
+              {(program.officialName || program.authors || program.approvedBy) && (
                 <div className="mt-3 pt-3 border-t border-slate-800 text-xs text-slate-500 space-y-1">
                   {program.officialName && <p>Офіційна програма: «{program.officialName}»</p>}
                   {program.authors && <p>Автори: {program.authors}</p>}
+                  {program.approvedBy && <p>Затверджено: {program.approvedBy}</p>}
                 </div>
               )}
             </div>
@@ -161,6 +203,24 @@ export default async function SubjectClassPlanPage({
               <span>Розподіл по семестрах — I семестр (вересень-грудень) або II семестр (січень-травень)</span>
             </li>
           </ul>
+        </div>
+
+        <div className="mt-8 bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl p-8">
+          <h2 className="text-xl font-bold text-white mb-6">Питання про {subject.toLowerCase()} у {classNum} класі</h2>
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-slate-200 font-medium mb-2">
+                Скільки уроків з предмету «{subject}» у {classNum} класі за навчальний рік?
+              </h3>
+              <p className="text-slate-400 text-sm">{hoursAnswer}</p>
+            </div>
+            <div>
+              <h3 className="text-slate-200 font-medium mb-2">
+                За якою програмою МОН генерується план для {classNum} класу?
+              </h3>
+              <p className="text-slate-400 text-sm">{officialAnswer}</p>
+            </div>
+          </div>
         </div>
 
         <div className="mt-14 text-center">
