@@ -345,11 +345,19 @@ export default function HomePageContent() {
         .tp-home .spotlight{ position:relative; overflow:hidden; }
         .tp-home .spotlight::before{ content:""; position:absolute; inset:0; z-index:0; opacity:0; pointer-events:none; background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%), color-mix(in srgb, var(--cyan) 14%, transparent), transparent 65%); transition:opacity .3s; }
         .tp-home .spotlight:hover::before{ opacity:1; }
-        /* Запит користувача 2026-09-27: на білій темі при наведенні на
-           картку "Популярний" колір картки змінювався (spotlight-підсвітка
-           поверх і так наближеного до темного градієнта фону робила її
-           нечитабельною) — на цій одній картці ефект просто вимикаємо. */
-        html[data-tp-theme="light"] .tp-home .price-card.popular.spotlight:hover::before{ opacity:0; }
+        /* Запит користувача 2026-09-27: на картці "Популярний" (обидві
+           теми — спершу вимкнув лише для світлої, але той самий ефект
+           заважав і в темній, "зроби такий як на інших") spotlight-
+           підсвітка поверх і так кольорового градієнтного фону псувала
+           вигляд при наведенні — на цій одній картці просто вимикаємо. */
+        .tp-home .price-card.popular.spotlight:hover::before{ opacity:0; }
+        /* Бейдж "Популярний" (popular-tag) навмисно стирчить НАД карткою
+           (top:-.8rem), а .spotlight{overflow:hidden} (потрібен, щоб
+           spotlight-підсвітка не вилазила за заокруглені кути) обрізав
+           його зверху — тому слово не вміщалось повністю. Оскільки
+           підсвітку на цій картці все одно щойно вимкнули вище, ховати
+           тут уже нічого — можна безпечно повернути overflow:visible. */
+        .tp-home .price-card.popular{ overflow:visible; }
         .tp-home .spotlight > *{ position:relative; z-index:1; }
 
         .tp-home section.compare{ padding:2rem 0 2rem; position:relative; z-index:2; }
@@ -450,7 +458,7 @@ export default function HomePageContent() {
         .tp-home .price-card.popular{ position:relative; z-index:0; border-color:var(--cyan); background:linear-gradient(160deg, color-mix(in srgb, var(--cyan) 10%, transparent), var(--card-dark)); }
         .tp-home .price-card.popular::before{ content:""; position:absolute; inset:-1.5px; z-index:-1; border-radius:inherit; background:conic-gradient(from var(--ang,0deg), var(--cyan), var(--sand), var(--cyan)); animation:tp-spin-border 4s linear infinite; }
         @keyframes tp-spin-border{ to{ --ang:360deg; } }
-        .tp-home .popular-tag{ position:absolute; top:-.8rem; left:50%; transform:translateX(-50%); background:var(--cyan); color:var(--btn-ink); font-size:.7rem; font-weight:700; padding:.3rem .8rem; border-radius:999px; }
+        .tp-home .popular-tag{ position:absolute; top:-.8rem; left:50%; transform:translateX(-50%); background:var(--cyan); color:var(--btn-ink); font-size:.7rem; font-weight:700; padding:.3rem .8rem; border-radius:999px; white-space:nowrap; }
         .tp-home .price-card h3{ font-size:1.05rem; margin:0 0 .3rem; }
         .tp-home .price-card .desc{ font-size:.8rem; color:var(--ink-dim); margin-bottom:1.2rem; }
         .tp-home .price-card .amount{ font-size:2.1rem; font-weight:800; margin-bottom:1.2rem; }
